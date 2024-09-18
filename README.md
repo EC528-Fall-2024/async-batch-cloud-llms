@@ -1,14 +1,14 @@
 # Project Title: Async Batch Processing Solution for Cloud-LLMs 
 Project Members:
 
-Yuhan Chen
+*Yuhan Chen*
 
-Noah Robitshek
+*Noah Robitshek*
 
-Sergio Rodriguez
+*Sergio Rodriguez*
 
-Andrew Sasamori
+*Andrew Sasamori*
 
-Rayan Syed
+*Rayan Syed*
 
-Bennet Taylor
+*Bennet Taylor*
