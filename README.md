@@ -8,6 +8,23 @@ Andrew Sasamori
 Rayan Syed  
 Bennet Taylor 
 
+## Sprint Demos:
+[Sprint1 Demo](https://drive.google.com/file/d/1AckVEbBgkP-q0t7MMwMPyFpk_JpBOWmr/view?usp=sharing)  
+Sprint2 Demo   
+Sprint3 Demo   
+Sprint4 Demo 
+Sprint5 Demos   
+
+
+## Sprint Slideshows:
+[Sprint1 Slideshow](https://docs.google.com/presentation/d/14M9Q9WwM2tktHl2NyspCqJEftkKHSECiHJnucQ3VKqw/edit?usp=sharing)  
+Sprint2 Slideshow  
+Sprint3 Slideshow  
+Sprint4 Slideshow  
+Sprint5 Slideshow  
+
+
+
 ## Project Mentors:
 Stefan Philip   
 Mayur Srivastava 
@@ -99,6 +116,8 @@ Implement fault tolerance mechanisms.
 This scope shows what  will be delivered in the project, focusing on asynchronous batch processing, scalability, and efficient rate limit management while avoiding unnecessary complexity and features in the initial development phases.
 
 ## 4. Solution Concept
+![image](./images/system.jpg)
+
 **Stage 1: Information Ingestion**  
 The start of the data pipeline will consist of collecting information from the users. Requests will likely be packaged with metadata and the data to be processed (pyarrow table, pandas data frame, etc.) as a binary. The request will then be sent to an HTTP endpoint exposed by our API hosted on google cloud. Multiple technologies could be used to manage our API including cloud endpoints, an API Gateway, or Apigee. Choices relating to specific implementation will be resolved as we continue to work on our design.
 
@@ -126,5 +145,22 @@ Our minimum viable product will be labeled as:
 1. Friendly UI to understand how the data pipeline is being processed at any moment in time
 2. Expand beyond OpenAI, Google, Azure and other LLMs for testing
 3. Allowance for flexible data; PyArrow, Pandas, other libraries supporting other data/file types.
+
+
+## 6. Rough Release Plan
+**Sprint 1:** End to End Proof of Concept.    
+During this demo, we will be building an end to end system that will mock the final data pipeline. This version will not use redis and will only implement a basic version of Apache Kafka and Flink those tasks are finished.
+
+**Sprint 2:** Batch Queuing and Kafka Integration  
+During this sprint, we will be integrating the batch processing, Kafka, and Flink technologies. 
+
+**Sprint 3:** Rate Limiting Logic and Fault Tolerance. Implementing additional LLMs
+During this sprint, we will begin to tune the rate limiting logic and include logic to detect and respond to Faults and Errors. Additionally, during this sprint we decide if we increase our offerings to more LLMs if possible.
+
+**Sprint 4:** Forwarding Results and Notifications  
+During this stage we will iterate on the response return process and handle notifications for the user.
+
+**Sprint 5:** Scalability and Performance Optimization 
+The final sprint will focus on scaling and tuning the pipeline to make sure it is efficient for Two Sigma’s use case as well as scaled large enough to withstand their jobs. 
 
 
