@@ -160,13 +160,13 @@ During this demo, we will be building an end to end system that will mock the fi
 **Sprint 2:** Batch Queuing and Kafka Integration  
 During this sprint, we will be integrating the batch processing, Kafka, and Flink technologies. 
 
-**Sprint 3:** Rate Limiting Logic and Fault Tolerance. Implementing additional LLMs  
+**Sprint 3:** Rate Limiting Logic and Fault Tolerance. Implementing additional LLMs
 During this sprint, we will begin to tune the rate limiting logic and include logic to detect and respond to Faults and Errors. Additionally, during this sprint we decide if we increase our offerings to more LLMs if possible.
 
 **Sprint 4:** Forwarding Results and Notifications  
 During this stage we will iterate on the response return process and handle notifications for the user.
 
-**Sprint 5:** Scalability and Performance Optimization   
+**Sprint 5:** Scalability and Performance Optimization 
 The final sprint will focus on scaling and tuning the pipeline to make sure it is efficient for Two Sigma’s use case as well as scaled large enough to withstand their jobs. 
 
 
