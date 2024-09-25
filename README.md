@@ -12,8 +12,8 @@ Bennet Taylor
 [Sprint1 Demo](https://drive.google.com/file/d/1AckVEbBgkP-q0t7MMwMPyFpk_JpBOWmr/view?usp=sharing)  
 Sprint2 Demo   
 Sprint3 Demo   
-Sprint4 Demo 
-Sprint5 Demos   
+Sprint4 Demo   
+Sprint5 Demo 
 
 
 ## Sprint Slideshows:
