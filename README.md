@@ -30,8 +30,12 @@ Sprint3 Slideshow
 Sprint4 Slideshow  
 Sprint5 Slideshow  
 
+## 1. The Problem
 
-## 1.   Vision and Goals Of The Project:
+There are three large problems with the current process for calling LLMs available on the market. The first problem is Rate Limits which Cloud LLM providers impose. These limits prevent sending all requests simultaneously. Second is the problem of the Manual Oversight: required in the current process. The current manual process is inefficient and impractical for large-scale backfill jobs. The third problem is the inefficient management of requests caused a delayed timely output.
+
+
+## 2.   Vision and Goals Of The Project:
 The vision of this project is to create an automated, scalable, and efficient asynchronous batch processing solution for cloud-based Large Language Models (LLMs) at Two Sigma, enabling effortless data backfilling for large-scale financial datasets. By removing the complexity of rate limits imposed by cloud LLM providers and minimizing the need for manual oversight, this solution will allow for processing large amounts of data in an optimized and timely manner, ultimately improving operational capabilities.
 
 High-Level Goals of this project include:
@@ -41,7 +45,7 @@ High-Level Goals of this project include:
 * Ensure Fault Tolerance: Design the system to gracefully handle failures, ensuring availability and reliability even under heavy workloads
 * Cost Management: Optimize the use of cloud-based LLMs and other computational resources to minimize costs without sacrificing performance
 
-## 2. Users/Personas Of The Project:
+## 3. Users/Personas Of The Project:
 
 **Persona 1: Quantitative Researcher**
 
@@ -63,7 +67,7 @@ They require an automated, scalable solution capable of handling large data volu
 **Typical Scenario:** The data engineer sets up parameters in the new system, which automatically manages request flows for multiple backfill jobs submitted by researchers. The system handles rate limiting, scales resources as needed, and provides real-time monitoring dashboards. If issues occur, they receive automated alerts and can address problems promptly without constant supervision.
 
 
-## 3.   Scope and Features Of The Project:
+## 4.   Scope and Features Of The Project:
 **Scope Overview:**  
 
 The scope of this project is to design and develop an asynchronous batch processing system that automates the management of rate limits and requests flows for cloud-based LLMs. The system will focus on ensuring efficient, scalable, and cost-effective processing of large datasets without requiring manual oversight. It will also provide a user-friendly interface for managing and monitoring the batch process.
@@ -117,7 +121,7 @@ Implement fault tolerance mechanisms.
 
 This scope shows what  will be delivered in the project, focusing on asynchronous batch processing, scalability, and efficient rate limit management while avoiding unnecessary complexity and features in the initial development phases.
 
-## 4. Solution Concept
+## 5. Solution Concept
 ![image](./images/system.jpg)
 
 **Stage 1: Information Ingestion**  
@@ -133,7 +137,7 @@ During this stage Flink will first ingest data from the kafka topic queue and pr
 **Stage 4: Forwarding Results**  
 Once the Flink job has received a complete response from an LLM API it will add this data to an appropriate kafka queue. Depending on the initial request made to our API these queues could deliver the data back to the user via a number of different methods. The resultant data could be stored on the cloud and continued to be used from there or a pub/sub system could be implemented to notify clients that the batch job is complete and the resulting data can be collected.
 
-## 5. Acceptance Criteria
+## 6. Acceptance Criteria
 Our minimum viable product will be labeled as:
 
 **Minimum Criteria** 
@@ -149,7 +153,7 @@ Our minimum viable product will be labeled as:
 3. Allowance for flexible data; PyArrow, Pandas, other libraries supporting other data/file types.
 
 
-## 6. Rough Release Plan
+## 7. Rough Release Plan
 **Sprint 1:** End to End Proof of Concept.    
 During this demo, we will be building an end to end system that will mock the final data pipeline. This version will not use redis and will only implement a basic version of Apache Kafka and Flink those tasks are finished.
 
