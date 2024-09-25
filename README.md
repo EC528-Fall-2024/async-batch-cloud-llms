@@ -1,12 +1,19 @@
 #    Project Title: Async Batch Processing Solution for Cloud-LLMs
 
-## Project Members:
-Yuhan Chen  
-Noah Robitshek  
-Sergio Rodriguez  
-Andrew Sasamori  
-Rayan Syed  
-Bennet Taylor 
+
+
+## Team Members
+
+| Names              | Roles   | Emails                |
+| :----------------- | ------- | --------------------- |
+| Yuhan Chen        | Student  | erv1n@bu.edu       |
+| Noah Robitshek     | Student  | noahro@bu.edu      |
+| Sergio Rodriguez      | Student  |  sergioer@bu.edu |
+| Andrew Sasamori   | Student | sasamori@bu.edu        |
+| Rayan Syed        | Student | rsyed@bu.edu         |
+| Bennet Taylor     | Student | betaylor@bu.edu         |
+| Stefan Philip | Mentor |        |
+| Mayur Srivastava          | Mentor |       |
 
 ## Sprint Demos:
 [Sprint1 Demo](https://drive.google.com/file/d/1AckVEbBgkP-q0t7MMwMPyFpk_JpBOWmr/view?usp=sharing)  
@@ -23,11 +30,6 @@ Sprint3 Slideshow
 Sprint4 Slideshow  
 Sprint5 Slideshow  
 
-
-
-## Project Mentors:
-Stefan Philip   
-Mayur Srivastava 
 
 ## 1.   Vision and Goals Of The Project:
 The vision of this project is to create an automated, scalable, and efficient asynchronous batch processing solution for cloud-based Large Language Models (LLMs) at Two Sigma, enabling effortless data backfilling for large-scale financial datasets. By removing the complexity of rate limits imposed by cloud LLM providers and minimizing the need for manual oversight, this solution will allow for processing large amounts of data in an optimized and timely manner, ultimately improving operational capabilities.
