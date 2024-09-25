@@ -162,7 +162,7 @@ During this sprint, we will begin to tune the rate limiting logic and include lo
 **Sprint 4:** Forwarding Results and Notifications  
 During this stage we will iterate on the response return process and handle notifications for the user.
 
-**Sprint 5:** Scalability and Performance Optimization 
+**Sprint 5:** Scalability and Performance Optimization   
 The final sprint will focus on scaling and tuning the pipeline to make sure it is efficient for Two Sigma’s use case as well as scaled large enough to withstand their jobs. 
 
 
