@@ -156,7 +156,7 @@ During this demo, we will be building an end to end system that will mock the fi
 **Sprint 2:** Batch Queuing and Kafka Integration  
 During this sprint, we will be integrating the batch processing, Kafka, and Flink technologies. 
 
-**Sprint 3:** Rate Limiting Logic and Fault Tolerance. Implementing additional LLMs
+**Sprint 3:** Rate Limiting Logic and Fault Tolerance. Implementing additional LLMs  
 During this sprint, we will begin to tune the rate limiting logic and include logic to detect and respond to Faults and Errors. Additionally, during this sprint we decide if we increase our offerings to more LLMs if possible.
 
 **Sprint 4:** Forwarding Results and Notifications  
