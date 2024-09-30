@@ -22,10 +22,6 @@ def load_openai_api_key(filepath):
 OPENAI_API_KEY_FILE = 'OPENAI_API_KEY.txt'
 openai_api_key = load_openai_api_key(OPENAI_API_KEY_FILE)
 
-# Optional: You can set organization and project IDs if needed
-organization_id = "your-organization-id"  # Replace with your org ID or None
-project_id = "your-project-id"  # Replace with your project ID or None
-
 # Kafka configurations
 KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "llm_requests")
 KAFKA_SERVER = os.getenv("KAFKA_SERVER", "localhost:9092")
