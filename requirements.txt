@@ -1,5 +1,5 @@
 kafka-python==2.0.2
-redis
+redis==5.1.0
 requests
 pandas~=2.2.3
 openai~=1.50.1
