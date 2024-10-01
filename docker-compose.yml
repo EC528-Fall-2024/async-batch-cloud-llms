@@ -1,0 +1,18 @@
+services:
+  redis:
+    image: redis:latest # Pull the latest Redis image
+    container_name: redis-container # Name of the Redis container
+    ports:
+      - "6379:6379" # Expose Redis on the default port
+    volumes:
+      - redis-data:/data # Mount a volume to persist Redis data
+    networks:
+      - app-network # Use the shared network for communication
+
+volumes:
+  redis-data:
+    driver: local # Local storage for Redis data
+
+networks:
+  app-network:
+    driver: bridge # Bridge network for internal communication
