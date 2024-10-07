@@ -6,34 +6,48 @@ services:
       - "6379:6379" # Expose Redis on the default port
     volumes:
       - redis-data:/data # Mount a volume to persist Redis data
-    networks:
-      - app-network # Use the shared network for communication
   zookeeper:
-    restart: always
-    image: docker.io/bitnami/zookeeper:3.8
+    image: confluentinc/cp-zookeeper:latest
+    hostname: zookeeper
+    container_name: zookeeper
     ports:
       - "2181:2181"
-    volumes:
-      - "zookeeper-volume:/bitnami"
     environment:
-      - ALLOW_ANONYMOUS_LOGIN=yes
-  kafka:
-    restart: always
-    image: docker.io/bitnami/kafka:3.3
-    ports:
-      - "9093:9093"
-    volumes:
-      - "kafka-volume:/bitnami"
-    environment:
-      - KAFKA_BROKER_ID=1
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-      - ALLOW_PLAINTEXT_LISTENER=yes
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
-      - KAFKA_CFG_LISTENERS=CLIENT://:9092,EXTERNAL://:9093
-      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:9092,EXTERNAL://localhost:9093
-      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    healthcheck:
+      test: [ "CMD", "bash", "-c", "echo 'ruok' | nc localhost 2181" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  broker:
+    image: confluentinc/cp-kafka:latest
+    hostname: broker
+    container_name: broker
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "9092:9092"
+      - "9101:9101"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+    healthcheck:
+      test: [ "CMD", "bash", "-c", 'nc -z localhost 9092' ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   flink-jobmanager:
     image: bitnami/flink:latest
     container_name: flink-jobmanager
@@ -42,8 +56,6 @@ services:
     environment:
       - FLINK_JOBMANAGER_RPC_ADDRESS=flink-jobmanager
     command: jobmanager
-    networks:
-      - app-network
   flink-taskmanager:
     image: bitnami/flink:latest
     container_name: flink-taskmanager
@@ -52,15 +64,9 @@ services:
     environment:
       - FLINK_JOBMANAGER_RPC_ADDRESS=flink-jobmanager
     command: taskmanager
-    networks:
-      - app-network
 
 volumes:
   redis-data:
     driver: local # Local storage for Redis data
-  kafka-volume:
-  zookeeper-volume:
-
-networks:
-  app-network:
-    driver: bridge # Bridge network for internal communication
+  kafka_data:
+    driver: local
