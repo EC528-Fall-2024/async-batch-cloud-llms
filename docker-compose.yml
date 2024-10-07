@@ -34,6 +34,26 @@ services:
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
     depends_on:
       - zookeeper
+  flink-jobmanager:
+    image: bitnami/flink:latest
+    container_name: flink-jobmanager
+    ports:
+      - "8081:8081"
+    environment:
+      - FLINK_JOBMANAGER_RPC_ADDRESS=flink-jobmanager
+    command: jobmanager
+    networks:
+      - app-network
+  flink-taskmanager:
+    image: bitnami/flink:latest
+    container_name: flink-taskmanager
+    depends_on:
+      - flink-jobmanager
+    environment:
+      - FLINK_JOBMANAGER_RPC_ADDRESS=flink-jobmanager
+    command: taskmanager
+    networks:
+      - app-network
 
 volumes:
   redis-data:
