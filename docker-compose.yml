@@ -50,7 +50,7 @@ services:
       timeout: 5s
       retries: 5
   flink-jobmanager:
-    image: bitnami/flink:latest
+    image: flink:latest
     container_name: flink-jobmanager
     ports:
       - "8081:8081"
@@ -58,7 +58,7 @@ services:
       - FLINK_JOBMANAGER_RPC_ADDRESS=flink-jobmanager
     command: jobmanager
   flink-taskmanager:
-    image: bitnami/flink:latest
+    image: flink:latest
     container_name: flink-taskmanager
     depends_on:
       - flink-jobmanager
