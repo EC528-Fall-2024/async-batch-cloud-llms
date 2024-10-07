@@ -129,6 +129,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+LLM_API/flink/pyflink_env
+LLM_API/flink/.python-version
 
 # Spyder project settings
 .spyderproject
