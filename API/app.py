@@ -81,11 +81,6 @@ def send_to_openai(prompt, data):
         "Content-Type": "application/json"
     }
 
-    if organization_id:
-        headers["OpenAI-Organization"] = organization_id
-    if project_id:
-        headers["OpenAI-Project"] = project_id
-
     payload = {
         "model": "gpt-4o-mini",  # Adjust to the model you are using
         "messages": [{"role": "user", "content": prompt}],
