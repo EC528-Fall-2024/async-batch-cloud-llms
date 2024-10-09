@@ -1,9 +1,0 @@
-kafka-python==2.0.2
-redis
-requests
-confluent-kafka==2.5.3
-apache-flink==1.20.0
-redis==5.1.0
-pandas~=2.2.3
-openai~=1.50.1
-Flask~=3.0.3
