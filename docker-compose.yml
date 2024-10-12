@@ -50,22 +50,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-  flink-jobmanager:
-    image: flink:latest
-    container_name: flink-jobmanager
-    ports:
-      - "8081:8081"
-    environment:
-      - FLINK_JOBMANAGER_RPC_ADDRESS=flink-jobmanager
-    command: jobmanager
-  flink-taskmanager:
-    image: flink:latest
-    container_name: flink-taskmanager
-    depends_on:
-      - flink-jobmanager
-    environment:
-      - FLINK_JOBMANAGER_RPC_ADDRESS=flink-jobmanager
-    command: taskmanager
 
   app:
     build: ./API  # Make sure this path points to the directory where your Dockerfile is located
