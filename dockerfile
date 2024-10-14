@@ -30,7 +30,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Expose the port the application will run on
 # This doesn't open the port, just documents it for future use
-EXPOSE 8000
+EXPOSE 8080
 
 # Specify the command to run when the container starts
 # This runs the Python application file `app.py`
