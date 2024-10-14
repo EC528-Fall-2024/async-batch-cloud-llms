@@ -34,4 +34,4 @@ EXPOSE 8080
 
 # Specify the command to run when the container starts
 # This runs the Python application file `app.py`
-CMD ["python", "app.py"]
+CMD ["python", "demo.py"]
