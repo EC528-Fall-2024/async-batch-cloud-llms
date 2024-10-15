@@ -132,6 +132,8 @@ venv.bak/
 LLM_API/flink/pyflink_env
 LLM_API/flink/.python-version
 
+flink-demo/pyflink/flink-venv
+
 # Spyder project settings
 .spyderproject
 .spyproject
