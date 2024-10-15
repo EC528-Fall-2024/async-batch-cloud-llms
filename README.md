@@ -17,7 +17,7 @@
 
 ## Sprint Demos:
 [Sprint1 Demo](https://drive.google.com/file/d/1AckVEbBgkP-q0t7MMwMPyFpk_JpBOWmr/view?usp=sharing)  
-Sprint2 Demo   
+[Sprint2 Demo](https://drive.google.com/file/d/1NjymlgsvtWI8tLfMjFaLiHEr-3TgZ8N5/view?usp=sharing)  
 Sprint3 Demo   
 Sprint4 Demo   
 Sprint5 Demo 
@@ -25,7 +25,7 @@ Sprint5 Demo
 
 ## Sprint Slideshows:
 [Sprint1 Slideshow](https://docs.google.com/presentation/d/14M9Q9WwM2tktHl2NyspCqJEftkKHSECiHJnucQ3VKqw/edit?usp=sharing)  
-Sprint2 Slideshow  
+[Sprint2 Slideshow](https://docs.google.com/presentation/d/1h4vzF_IGO_7xRFhTZ4Gz1gRdLEJGcvXHZI2-pYbjRF4/edit?usp=sharing)   
 Sprint3 Slideshow  
 Sprint4 Slideshow  
 Sprint5 Slideshow  

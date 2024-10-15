@@ -44,27 +44,29 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_JMX_PORT: 9101
       KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true' 
     healthcheck:
       test: [ "CMD", "bash", "-c", 'nc -z localhost 9092' ]
       interval: 10s
       timeout: 5s
       retries: 5
-  flink-jobmanager:
-    image: flink:latest
-    container_name: flink-jobmanager
+
+  app:
+    build: ./API  # Make sure this path points to the directory where your Dockerfile is located
+    container_name: flask-app
     ports:
-      - "8081:8081"
+      - "5000:5000"
+    volumes:
+      - ./API:/app/API
     environment:
-      - FLINK_JOBMANAGER_RPC_ADDRESS=flink-jobmanager
-    command: jobmanager
-  flink-taskmanager:
-    image: flink:latest
-    container_name: flink-taskmanager
+      - KAFKA_TOPIC=llm_requests
+      - KAFKA_SERVER=broker:9092
+      - KAFKA_GROUP_ID=llm_group
+      - OPENAI_API_KEY_FILE=/app/API/OPENAI_API_KEY.txt
     depends_on:
-      - flink-jobmanager
-    environment:
-      - FLINK_JOBMANAGER_RPC_ADDRESS=flink-jobmanager
-    command: taskmanager
+      - broker
+      - redis
+    command: python /app/API/app.py  
 
 volumes:
   redis-data:

@@ -1,17 +1,19 @@
+# Use an official Python runtime as a parent image
 FROM python:3.9-slim
-WORKDIR /API
-COPY . /API
+
+# Set the working directory in the container
+WORKDIR /app/API
+
+# Copy the current directory contents into the container at /app/API
+COPY . /app/API
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-# COPY OPENAI_API_KEY.txt /API/OPENAI_API_KEY.txt
 
-# Expose port for Flask
 EXPOSE 5000
 
-# Dont know if we will run this from here
-# ENV KAFKA_SERVER=localhost:9092
-# ENV KAFKA_TOPIC=llm_requests
-# ENV KAFKA_GROUP_ID=llm_group
+
+ENV FLASK_APP=app.py
+
 
 CMD ["python", "app.py"]
