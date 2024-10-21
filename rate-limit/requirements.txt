@@ -4,3 +4,4 @@ tqdm
 datasets
 openai
 python-dotenv
+tiktoken
