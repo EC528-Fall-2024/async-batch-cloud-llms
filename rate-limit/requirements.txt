@@ -1,2 +1,6 @@
 redis==5.1.0
 requests
+tqdm
+datasets
+openai
+python-dotenv

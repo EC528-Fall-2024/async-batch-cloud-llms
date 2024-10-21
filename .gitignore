@@ -129,8 +129,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-LLM_API/flink/pyflink_env
-LLM_API/flink/.python-version
+LLM_API/LLM_env
 
 flink-demo/pyflink/flink-venv
 
