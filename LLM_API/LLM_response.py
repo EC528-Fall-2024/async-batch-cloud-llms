@@ -2,11 +2,12 @@ from datasets import load_dataset
 from tqdm import tqdm
 import os
 import time
-from queue import Queue
+from queue import Queue, Empty
 import threading
-from openai import OpenAI
 from dotenv import load_dotenv
 import signal
+from openai import OpenAI
+import atexit
 
 load_dotenv()
 openai_api_key = os.getenv('OPENAI_API_KEY')
@@ -17,11 +18,14 @@ client = OpenAI(api_key=openai_api_key)
 
 class SampleStorageBucket:
     def __init__(self):
-        self.bucket= []
+        self.bucket = []
     
     def write(self, data):
-        self.bucket .append(data)
+        self.bucket.append(data)
     
+    @property
+    def data(self):
+        return self.bucket
 
 class SampleLimiter:
     def __init__(self, rate_limit):
@@ -34,98 +38,135 @@ class SampleLimiter:
             now = time.time()
             time_passed = now - self.last_refill
             self.tokens = min(self.rate_limit, self.tokens + time_passed * (self.rate_limit / 60))
+            self.last_refill = now
             if self.tokens < tokens:
                 time.sleep(.1)
-            self.tokens -= tokens
+        self.tokens -= tokens
 
-# Response Queue for deciphering inf
 llm_response_queue = Queue()
-
-# User's Output Bucket 
 output_bucket = SampleStorageBucket()
-
-data = load_dataset("stanford-oval/ccnews", name="2016", streaming=True) # `name` can be one of 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024
-
 shutdown_flag = threading.Event()
+processing_complete = threading.Event()
+interrupt_count = 0
 
-# Sample Limiting Function
 def process(batch):
-    rate_limiter = SampleLimiter(60)  # 60 requests per minute
+    rate_limiter = SampleLimiter(60)
     for item in batch:
         if shutdown_flag.is_set():
-            break
-        rate_limiter.wait(1)  # Wait for 1 token (1 request)
+            print("Shutdown flag set, exiting process")
+            return
+        
+        rate_limiter.wait(1)
         try:
+            print(f"Processing review: {item['sentence'][:50]}...")
+
+            #  Define what type of OpenAI generation want to use
+            # TODO: Make this a variable later to allow user input
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
-                    {"role": "system", "content": "You are a helpful assistant that summarizes news articles."},
-                    {"role": "user", "content": f"Summarize this news article in one sentence: {item['title']}"}
+                    {"role": "system", "content": "You are a helpful assistant that analyzes movie reviews."},
+                    {"role": "user", "content": f"Analyze the sentiment of this movie review in one word (happy or sad): {item['sentence']}"}
                 ]
             )
-            summary = response.choices[0].message.content.strip()
-            llm_response_queue.put({"title": item["title"], "summary": summary})
+            analysis = response.choices[0].message.content.strip()
+            llm_response_queue.put({"sentence": item["sentence"], "analysis": analysis})
+            print(f"Analysis complete: {analysis}")
         except Exception as e:
             print(f"Error processing item: {str(e)}")
+            # Ran out of credits
             if "insufficient_quota" in str(e):
                 print("You have exceeded your OpenAI API quota. Please check your plan and billing details.")
                 shutdown_flag.set()
-                break
-
+                return
+            else:
+                print(f"Unknown error: {e}")
 
 def rev_process():
-    while not shutdown_flag.is_set():
+    while not (processing_complete.is_set() and llm_response_queue.empty()):
         try:
-            resp = llm_response_queue.get()
+            resp = llm_response_queue.get(timeout=1)
             if resp is None:
                 break
             output_bucket.write(resp)
             llm_response_queue.task_done()
-        except Queue.empty:
+            print(f"Stored analysis for: {resp['sentence'][:50]}... -> {resp['analysis']}")
+        except Empty:
+            if shutdown_flag.is_set():
+                break
             continue
-    
+        except Exception as e:
+            print(f"Error in rev_process: {str(e)}")
+    print("Reverse process completed")
+
 def signal_handler(signum, frame):
-    print('\nInterrupt received, shutting down')
-    shutdown_flag.set()
+    global interrupt_count
+    interrupt_count += 1
+    if interrupt_count == 1:
+        print('\nInterrupt received, shutting down...')
+        shutdown_flag.set()
+        processing_complete.set()
+    elif interrupt_count >= 2:
+        print('\nForce quitting...')
+        os._exit(0)
 
-signal.signal(signal.SIGINT, signal_handler)
+def cleanup():
+    if not shutdown_flag.is_set():
+        shutdown_flag.set()
+    if not processing_complete.is_set():
+        processing_complete.set()
 
-# Start rev batch processor thread
-print('\nCreated reverse process')
-rev_process_thread = threading.Thread(target=rev_process)
-print('\nStarting reverse process')
-rev_process_thread.start()
+def main():
+    atexit.register(cleanup)
+    signal.signal(signal.SIGINT, signal_handler)
 
-# Not sure if this helps or not 
-batch_size = 2
-batch = []
+    print("Starting sentiment analysis processing...")
+    rev_process_thread = threading.Thread(target=rev_process)
+    rev_process_thread.daemon = True
+    rev_process_thread.start()
 
-print('\nAppending batches')
-for i, example in  enumerate(tqdm(data['train'])):
-    batch.append(example)
-    if len(batch) == batch_size:
-        process(batch)
-        batch = []
+    # Load and process data
+    data = load_dataset('glue', 'sst2')['train'].select(range(5))
+    batch_size = 2
+    batch = []
 
-# Process remaining
-print('\nProcessing remaining batches')
-if batch:
-    process(batch)
+    try:
+        for i, example in enumerate(tqdm(data, desc="Processing reviews")):
+            if shutdown_flag.is_set():
+                break
+            batch.append(example)
+            if len(batch) == batch_size:
+                process(batch)
+                batch = []
 
-# Signal Rev Batch Processor to finish
-print('Signalling Rev Batch to finish')
-llm_response_queue.put(None)
+        if batch and not shutdown_flag.is_set():
+            process(batch)
 
-# Wait for tasks to be processed
-print('Waiting Rev Batch to finish')
-llm_response_queue.join()
+    finally:
+        processing_complete.set()
+        print("\nAll reviews processed, finalizing results...")
+        
+        # Ensure queue is properly closed
+        if not llm_response_queue.empty():
+            llm_response_queue.put(None)
+        
+        # Wait for processing to complete
+        try:
+            llm_response_queue.join()
+            rev_process_thread.join(timeout=3)
+        except:
+            pass
 
-# Wait for rev processor to finish
-rev_process_thread.join()
+        # Print results
+        if output_bucket.data:
+            print("\nFinal Results:")
+            print("-" * 50)
+            for i, item in enumerate(output_bucket.data, 1):
+                print(f"\n{i}. Review: {item['sentence'][:100]}...")
+                print(f"   Analysis: {item['analysis']}")
+            print(f"\nTotal processed items: {len(output_bucket.data)}")
+        else:
+            print("\nNo results were processed.")
 
-# Print results
-print("\nProcessed summaries:")
-for item in output_bucket.data[:5]: # Print only first 5 summaries, I think
-    print(f"Title: {item['title'][:50]}..., Summary: {item['summary']}")
-
-print(f'\nTotal processed items: {len(output_bucket.bucket)}')
+if __name__ == "__main__":
+    main()
