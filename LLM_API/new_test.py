@@ -130,7 +130,7 @@ shutdown_flag = threading.Event()
 processing_complete = threading.Event()
 
 def signal_handler(signum, frame):
-    print("\n⚠️ Interrupt received, shutting down gracefully...")
+    print("\nInterrupt received, shutting down gracefully...")
     shutdown_flag.set()
     processing_complete.set()
     sys.exit(0)
@@ -147,7 +147,7 @@ def main():
     # Start reverse processor
     reverse_processor.start()
     
-    print("\n🚀 Starting sentiment analysis system...")
+    print("\n Starting sentiment analysis system...")
     
     # Load small dataset for testing
     data = load_dataset('glue', 'sst2')['train'].select(range(6))  # Processing 6 items
@@ -188,9 +188,9 @@ def main():
                 print(f"\n{i}. Review: {result['sentence'][:100]}...")
                 print(f"   Sentiment: {result['analysis']}")
             print("\n=" * 50)
-            print(f"✨ Total processed items: {len(results)}")
+            print(f"Total processed items: {len(results)}")
         else:
-            print("\n⚠️ No results were processed.")
+            print("\n No results were processed.")
             
     except Exception as e:
         print(f"\n Error in main process: {str(e)}")
@@ -200,3 +200,109 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+'''
+Sample Output: 
+
+Reverse batch processor started...
+
+ Starting sentiment analysis system...
+Reading dataset:   0%|                                                                      | 0/6 [00:00<?, ?it/s]
+Processing batch 0 with 2 items...
+✓ Review analyzed: 'hide new secretions from the parental units ...' → negative
+✓ Review analyzed: 'contains no wit , only labored gags ...' → negative
+→ Batch 0 sent to processing queue
+Reading dataset:  33%|████████████████████▋                                         | 2/6 [00:00<00:01,  2.10it/s]← Stored analysis for batch 0
+← Stored analysis for batch 0
+
+Processing batch 1 with 2 items...
+✓ Review analyzed: 'that loves its characters and communicates somethi...' → positive
+✓ Review analyzed: 'remains utterly satisfied to remain the same throu...' → positive
+→ Batch 1 sent to processing queue
+Reading dataset:  67%|█████████████████████████████████████████▎                    | 4/6 [00:01<00:00,  2.41it/s]← Stored analysis for batch 1
+← Stored analysis for batch 1
+
+Processing batch 2 with 2 items...
+✓ Review analyzed: 'on the worst revenge-of-the-nerds clichés the film...' → negative
+✓ Review analyzed: 'that 's far too tragic to merit such superficial t...' → negative
+→ Batch 2 sent to processing queue
+Reading dataset: 100%|██████████████████████████████████████████████████████████████| 6/6 [00:02<00:00,  2.20it/s]
+← Stored analysis for batch 2
+← Stored analysis for batch 2
+
+✓ Reverse batch processor finished
+
+Final Analysis Results:
+==================================================
+
+1. Review: contains no wit , only labored gags ...
+   Sentiment: negative
+
+2. Review: hide new secretions from the parental units ...
+   Sentiment: negative
+
+3. Review: remains utterly satisfied to remain the same throughout ...
+   Sentiment: positive
+
+4. Review: that loves its characters and communicates something rather beautiful about human nature ...
+   Sentiment: positive
+
+5. Review: on the worst revenge-of-the-nerds clichés the filmmakers could dredge up ...
+   Sentiment: negative
+
+6. Review: that 's far too tragic to merit such superficial treatment ...
+   Sentiment: negative
+
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+Total processed items: 6
+
+'''

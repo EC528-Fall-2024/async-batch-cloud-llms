@@ -170,3 +170,53 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+'''
+Dataset is from: https://huggingface.co/datasets/stanfordnlp/sst2
+
+-----------------------
+
+Sample Output:
+
+Starting sentiment analysis processing...
+Processing reviews:   0%|                                                                   | 0/5 [00:00<?, ?it/s]Processing review: hide new secretions from the parental units ...
+Analysis complete: happy
+Processing review: contains no wit , only labored gags ...
+Stored analysis for: hide new secretions from the parental units ... -> happy
+Analysis complete: Sad
+Processing reviews:  40%|███████████████████████▌                                   | 2/5 [00:00<00:01,  2.28it/s]Stored analysis for: contains no wit , only labored gags ... -> Sad
+Processing review: that loves its characters and communicates somethi...
+Analysis complete: Happy
+Processing review: remains utterly satisfied to remain the same throu...
+Stored analysis for: that loves its characters and communicates somethi... -> Happy
+Analysis complete: happy
+Processing reviews: 100%|███████████████████████████████████████████████████████████| 5/5 [00:01<00:00,  2.95it/s]
+Stored analysis for: remains utterly satisfied to remain the same throu... -> happy
+Processing review: on the worst revenge-of-the-nerds clichés the film...
+Analysis complete: negative
+Stored analysis for: on the worst revenge-of-the-nerds clichés the film... -> negative
+
+All reviews processed, finalizing results...
+Reverse process completed
+
+Final Results:
+--------------------------------------------------
+
+1. Review: hide new secretions from the parental units ...
+   Analysis: happy
+
+2. Review: contains no wit , only labored gags ...
+   Analysis: Sad
+
+3. Review: that loves its characters and communicates something rather beautiful about human nature ...
+   Analysis: Happy
+
+4. Review: remains utterly satisfied to remain the same throughout ...
+   Analysis: happy
+
+5. Review: on the worst revenge-of-the-nerds clichés the filmmakers could dredge up ...
+   Analysis: negative
+
+Total processed items: 5
+'''
