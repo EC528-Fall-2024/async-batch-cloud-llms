@@ -1,0 +1,129 @@
+Performing simple test...
+Global bucket initialized with 200000 tokens
+Predicting 125 tokens needed
+Accessing global bucket. Currently has 200000 out of 200000 tokens
+Consumed 125 tokens from global bucket. 199875 tokens remaining.
+Initialized new sub-bucket for user user123 with 125 tokens.
+Consumed 125 tokens from user123's sub-bucket.
+Sufficient tokens available, calling OpenAI...
+Actually used 32 tokens
+Response: 1 + 1 equals 2.
+All batches for user user123 complete, destroyed bucket.
+Global bucket increased to 200000 tokens.
+
+Performing complex concurency test...
+Global bucket initialized with 200000 tokens
+Predicting 125 tokens needed
+Predicting 125 tokens needed
+Predicting 125 tokens needed
+Predicting 125 tokens needed
+Predicting 125 tokens needed
+Accessing global bucket. Currently has 200000 out of 200000 tokens
+Consumed 125 tokens from global bucket. 199875 tokens remaining.
+Initialized new sub-bucket for user user123 with 125 tokens.
+Consumed 125 tokens from user123's sub-bucket.
+Sufficient tokens available, calling OpenAI...
+Altering user user123's subbucket.
+User user123 needs 125 more tokens.
+Accessing global bucket. Currently has 199875 out of 200000 tokens
+Consumed 250 tokens from global bucket. 199625 tokens remaining.
+Added 125 tokens to user123's sub-bucket. Now has 250 maximum tokens.
+Consumed 125 tokens from user123's sub-bucket.
+Sufficient tokens available, calling OpenAI...
+Accessing global bucket. Currently has 199625 out of 200000 tokens
+Consumed 125 tokens from global bucket. 199500 tokens remaining.
+Initialized new sub-bucket for user user123 with 125 tokens.
+Consumed 125 tokens from user123's sub-bucket.
+Sufficient tokens available, calling OpenAI...
+Altering user user123's subbucket.
+User user123 needs 125 more tokens.
+Accessing global bucket. Currently has 199500 out of 200000 tokens
+Consumed 250 tokens from global bucket. 199250 tokens remaining.
+Added 125 tokens to user123's sub-bucket. Now has 250 maximum tokens.
+Consumed 125 tokens from user123's sub-bucket.
+Sufficient tokens available, calling OpenAI...
+Accessing global bucket. Currently has 199250 out of 200000 tokens
+Consumed 125 tokens from global bucket. 199125 tokens remaining.
+Initialized new sub-bucket for user user123 with 125 tokens.
+Consumed 125 tokens from user123's sub-bucket.
+Sufficient tokens available, calling OpenAI...
+Actually used 32 tokens
+Response: 1 + 1 equals 2.
+All batches for user user123 complete, destroyed bucket.
+Global bucket increased to 199250 tokens.
+Processed batch: {'user_id': 'user123', 'prompt': 'Solve: ', 'data': '1+1'}
+Predicting 125 tokens needed
+Accessing global bucket. Currently has 199250 out of 200000 tokens
+Consumed 125 tokens from global bucket. 199125 tokens remaining.
+Initialized new sub-bucket for user user123 with 125 tokens.
+Consumed 125 tokens from user123's sub-bucket.
+Sufficient tokens available, calling OpenAI...
+Actually used 31 tokens
+Response: 1+1 equals 2.
+All batches for user user123 complete, destroyed bucket.
+Global bucket increased to 199250 tokens.
+Processed batch: {'user_id': 'user123', 'prompt': 'Solve: ', 'data': '1+1'}
+Predicting 125 tokens needed
+Accessing global bucket. Currently has 199250 out of 200000 tokens
+Consumed 125 tokens from global bucket. 199125 tokens remaining.
+Initialized new sub-bucket for user user123 with 125 tokens.
+Consumed 125 tokens from user123's sub-bucket.
+Sufficient tokens available, calling OpenAI...
+Actually used 31 tokens
+Response: 1 + 1 = 2
+All batches for user user123 complete, destroyed bucket.
+Global bucket increased to 199250 tokens.
+Processed batch: {'user_id': 'user123', 'prompt': 'Solve: ', 'data': '1+1'}
+Predicting 125 tokens needed
+Accessing global bucket. Currently has 199250 out of 200000 tokens
+Consumed 125 tokens from global bucket. 199125 tokens remaining.
+Initialized new sub-bucket for user user123 with 125 tokens.
+Consumed 125 tokens from user123's sub-bucket.
+Sufficient tokens available, calling OpenAI...
+Actually used 32 tokens
+Response: 1 + 1 equals 2.
+All batches for user user123 complete, destroyed bucket.
+Global bucket increased to 199250 tokens.
+Processed batch: {'user_id': 'user123', 'prompt': 'Solve: ', 'data': '1+1'}
+Predicting 125 tokens needed
+Accessing global bucket. Currently has 199250 out of 200000 tokens
+Consumed 125 tokens from global bucket. 199125 tokens remaining.
+Initialized new sub-bucket for user user123 with 125 tokens.
+Consumed 125 tokens from user123's sub-bucket.
+Sufficient tokens available, calling OpenAI...
+Actually used 32 tokens
+Response: 1 + 1 = 2.
+All batches for user user123 complete, destroyed bucket.
+Global bucket increased to 199250 tokens.
+Processed batch: {'user_id': 'user123', 'prompt': 'Solve: ', 'data': '1+1'}
+Predicting 125 tokens needed
+Accessing global bucket. Currently has 199250 out of 200000 tokens
+Consumed 125 tokens from global bucket. 199125 tokens remaining.
+Initialized new sub-bucket for user user123 with 125 tokens.
+Consumed 125 tokens from user123's sub-bucket.
+Sufficient tokens available, calling OpenAI...
+Actually used 31 tokens
+Response: 1 + 1 = 2
+All batches for user user123 complete, destroyed bucket.
+Global bucket increased to 199250 tokens.
+Processed batch: {'user_id': 'user123', 'prompt': 'Solve: ', 'data': '1+1'}
+Actually used 31 tokens
+Response: 1 + 1 = 2
+Shrunk user123's bucket by 125 tokens. New max: -125
+Global bucket increased to 199375 tokens.
+Processed batch: {'user_id': 'user123', 'prompt': 'Solve: ', 'data': '1+1'}
+Actually used 30 tokens
+Response: The solution is 2.
+Shrunk user123's bucket by 125 tokens. New max: -250
+Global bucket increased to 199500 tokens.
+Processed batch: {'user_id': 'user123', 'prompt': 'Solve: ', 'data': '1+1'}
+Actually used 31 tokens
+Response: 1+1 equals 2.
+Shrunk user123's bucket by 125 tokens. New max: -375
+Global bucket increased to 199625 tokens.
+Processed batch: {'user_id': 'user123', 'prompt': 'Solve: ', 'data': '1+1'}
+Actually used 31 tokens
+Response: 1 + 1 = 2
+Shrunk user123's bucket by 125 tokens. New max: -500
+Global bucket increased to 199750 tokens.
+Processed batch: {'user_id': 'user123', 'prompt': 'Solve: ', 'data': '1+1'}

@@ -48,7 +48,7 @@ def init_global_bucket():
 
 def get_tokens_from_global(amount):
     # Withdraw tokens from the global bucket using Redis lock
-    with redis_client.lock("global_bucket_lock", blocking_timeout=5):
+    with redis_client.lock("global_bucket_lock"):
         # Let sub bucket consume tokens        
         tokens = int(redis_client.hget(GLOBAL_BUCKET_KEY, "tokens") or 0)
         print(f"Accessing global bucket. Currently has {tokens} out of {tpm} tokens")
@@ -66,7 +66,7 @@ def init_user_subbucket(user_id, tokens_needed):
     user_bucket_key = f"user_bucket:{user_id}"
     bucket_exists = redis_client.exists(user_bucket_key)
 
-    with redis_client.lock(f"{user_bucket_key}_lock", blocking_timeout=5):
+    with redis_client.lock(f"{user_bucket_key}_lock"):
         # Check if the user bucket already exists
         if bucket_exists:
             print(f"Altering user {user_id}'s subbucket.")
@@ -78,6 +78,9 @@ def init_user_subbucket(user_id, tokens_needed):
 
             # Try to withdraw additional tokens from global bucket
             if get_tokens_from_global(new_max):
+                tokens = int(redis_client.hget(user_bucket_key, "tokens") or 0)
+                tokens = tokens + tokens_needed # add to curr tokens as well
+                redis_client.hset(user_bucket_key, "tokens", tokens)
                 redis_client.hset(user_bucket_key, "max_tokens", new_max)
                 print(f"Added {tokens_needed} tokens to {user_id}'s sub-bucket. Now has {new_max} maximum tokens.")
                 return True
@@ -85,8 +88,8 @@ def init_user_subbucket(user_id, tokens_needed):
                 print(f"Insufficient global tokens to add {tokens_needed} tokens.")
                 return False
 
+        # If bucket doesn't exist, initialize a new one
         else:
-            # If bucket doesn't exist, initialize a new one
             if get_tokens_from_global(tokens_needed):
                 current_time = int(time.time())
                 redis_client.hset(user_bucket_key, "max_tokens", tokens_needed)
@@ -101,7 +104,7 @@ def init_user_subbucket(user_id, tokens_needed):
 def get_tokens_from_user(user_id, tokens_needed):
     user_bucket_key = f"user_bucket:{user_id}"
 
-    with redis_client.lock(f"{user_bucket_key}_lock", blocking_timeout=5):
+    with redis_client.lock(f"{user_bucket_key}_lock"):
         current_time = int(time.time())
         last_updated = int(redis_client.hget(user_bucket_key, "last_updated") or 0)
 
@@ -122,7 +125,33 @@ def get_tokens_from_user(user_id, tokens_needed):
             print(f"Insufficient tokens in {user_id}'s bucket. Needed: {tokens_needed}, Available: {tokens}.")
             return False
 
-# LLM API call
+def shrink_user_bucket(user_id, tokens_used):
+    user_bucket_key = f"user_bucket:{user_id}"
+
+    with redis_client.lock(f"{user_bucket_key}_lock"):
+        # Get user bucket state
+        max_tokens = int(redis_client.hget(user_bucket_key, "max_tokens") or 0)
+
+        # Update user max tokens
+        new_max = max_tokens - tokens_used
+        if new_max != 0:
+            redis_client.hset(user_bucket_key, "max_tokens", new_max)
+            print(f"Shrunk {user_id}'s bucket by {tokens_used} tokens. New max: {new_max}")
+        else:
+            redis_client.delete(user_bucket_key)
+            print(f"All batches for user {user_id} complete, destroyed bucket.")
+
+    # Return tokens to global bucket 
+    with redis_client.lock("global_bucket_lock"):
+        # Get global bucket state
+        global_tokens = int(redis_client.hget(GLOBAL_BUCKET_KEY, "tokens") or 0)
+
+        # Update global tokens
+        new_global_tokens = global_tokens + tokens_used
+        redis_client.hset(GLOBAL_BUCKET_KEY, "tokens", new_global_tokens)
+        print(f"Global bucket increased to {new_global_tokens} tokens.")
+
+############################## LLM API call #############################
 def call_openai(messages):
     # Make a call to the OpenAI API and track token usage
     try:
@@ -159,25 +188,82 @@ def process(item):
     # try to run
     if get_tokens_from_user(user_id, tokens_needed):
         print("Sufficient tokens available, calling OpenAI...")
-        # response_content = call_openai(messages)
-        # print(f"Response: {response_content}")
+        response_content = call_openai(messages)
+        print(f"Response: {response_content}")
+        shrink_user_bucket(user_id,tokens_needed)
     else:
         print("Insufficient tokens in user bucket.")
 
-    
+##################### UNIT TESTS ######################################
 # Simple test
+def simple_test():
+    # Delete user bucket for testing purposes
+    user_bucket_key = "user_bucket:user123"
+    if redis_client.exists(user_bucket_key): 
+        redis_client.delete(user_bucket_key)
 
-# Initialize global bucket
-user_bucket_key = "user_bucket:user123"
-if redis_client.exists(user_bucket_key):
-    redis_client.delete(user_bucket_key)
-init_global_bucket()
+    # Initialize global bucket
+    init_global_bucket()
 
-# batch data
-batch = {
-    'user_id': "user123",
-    'prompt': "Solve: ",
-    'data': "1+1"
-}
+    # Simulate batch data
+    batch = {
+        'user_id': "user123",
+        'prompt': "Solve: ",
+        'data': "1+1"
+    }
 
-process(batch)
+    # Process batch
+    process(batch)
+
+# Concurrency Test
+import concurrent.futures
+import time
+
+def process_batch(batch):
+    # Call the process function defined in your system
+    process(batch)
+
+def create_user_batches(user_id, prompt, data, num_batches):
+    return [{
+        'user_id': user_id,
+        'prompt': prompt,
+        'data': f"{data}" 
+    } for i in range(num_batches)]
+
+def test_concurrency():
+    # Clear existing user bucket for testing
+    user_bucket_key = "user_bucket:user123"
+    if redis_client.exists(user_bucket_key): 
+        redis_client.delete(user_bucket_key)
+
+    # Initialize global bucket
+    init_global_bucket()
+
+    # Prepare batch data
+    user_id = "user123"
+    prompt = "Solve: "
+    data = "1+1"
+    num_batches = 10  # Number of concurrent batches
+
+    # Create batches for concurrent processing
+    batches = create_user_batches(user_id, prompt, data, num_batches)
+
+    # Use ThreadPoolExecutor to simulate concurrent processing
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        futures = {executor.submit(process_batch, batch): batch for batch in batches}
+
+        for future in concurrent.futures.as_completed(futures):
+            batch = futures[future]
+            try:
+                future.result()  # Get the result (or raise an exception if occurred)
+                print(f"Processed batch: {batch}")
+            except Exception as exc:
+                print(f"Batch {batch} generated an exception: {exc}")
+
+# Run tests
+if __name__ == "__main__":
+    print("Performing simple test...")
+    simple_test()
+
+    print("\nPerforming complex concurency test...")
+    test_concurrency()
