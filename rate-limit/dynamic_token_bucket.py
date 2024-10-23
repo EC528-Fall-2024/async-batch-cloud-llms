@@ -3,6 +3,8 @@ from openai import OpenAI
 import redis
 import tiktoken
 import time
+from queue import Queue, Empty
+import threading
 
 # Initialize Redis connection and bucket info
 redis_client = redis.Redis(host='localhost', port=6379, db=0)
@@ -14,6 +16,30 @@ tokenizer = tiktoken.encoding_for_model("gpt-3.5-turbo")  # Adjust for your mode
 
 # OpenAI client
 client = OpenAI(api_key="")
+
+##################### RESPONSE LOGIC #######################
+class SampleStorageBucket:
+    def __init__(self):
+        self.bucket = []
+    
+    def write(self, data):
+        self.bucket.append(data)
+    
+    def clear(self):
+        self.bucket = []
+    
+    @property
+    def data(self):
+        return self.bucket
+    
+llm_response_queue = Queue()
+output_bucket = SampleStorageBucket()
+
+def reverse():
+    resp = llm_response_queue.get(timeout=1)
+    output_bucket.write(resp)
+    llm_response_queue.task_done()
+    print(f"Stored response for: {resp['user']}")
 
 ################ TOKENIZER ########################
 def openai_tokenizer(messages) -> int:
@@ -187,9 +213,17 @@ def process(item):
 
     # try to run
     if get_tokens_from_user(user_id, tokens_needed):
+        # Call LLM API
         print("Sufficient tokens available, calling OpenAI...")
         response_content = call_openai(messages)
         print(f"Response: {response_content}")
+
+        # Response Logic
+        llm_response_queue.put({"user": user_id, "response": response_content})
+        print("Put response into response queue")
+        reverse()
+
+        # Shrink user bucket accordingly
         shrink_user_bucket(user_id,tokens_needed)
     else:
         print("Insufficient tokens in user bucket.")
@@ -201,6 +235,9 @@ def simple_test():
     user_bucket_key = "user_bucket:user123"
     if redis_client.exists(user_bucket_key): 
         redis_client.delete(user_bucket_key)
+
+    # Clear output bucket for same reason
+    output_bucket.clear()
 
     # Initialize global bucket
     init_global_bucket()
@@ -214,6 +251,16 @@ def simple_test():
 
     # Process batch
     process(batch)
+
+    # Display output bucket
+    if output_bucket.data:
+            print("\nContents of output bucket after test:")
+            print("-" * 50)
+            for item in output_bucket.data:
+                print(f"\nUser: {item['user']}...")
+                print(f"Response: {item['response']}")
+    else:
+        print("\nNo results were processed.")
 
 # Concurrency Test
 import concurrent.futures
@@ -236,17 +283,21 @@ def test_concurrency():
     if redis_client.exists(user_bucket_key): 
         redis_client.delete(user_bucket_key)
 
+    # Clear output bucket for same reason
+    output_bucket.clear()
+
     # Initialize global bucket
     init_global_bucket()
 
     # Prepare batch data
-    user_id = "user123"
+    user_id = "user1"
+    user_id2 = "user2"
     prompt = "Solve: "
     data = "1+1"
-    num_batches = 10  # Number of concurrent batches
+    num_batches = 5 # Number of concurrent batches
 
     # Create batches for concurrent processing
-    batches = create_user_batches(user_id, prompt, data, num_batches)
+    batches = create_user_batches(user_id, prompt, data, num_batches) + create_user_batches(user_id2, prompt, data, num_batches)
 
     # Use ThreadPoolExecutor to simulate concurrent processing
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
@@ -260,10 +311,23 @@ def test_concurrency():
             except Exception as exc:
                 print(f"Batch {batch} generated an exception: {exc}")
 
+    # Display output bucket
+    if output_bucket.data:
+            print("\nContents of output bucket after test:")
+            print("-" * 50)
+            for item in output_bucket.data:
+                print(f"\nUser: {item['user']}...")
+                print(f"Response: {item['response']}")
+    else:
+        print("\nNo results were processed.")
+
 # Run tests
 if __name__ == "__main__":
+    # Simple test
     print("Performing simple test...")
     simple_test()
-
-    print("\nPerforming complex concurency test...")
+    
+    # Concurrency Test
+    print("-" * 50)
+    print("Performing complex concurency test...")
     test_concurrency()

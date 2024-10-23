@@ -6,11 +6,19 @@ Consumed 125 tokens from global bucket. 199875 tokens remaining.
 Initialized new sub-bucket for user user123 with 125 tokens.
 Consumed 125 tokens from user123's sub-bucket.
 Sufficient tokens available, calling OpenAI...
-Actually used 32 tokens
-Response: 1 + 1 equals 2.
+Actually used 31 tokens
+Response: 1 + 1 = 2
+Put response into response queue
+Stored response for: user123
 All batches for user user123 complete, destroyed bucket.
 Global bucket increased to 200000 tokens.
 
+Contents of output bucket after test:
+--------------------------------------------------
+
+User: user123...
+Response: 1 + 1 = 2
+--------------------------------------------------
 Performing complex concurency test...
 Global bucket initialized with 200000 tokens
 Predicting 125 tokens needed
@@ -18,112 +26,162 @@ Predicting 125 tokens needed
 Predicting 125 tokens needed
 Predicting 125 tokens needed
 Predicting 125 tokens needed
+Altering user user1's subbucket.
+User user1 needs 125 more tokens.
 Accessing global bucket. Currently has 200000 out of 200000 tokens
-Consumed 125 tokens from global bucket. 199875 tokens remaining.
-Initialized new sub-bucket for user user123 with 125 tokens.
-Consumed 125 tokens from user123's sub-bucket.
+Consumed -125 tokens from global bucket. 200125 tokens remaining.
+Added 125 tokens to user1's sub-bucket. Now has -125 maximum tokens.
+Refilled bucket for user user1 to -125 tokens.
+Insufficient tokens in user1's bucket. Needed: 125, Available: -125.
+Insufficient tokens in user bucket.
+Processed batch: {'user_id': 'user1', 'prompt': 'Solve: ', 'data': '1+1'}
+Predicting 125 tokens needed
+Accessing global bucket. Currently has 200125 out of 200000 tokens
+Consumed 125 tokens from global bucket. 200000 tokens remaining.
+Initialized new sub-bucket for user user2 with 125 tokens.
+Consumed 125 tokens from user2's sub-bucket.
 Sufficient tokens available, calling OpenAI...
-Altering user user123's subbucket.
-User user123 needs 125 more tokens.
-Accessing global bucket. Currently has 199875 out of 200000 tokens
-Consumed 250 tokens from global bucket. 199625 tokens remaining.
-Added 125 tokens to user123's sub-bucket. Now has 250 maximum tokens.
-Consumed 125 tokens from user123's sub-bucket.
+Altering user user1's subbucket.
+User user1 needs 125 more tokens.
+Accessing global bucket. Currently has 200000 out of 200000 tokens
+Consumed 0 tokens from global bucket. 200000 tokens remaining.
+Added 125 tokens to user1's sub-bucket. Now has 0 maximum tokens.
+Insufficient tokens in user1's bucket. Needed: 125, Available: 0.
+Insufficient tokens in user bucket.
+Processed batch: {'user_id': 'user1', 'prompt': 'Solve: ', 'data': '1+1'}
+Predicting 125 tokens needed
+Altering user user2's subbucket.
+User user2 needs 125 more tokens.
+Accessing global bucket. Currently has 200000 out of 200000 tokens
+Consumed 250 tokens from global bucket. 199750 tokens remaining.
+Added 125 tokens to user2's sub-bucket. Now has 250 maximum tokens.
+Consumed 125 tokens from user2's sub-bucket.
 Sufficient tokens available, calling OpenAI...
+Altering user user1's subbucket.
+User user1 needs 125 more tokens.
+Accessing global bucket. Currently has 199750 out of 200000 tokens
+Consumed 125 tokens from global bucket. 199625 tokens remaining.
+Added 125 tokens to user1's sub-bucket. Now has 125 maximum tokens.
+Consumed 125 tokens from user1's sub-bucket.
+Sufficient tokens available, calling OpenAI...
+Altering user user1's subbucket.
+User user1 needs 125 more tokens.
 Accessing global bucket. Currently has 199625 out of 200000 tokens
-Consumed 125 tokens from global bucket. 199500 tokens remaining.
-Initialized new sub-bucket for user user123 with 125 tokens.
-Consumed 125 tokens from user123's sub-bucket.
+Consumed 250 tokens from global bucket. 199375 tokens remaining.
+Added 125 tokens to user1's sub-bucket. Now has 250 maximum tokens.
+Consumed 125 tokens from user1's sub-bucket.
 Sufficient tokens available, calling OpenAI...
-Altering user user123's subbucket.
-User user123 needs 125 more tokens.
+Actually used 32 tokens
+Response: 1 + 1 equals 2.
+Put response into response queue
+Stored response for: user2
+Shrunk user2's bucket by 125 tokens. New max: 125
+Altering user user1's subbucket.
+User user1 needs 125 more tokens.
+Global bucket increased to 199500 tokens.
+Processed batch: {'user_id': 'user2', 'prompt': 'Solve: ', 'data': '1+1'}
+Predicting 125 tokens needed
+Altering user user2's subbucket.
+User user2 needs 125 more tokens.
 Accessing global bucket. Currently has 199500 out of 200000 tokens
 Consumed 250 tokens from global bucket. 199250 tokens remaining.
-Added 125 tokens to user123's sub-bucket. Now has 250 maximum tokens.
-Consumed 125 tokens from user123's sub-bucket.
-Sufficient tokens available, calling OpenAI...
-Accessing global bucket. Currently has 199250 out of 200000 tokens
-Consumed 125 tokens from global bucket. 199125 tokens remaining.
-Initialized new sub-bucket for user user123 with 125 tokens.
-Consumed 125 tokens from user123's sub-bucket.
-Sufficient tokens available, calling OpenAI...
-Actually used 32 tokens
-Response: 1 + 1 equals 2.
-All batches for user user123 complete, destroyed bucket.
-Global bucket increased to 199250 tokens.
-Processed batch: {'user_id': 'user123', 'prompt': 'Solve: ', 'data': '1+1'}
-Predicting 125 tokens needed
-Accessing global bucket. Currently has 199250 out of 200000 tokens
-Consumed 125 tokens from global bucket. 199125 tokens remaining.
-Initialized new sub-bucket for user user123 with 125 tokens.
-Consumed 125 tokens from user123's sub-bucket.
-Sufficient tokens available, calling OpenAI...
-Actually used 31 tokens
-Response: 1+1 equals 2.
-All batches for user user123 complete, destroyed bucket.
-Global bucket increased to 199250 tokens.
-Processed batch: {'user_id': 'user123', 'prompt': 'Solve: ', 'data': '1+1'}
-Predicting 125 tokens needed
-Accessing global bucket. Currently has 199250 out of 200000 tokens
-Consumed 125 tokens from global bucket. 199125 tokens remaining.
-Initialized new sub-bucket for user user123 with 125 tokens.
-Consumed 125 tokens from user123's sub-bucket.
+Added 125 tokens to user2's sub-bucket. Now has 250 maximum tokens.
+Consumed 125 tokens from user2's sub-bucket.
 Sufficient tokens available, calling OpenAI...
 Actually used 31 tokens
 Response: 1 + 1 = 2
-All batches for user user123 complete, destroyed bucket.
-Global bucket increased to 199250 tokens.
-Processed batch: {'user_id': 'user123', 'prompt': 'Solve: ', 'data': '1+1'}
-Predicting 125 tokens needed
+Put response into response queue
+Stored response for: user2
+Shrunk user2's bucket by 125 tokens. New max: 125
 Accessing global bucket. Currently has 199250 out of 200000 tokens
-Consumed 125 tokens from global bucket. 199125 tokens remaining.
-Initialized new sub-bucket for user user123 with 125 tokens.
-Consumed 125 tokens from user123's sub-bucket.
+Consumed 375 tokens from global bucket. 198875 tokens remaining.
+Added 125 tokens to user1's sub-bucket. Now has 375 maximum tokens.
+Consumed 125 tokens from user1's sub-bucket.
 Sufficient tokens available, calling OpenAI...
-Actually used 32 tokens
-Response: 1 + 1 equals 2.
-All batches for user user123 complete, destroyed bucket.
-Global bucket increased to 199250 tokens.
-Processed batch: {'user_id': 'user123', 'prompt': 'Solve: ', 'data': '1+1'}
-Predicting 125 tokens needed
-Accessing global bucket. Currently has 199250 out of 200000 tokens
-Consumed 125 tokens from global bucket. 199125 tokens remaining.
-Initialized new sub-bucket for user user123 with 125 tokens.
-Consumed 125 tokens from user123's sub-bucket.
-Sufficient tokens available, calling OpenAI...
-Actually used 32 tokens
-Response: 1 + 1 = 2.
-All batches for user user123 complete, destroyed bucket.
-Global bucket increased to 199250 tokens.
-Processed batch: {'user_id': 'user123', 'prompt': 'Solve: ', 'data': '1+1'}
-Predicting 125 tokens needed
-Accessing global bucket. Currently has 199250 out of 200000 tokens
-Consumed 125 tokens from global bucket. 199125 tokens remaining.
-Initialized new sub-bucket for user user123 with 125 tokens.
-Consumed 125 tokens from user123's sub-bucket.
-Sufficient tokens available, calling OpenAI...
-Actually used 31 tokens
-Response: 1 + 1 = 2
-All batches for user user123 complete, destroyed bucket.
-Global bucket increased to 199250 tokens.
-Processed batch: {'user_id': 'user123', 'prompt': 'Solve: ', 'data': '1+1'}
-Actually used 31 tokens
-Response: 1 + 1 = 2
-Shrunk user123's bucket by 125 tokens. New max: -125
-Global bucket increased to 199375 tokens.
-Processed batch: {'user_id': 'user123', 'prompt': 'Solve: ', 'data': '1+1'}
 Actually used 30 tokens
 Response: The solution is 2.
-Shrunk user123's bucket by 125 tokens. New max: -250
-Global bucket increased to 199500 tokens.
-Processed batch: {'user_id': 'user123', 'prompt': 'Solve: ', 'data': '1+1'}
+Put response into response queue
+Stored response for: user1
+Global bucket increased to 199000 tokens.
+Predicting 125 tokens needed
+Processed batch: {'user_id': 'user2', 'prompt': 'Solve: ', 'data': '1+1'}
+Shrunk user1's bucket by 125 tokens. New max: 250
+Altering user user2's subbucket.
+User user2 needs 125 more tokens.
+Global bucket increased to 199125 tokens.
+Processed batch: {'user_id': 'user1', 'prompt': 'Solve: ', 'data': '1+1'}
+Predicting 125 tokens needed
+Actually used 32 tokens
+Response: 1 + 1 equals 2.
+Put response into response queue
+Stored response for: user1
+Shrunk user1's bucket by 125 tokens. New max: 125
+Global bucket increased to 199250 tokens.
+Processed batch: {'user_id': 'user1', 'prompt': 'Solve: ', 'data': '1+1'}
+Accessing global bucket. Currently has 199250 out of 200000 tokens
+Consumed 250 tokens from global bucket. 199000 tokens remaining.
+Added 125 tokens to user2's sub-bucket. Now has 250 maximum tokens.
+Consumed 125 tokens from user2's sub-bucket.
+Sufficient tokens available, calling OpenAI...
+Altering user user2's subbucket.
+User user2 needs 125 more tokens.
+Accessing global bucket. Currently has 199000 out of 200000 tokens
+Consumed 375 tokens from global bucket. 198625 tokens remaining.
+Added 125 tokens to user2's sub-bucket. Now has 375 maximum tokens.
+Actually used 32 tokens
+Response: 1 + 1 equals 2.
+Put response into response queue
+Stored response for: user2
+Consumed 125 tokens from user2's sub-bucket.
+Sufficient tokens available, calling OpenAI...
 Actually used 31 tokens
 Response: 1+1 equals 2.
-Shrunk user123's bucket by 125 tokens. New max: -375
-Global bucket increased to 199625 tokens.
-Processed batch: {'user_id': 'user123', 'prompt': 'Solve: ', 'data': '1+1'}
-Actually used 31 tokens
+Put response into response queue
+Stored response for: user1
+All batches for user user1 complete, destroyed bucket.
+Global bucket increased to 198750 tokens.
+Processed batch: {'user_id': 'user1', 'prompt': 'Solve: ', 'data': '1+1'}
+Shrunk user2's bucket by 125 tokens. New max: 250
+Global bucket increased to 198875 tokens.
+Processed batch: {'user_id': 'user2', 'prompt': 'Solve: ', 'data': '1+1'}
+Actually used 32 tokens
+Response: 1 + 1 equals 2.
+Put response into response queue
+Stored response for: user2
+Shrunk user2's bucket by 125 tokens. New max: 125
+Global bucket increased to 199000 tokens.
+Processed batch: {'user_id': 'user2', 'prompt': 'Solve: ', 'data': '1+1'}
+Actually used 36 tokens
+Response: The sum of 1 + 1 is 2.
+Put response into response queue
+Stored response for: user2
+All batches for user user2 complete, destroyed bucket.
+Global bucket increased to 199125 tokens.
+Processed batch: {'user_id': 'user2', 'prompt': 'Solve: ', 'data': '1+1'}
+
+Contents of output bucket after test:
+--------------------------------------------------
+
+User: user2...
+Response: 1 + 1 equals 2.
+
+User: user2...
 Response: 1 + 1 = 2
-Shrunk user123's bucket by 125 tokens. New max: -500
-Global bucket increased to 199750 tokens.
-Processed batch: {'user_id': 'user123', 'prompt': 'Solve: ', 'data': '1+1'}
+
+User: user1...
+Response: The solution is 2.
+
+User: user1...
+Response: 1 + 1 equals 2.
+
+User: user2...
+Response: 1 + 1 equals 2.
+
+User: user1...
+Response: 1+1 equals 2.
+
+User: user2...
+Response: 1 + 1 equals 2.
+
+User: user2...
+Response: The sum of 1 + 1 is 2.
