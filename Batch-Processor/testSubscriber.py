@@ -2,10 +2,10 @@ from concurrent.futures import TimeoutError
 from google.cloud import pubsub_v1
 
 # TODO(developer)
-# project_id = "your-project-id"
-# subscription_id = "your-subscription-id"
+project_id = "elated-scope-437703-h9"
+subscription_id = "InputData-sub"
 # Number of seconds the subscriber should listen for messages
-# timeout = 5.0
+timeout = 20.0
 
 subscriber = pubsub_v1.SubscriberClient()
 # The `subscription_path` method creates a fully qualified identifier

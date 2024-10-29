@@ -1,8 +1,8 @@
 from google.cloud import pubsub_v1
 
 # TODO(developer)
-# project_id = "your-project-id"
-# topic_id = "your-topic-id"
+project_id = "elated-scope-437703-h9"
+topic_id = "InputData"
 
 publisher = pubsub_v1.PublisherClient()
 # The `topic_path` method creates a fully qualified identifier
