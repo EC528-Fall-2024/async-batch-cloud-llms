@@ -12,8 +12,16 @@ def pubSubSender(message):
     data_str = f"{message}"
     # Data must be a bytestring
     data = data_str.encode("utf-8")
-    # When you publish a message, the client returns a future.
-    future = publisher.publish(topic_path, data)
+    
+        # Define attributes as a dictionary
+    attributes = {
+        "JobID": "wolf",
+        "Client_ID": "richard",
+        "Row number": "15"
+    }
+
+    # Pass the attributes to the publish method
+    future = publisher.publish(topic_path, data, **attributes)
     
     print(future.result())
     print("done")
