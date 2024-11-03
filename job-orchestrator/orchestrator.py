@@ -1,21 +1,27 @@
-from google.cloud.sql.connector import Connector
-import sqlalchemy
 from sqlalchemy import text
+import json
+import os
+from google.cloud.sql.connector import Connector, IPTypes
+import sqlalchemy
 
+
+# initialize Connector object
 connector = Connector()
 
 
-# Set up connection to PostgreSQL job-data database
+# function to return the database connection object
 def getconn():
-    return connector.connect(
+    conn = connector.connect(
         "elated-scope-437703-h9:us-east5:job-orchestration-database",
         "pg8000",
-        user="postgres",
+        user="orchestrator",
         password="m~o'I39?A@8cu?;P",
-        db="job-data"
+        db="job-orchestration-database"
     )
+    return conn
 
 
+# create connection pool with 'creator' argument to our connection object function
 pool = sqlalchemy.create_engine(
     "postgresql+pg8000://",
     creator=getconn,
@@ -60,6 +66,11 @@ def insert_job(job_data):
                 client_id,
                 table_key,
                 project_id,
+                dataset_id,
+                table_id,
+                row_count,
+                request_column,
+                response_column,
                 llm_model,
                 prompt_prefix,
                 prompt_postfix
@@ -69,23 +80,33 @@ def insert_job(job_data):
                 :client_id,
                 :table_key,
                 :project_id,
+                :dataset_id,
+                :table_id,
+                :row_count,
+                :request_column,
+                :response_column,
                 :llm_model,
                 :prompt_prefix,
                 :prompt_postfix
             )
         """), {
             "job_id": job_data["job_id"],
-            "client_id": client_id,
-            "table_key": table_key,
-            "project_id": project_id,
-            "llm_model": llm_model,
-            "prompt_prefix": prompt_prefix,
-            "prompt_postfix": prompt_postfix
+            "client_id": job_data["client_id"],
+            "table_key": job_data["table_key"],
+            "project_id": job_data["project_id"],
+            "dataset_id": job_data["dataset_id"],
+            "table_id": job_data["table_id"],
+            "row_count": job_data["row_count"],
+            "request_column": job_data["request_column"],
+            "response_column": job_data["response_column"],
+            "llm_model": job_data["llm_model"],
+            "prompt_prefix": job_data["prompt_prefix"],
+            "prompt_postfix": job_data["prompt_postfix"]
         })
         conn.commit()
 
 
-# Function for updating 
+# Function for updating job with specified job_id
 def update_job(job_id, **kwargs):
     updates = []
     parameters = {"job_id": job_id}
@@ -113,6 +134,46 @@ def read_job(job_id):
         """), {"job_id": job_id})
         return result.fetchone()
 
-# Example usage
-new_data = {"value1": "example", "value2": 123}
-write_data(new_data)
+
+# Main function
+def main():
+    try:
+        # Connect to the database and create the table
+        create_table()
+        print("Table created successfully.")
+
+        # Create fake job data
+        fake_job_data = {
+            "job_id": "18cbe750-edba-4537-ad24-9c0a0a163c4f",
+            "client_id": "client_123",
+            "table_key": json.dumps({"key1": "value1", "key2": "value2"}),
+            "project_id": "project_456",
+            "dataset_id": "dataset_789",
+            "table_id": "table_101112",
+            "row_count": 1000,
+            "request_column": 0,
+            "response_column": 1,
+            "llm_model": "gpt-3.5",
+            "prompt_prefix": "Translate the following to French:",
+            "prompt_postfix": "Ensure the translation is grammatically correct."
+        }
+
+        # Insert the fake job data
+        insert_job(fake_job_data)
+        print(f"Job inserted successfully with ID: {fake_job_data['job_id']}")
+
+        # Read the inserted job data
+        job = read_job(fake_job_data['job_id'])
+        if job:
+            print("\nRetrieved job data:")
+            for column, value in job._mapping.items():
+                print(f"{column}: {value}")
+        else:
+            print("Job not found.")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+if __name__ == "__main__":
+    main()
