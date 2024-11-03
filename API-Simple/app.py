@@ -1,12 +1,22 @@
 from flask import Flask, request, jsonify
 import uuid
 import time
+import os
 from functools import wraps
+from google.cloud import pubsub_v1
+
+
+
+publisher = pubsub_v1.PublisherClient()
+topic_name = 'projects/{project_id}/topics/{topic}'.format(
+    project_id=os.getenv('GOOGLE_CLOUD_PROJECT'),
+    topic='MY_TOPIC_NAME',  # Set this to something appropriate.
+)
 
 app = Flask(__name__)
 
 # This should be a secure, randomly generated key in a real application
-API_KEY = "your-secret-api-key"
+API_KEY = "secret-api-key"
 
 
 # Wrapper for checking if API request has secret API key
@@ -28,14 +38,12 @@ def check_valid_job(job_data):
         return False
 
 
-# Function for posting the new job to the jobs Redis Datastore
+# Function for posting the new job to the IncomingJob pubsub topic
 def post_job(job_data, job_id):
     pass
 
 
 # Function for calling batch processor to start job
-def notify_batch_processor(job_id):
-
 
 
 # Route for submitting a new job
@@ -47,15 +55,21 @@ def submit_job():
         # If valid, generate job ID, post job, and notify batch processor
         job_id = str(uuid.uuid4())
         post_job(job_data, job_id)
-        notify_batch_processor(job_id)
+
+        # Return job ID to user and indicate that job is submitted
         return jsonify({"job_id": job_id, "status": "submitted"})
     else:
-        return 
+        # Job was not valid
+        return jsonify({"error": "Job not valid"}), 400
 
+
+# Route for checking 
 @app.route('/job_status/<job_id>', methods=['GET'])
 @require_api_key
 def job_status(job_id):
-    job = jobs.get(job_id)
+    job = pull_job(job_id)
+    if (job is None):
+        return jsonify({"error": "Job not found"}), 404
     if job:
         # Simulate job progress
         elapsed_time = time.time() - job['created_at']
