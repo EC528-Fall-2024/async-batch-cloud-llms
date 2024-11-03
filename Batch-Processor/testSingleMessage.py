@@ -48,4 +48,5 @@ def dequeue_one_message(project_id, subscription_id, timeout=10):
 # Replace with your project ID and subscription ID
 # project_id = "elated-scope-437703-h9"
 # subscription_id = "InputData-sub"
-dequeue_one_message("elated-scope-437703-h9", "InputData-sub")
+dequeue_one_message("elated-scope-437703-h9", "InputData-su
+                    b")

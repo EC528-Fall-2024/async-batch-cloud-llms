@@ -15,7 +15,7 @@ subscription_path = subscriber.subscription_path(project_id, subscription_id)
 def callbafrom google.cloud import pubsub_v1
 import time
 
-def dequeue_one_message(project_id, subscription_id, timeout=10):
+def dequeue_one_message(project_id, subscription_id, timeout=30):
     """
     Pulls one message from a Pub/Sub subscription, processes it, and acknowledges it.
 
