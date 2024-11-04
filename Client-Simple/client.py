@@ -1,22 +1,26 @@
 import requests
 import time
 
-API_BASE_URL = "http://localhost:5000"
-API_KEY = "your-secret-api-key"
+API_BASE_URL = "https://flask-api-1069651367433.us-east4.run.app"
+API_KEY = "secret-api-key"
 
 headers = {
     "Content-Type": "application/json",
-    "X-API-Key": API_KEY
 }
 
-def submit_job(input_bucket_url, output_bucket_url, input_format, input_file_name, output_format, llm_model):
+def submit_job():
     job_data = {
-        "input_bucket_url": input_bucket_url,
-        "output_bucket_url": output_bucket_url,
-        "input_format": input_format,
-        "input_file_name": input_file_name,
-        "output_format": output_format,
-        "llm_model": llm_model
+        "client_id":  "example_client",
+        "project_id": "example_project_id",
+        "dataset_id": "example_dataset_id",
+        "table_id": "example_table_id",
+        "table_key": {},
+        "row_count": 100,
+        "request_column": 0,
+        "response_column": 1,
+        "llm_model": "gpt-3.5",
+        "prompt_prefix": "example_prefix",
+        "prompt_postfix": "example_postfix"
     }
     
     response = requests.post(f"{API_BASE_URL}/submit_job", json=job_data, headers=headers)
@@ -27,25 +31,10 @@ def submit_job(input_bucket_url, output_bucket_url, input_format, input_file_nam
         print(f"Error submitting job: {response.text}")
         return None
 
-def check_job_status(job_id):
-    response = requests.get(f"{API_BASE_URL}/job_status/{job_id}", headers=headers)
-    
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(f"Error checking job status: {response.text}")
-        return None
 
 def main():
     # Submit a job
-    job_id = submit_job(
-        input_bucket_url="https://storage.googleapis.com/input-bucket",
-        output_bucket_url="https://storage.googleapis.com/output-bucket",
-        input_format="csv",
-        input_file_name="data.csv",
-        output_format="json",
-        llm_model="gpt-3.5-turbo"
-    )
+    job_id = submit_job()
  
     if job_id:
         print(f"Job submitted successfully. Job ID: {job_id}")

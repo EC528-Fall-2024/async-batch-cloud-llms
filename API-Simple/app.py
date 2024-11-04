@@ -1,33 +1,61 @@
 from flask import Flask, request, jsonify
 import uuid
 import time
+import json
 import os
-from functools import wraps
 from google.cloud import pubsub_v1
+from dotenv import load_dotenv
+from flask_cors import CORS
 
-
-
-publisher = pubsub_v1.PublisherClient()
-topic_name = 'projects/{project_id}/topics/{topic}'.format(
-    project_id=os.getenv('GOOGLE_CLOUD_PROJECT'),
-    topic='MY_TOPIC_NAME',  # Set this to something appropriate.
-)
+load_dotenv()
 
 app = Flask(__name__)
+CORS(app)
 
-# This should be a secure, randomly generated key in a real application
-API_KEY = "secret-api-key"
+app.config['DEBUG'] = os.environ.get('FLASK_DEBUG')
 
 
-# Wrapper for checking if API request has secret API key
-def require_api_key(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if request.headers.get('API-Key') and request.headers.get('X-API-Key') == API_KEY:
-            return f(*args, **kwargs)
-        else:
-            return jsonify({"error": "Invalid or missing API key"}), 401
-    return decorated_function
+# Set up pub/sub publisher for IncomingJob topic
+project_id = "elated-scope-437703-h9"
+topic_id = "IncomingJob"
+
+publisher = pubsub_v1.PublisherClient()
+# The `topic_path` method creates a fully qualified identifier
+# in the form `projects/{project_id}/topics/{topic_id}`
+topic_path = publisher.topic_path(project_id, topic_id)
+
+
+# Function for submitting job
+def publish_job(job_data, job_id):
+    data_str = {
+        "job_id": job_id,
+        "client_id": job_data["client_id"],
+        "project_id": job_data["project_id"],
+        "dataset_id": job_data["dataset_id"],
+        "table_id": job_data["table_id"],
+        "table_key": job_data["table_key"],
+        "row_count": job_data["row_count"],
+        "request_column": job_data["request_column"],
+        "response_column": job_data["response_column"],
+        "llm_model": job_data["llm_model"],
+        "prompt_prefix": job_data["prompt_prefix"],
+        "prompt_postfix": job_data["prompt_postfix"]
+    }
+    # Data must be a bytestring
+    json_data = json.dumps(data_str)
+    encoded_data = json_data.encode('utf-8')
+    
+    # Define attributes as a dictionary
+    attributes = {
+        "job_id": "job_id",
+        "client_id": job_data["client_id"]
+    }
+
+    # Pass the attributes to the publish method
+    future = publisher.publish(topic_path, encoded_data, **attributes)
+    
+    print(future.result())
+    print("done")
 
 
 # Function for checking if job_data is valid
@@ -38,23 +66,14 @@ def check_valid_job(job_data):
         return False
 
 
-# Function for posting the new job to the IncomingJob pubsub topic
-def post_job(job_data, job_id):
-    pass
-
-
-# Function for calling batch processor to start job
-
-
 # Route for submitting a new job
 @app.route('/submit_job', methods=['POST'])
-@require_api_key
 def submit_job():
     job_data = request.json
     if (check_valid_job(job_data)):
         # If valid, generate job ID, post job, and notify batch processor
         job_id = str(uuid.uuid4())
-        post_job(job_data, job_id)
+        publish_job(job_data, job_id)
 
         # Return job ID to user and indicate that job is submitted
         return jsonify({"job_id": job_id, "status": "submitted"})
@@ -65,9 +84,8 @@ def submit_job():
 
 # Route for checking 
 @app.route('/job_status/<job_id>', methods=['GET'])
-@require_api_key
 def job_status(job_id):
-    job = pull_job(job_id)
+    job = None
     if (job is None):
         return jsonify({"error": "Job not found"}), 404
     if job:
@@ -88,4 +106,4 @@ def job_status(job_id):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
