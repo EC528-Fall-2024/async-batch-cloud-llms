@@ -3,8 +3,6 @@ from openai import OpenAI
 import redis
 import tiktoken
 import time
-from queue import Queue, Empty
-import threading
 from google.cloud import pubsub_v1
 
 ########################## GENERAL VARIABLES #########################
@@ -26,6 +24,7 @@ api_key = ""
 client = OpenAI(api_key=api_key) 
 
 ##################### TEST RESPONSE LOGIC #######################
+from queue import Queue
 class SampleStorageBucket:
     def __init__(self):
         self.bucket = []
