@@ -3,8 +3,8 @@ from google.cloud import pubsub_v1
 
 # TODO(developer)
 project_id = "elated-scope-437703-h9"
-subscription_id = "InputData-sub"
-timeout = 20.0
+subscription_id = "OutputData-sub"
+timeout = 3.0
 
 subscriber = pubsub_v1.SubscriberClient()
 # The `subscription_path` method creates a fully qualified identifier

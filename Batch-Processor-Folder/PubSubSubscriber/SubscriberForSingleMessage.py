@@ -1,16 +1,10 @@
 from google.cloud import pubsub_v1
 import time
 
+
+# Pulls one message from a Pub/Sub subscription, processes it, and acknowledges it.
 def dequeue_one_message(project_id, subscription_id, timeout=10):
-    """
-    Pulls one message from a Pub/Sub subscription, processes it, and acknowledges it.
-
-    Args:
-    - project_id (str): Google Cloud project ID.
-    - subscription_id (str): Pub/Sub subscription ID.
-    - timeout (int): Time to wait for a message before timing out.
-    """
-
+    
     # Initialize a subscriber client
     subscriber = pubsub_v1.SubscriberClient()
     subscription_path = subscriber.subscription_path(project_id, subscription_id)
@@ -44,8 +38,6 @@ def dequeue_one_message(project_id, subscription_id, timeout=10):
     # Close the subscriber to free up resources
     subscriber.close()
 
-# Example usage:
-# Replace with your project ID and subscription ID
-# project_id = "elated-scope-437703-h9"
-# subscription_id = "InputData-sub"
-dequeue_one_message("elated-scope-437703-h9", "InputData-sub")
+
+if __name__ == "__main__":
+    dequeue_one_message("elated-scope-437703-h9", "InputData-sub")
