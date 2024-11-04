@@ -5,6 +5,12 @@ import tiktoken
 import time
 from queue import Queue, Empty
 import threading
+from google.cloud import pubsub_v1
+
+########################## GENERAL VARIABLES #########################
+# Pub/sub topic info for incoming batches
+project_id = "elated-scope-437703-h9"
+subscription_id = "InputData-sub"
 
 # Initialize Redis connection and bucket info
 redis_client = redis.Redis(host='localhost', port=6379, db=0)
@@ -15,7 +21,8 @@ tpm = 200000 # 200,000 tpm rate for gpt3.5
 tokenizer = tiktoken.encoding_for_model("gpt-3.5-turbo")  # Adjust for your model
 
 # OpenAI client
-client = OpenAI(api_key="")
+api_key = ""
+client = OpenAI(api_key=api_key) 
 
 ##################### RESPONSE LOGIC #######################
 class SampleStorageBucket:
@@ -193,15 +200,14 @@ def call_openai(messages):
         return None
 
 # Batch process
-def process(item):
-    user_id = item['user_id']
-    prompt = item['prompt']
-    data = item['data']
+def process(batch):
+    user_id = batch['client_id'] 
+    message = batch['message']
 
     # format for openai
     messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": prompt + data},
+                {"role": "user", "content": message},
             ]
     
     # predict needed tokens
@@ -215,7 +221,7 @@ def process(item):
     if get_tokens_from_user(user_id, tokens_needed):
         # Call LLM API
         print("Sufficient tokens available, calling OpenAI...")
-        response_content = call_openai(messages)
+        response_content = "fake_response" # call_openai(messages)
         print(f"Response: {response_content}")
 
         # Response Logic
@@ -227,6 +233,51 @@ def process(item):
         shrink_user_bucket(user_id,tokens_needed)
     else:
         print("Insufficient tokens in user bucket.")
+
+################################# BATCH RECEIVER #####################################
+# Convert input to batch format
+def process_message(message):
+    batch = {
+        'client_id': message.attributes['Client_ID'],
+        'message': message.data.decode('utf-8'),
+        'row': message.attributes['Row number'],
+        'job_id': message.attributes['JobID']
+    }
+
+    # Acknowledge the message
+    message.ack()
+
+    # Process the batch
+    process(batch)
+    
+def batch_receiver():
+    # Initialize a subscriber client
+    subscriber = pubsub_v1.SubscriberClient()
+    subscription_path = subscriber.subscription_path(project_id, subscription_id)
+    
+    # Pull a single message
+    # response = subscriber.pull(
+    #     request={
+    #         "subscription": subscription_path,
+    #         "max_messages": 1,  # Limit to one message
+    #     },
+    #     timeout=timeout  # Wait up to `timeout` seconds for a message
+    # )
+
+    # Subscribe to the topic
+    streaming_pull_future = subscriber.subscribe(subscription_path, callback=process_message)
+    print(f"Listening for messages on {subscription_path}..\n")
+
+    # Keep the main thread alive to allow asynchronous message handling
+    try:
+        streaming_pull_future.result()
+    except:
+        streaming_pull_future.cancel()
+
+
+
+
+
 
 ##################### UNIT TESTS ######################################
 # Simple test
@@ -244,9 +295,8 @@ def simple_test():
 
     # Simulate batch data
     batch = {
-        'user_id': "user123",
-        'prompt': "Solve: ",
-        'data': "1+1"
+        'client_id': "user123",
+        'message': "Solve 1+1"
     }
 
     # Process batch
@@ -270,11 +320,10 @@ def process_batch(batch):
     # Call the process function defined in your system
     process(batch)
 
-def create_user_batches(user_id, prompt, data, num_batches):
+def create_user_batches(user_id, message, num_batches):
     return [{
-        'user_id': user_id,
-        'prompt': prompt,
-        'data': f"{data}" 
+        'client_id': user_id,
+        'message': message
     } for i in range(num_batches)]
 
 def test_concurrency():
@@ -292,12 +341,11 @@ def test_concurrency():
     # Prepare batch data
     user_id = "user1"
     user_id2 = "user2"
-    prompt = "Solve: "
-    data = "1+1"
-    num_batches = 5 # Number of concurrent batches
+    message = "Solve: 1+1"
+    num_batches = 3 # Number of concurrent batches
 
     # Create batches for concurrent processing
-    batches = create_user_batches(user_id, prompt, data, num_batches) + create_user_batches(user_id2, prompt, data, num_batches)
+    batches = create_user_batches(user_id, message, num_batches) + create_user_batches(user_id2, message, num_batches)
 
     # Use ThreadPoolExecutor to simulate concurrent processing
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
@@ -323,11 +371,14 @@ def test_concurrency():
 
 # Run tests
 if __name__ == "__main__":
+    init_global_bucket()
+    batch_receiver()
+
     # Simple test
-    print("Performing simple test...")
-    simple_test()
+    # print("Performing simple test...")
+    # simple_test()
     
-    # Concurrency Test
-    print("-" * 50)
-    print("Performing complex concurency test...")
-    test_concurrency()
+    # # Concurrency Test
+    # print("-" * 50)
+    # print("Performing complex concurency test...")
+    # test_concurrency()
