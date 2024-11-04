@@ -243,7 +243,7 @@ def process(batch):
     if get_tokens_from_user(user_id, tokens_needed):
         # Call LLM API
         print("Sufficient tokens available, calling OpenAI...")
-        response_content = "fake_respone" # call_openai(messages)
+        response_content = "fake_response" # call_openai(messages)
         print(f"Response: {response_content}")
 
         # Old Response Logic for Testing
