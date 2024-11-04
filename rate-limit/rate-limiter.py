@@ -330,8 +330,6 @@ def simple_test():
 
 # Concurrency Test
 import concurrent.futures
-import time
-
 def create_user_batches(user_id, message, num_batches):
     return [{
         'client_id': user_id,
