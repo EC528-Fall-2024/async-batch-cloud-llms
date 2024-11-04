@@ -9,19 +9,19 @@ def pubSubSender(message):
     # in the form `projects/{project_id}/topics/{topic_id}`
     topic_path = publisher.topic_path(project_id, topic_id)
 
-    data_str = f"{message}"
+    message_str = f"{message}"
     # Data must be a bytestring
-    data = data_str.encode("utf-8")
+    message = message_str.encode("utf-8")
     
     # Define attributes as a dictionary
     attributes = {
-        "JobID": "temp",
+        "Job_ID": "1",
         "Client_ID": "user1",
-        "Row number": "1"
+        "Row_Number": "1"
     }
 
     # Pass the attributes to the publish method
-    future = publisher.publish(topic_path, data, **attributes)
+    future = publisher.publish(topic_path, message, **attributes)
     
     print(future.result())
     print("done")

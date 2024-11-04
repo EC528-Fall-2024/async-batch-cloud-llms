@@ -1,4 +1,4 @@
-'''Simple single global token bucket'''
+'''Rate-Limiting Module'''
 from openai import OpenAI
 import redis
 import tiktoken
@@ -10,7 +10,8 @@ from google.cloud import pubsub_v1
 ########################## GENERAL VARIABLES #########################
 # Pub/sub topic info for incoming batches
 project_id = "elated-scope-437703-h9"
-subscription_id = "InputData-sub"
+input_topic = "InputData-sub"
+output_topic = "OutputData"
 
 # Initialize Redis connection and bucket info
 redis_client = redis.Redis(host='localhost', port=6379, db=0)
@@ -24,7 +25,7 @@ tokenizer = tiktoken.encoding_for_model("gpt-3.5-turbo")  # Adjust for your mode
 api_key = ""
 client = OpenAI(api_key=api_key) 
 
-##################### RESPONSE LOGIC #######################
+##################### TEST RESPONSE LOGIC #######################
 class SampleStorageBucket:
     def __init__(self):
         self.bucket = []
@@ -97,10 +98,10 @@ def get_tokens_from_global(amount):
 ################################ SUB BUCKET FUNCTIONS #####################################
 def init_user_subbucket(user_id, tokens_needed):
     user_bucket_key = f"user_bucket:{user_id}"
-    bucket_exists = redis_client.exists(user_bucket_key)
 
     with redis_client.lock(f"{user_bucket_key}_lock"):
         # Check if the user bucket already exists
+        bucket_exists = redis_client.exists(user_bucket_key)
         if bucket_exists:
             print(f"Altering user {user_id}'s subbucket.")
             max_tokens = int(redis_client.hget(user_bucket_key, "max_tokens") or 0)
@@ -110,7 +111,7 @@ def init_user_subbucket(user_id, tokens_needed):
             print(f"User {user_id} needs {tokens_needed} more tokens.")
 
             # Try to withdraw additional tokens from global bucket
-            if get_tokens_from_global(new_max):
+            if get_tokens_from_global(tokens_needed):
                 tokens = int(redis_client.hget(user_bucket_key, "tokens") or 0)
                 tokens = tokens + tokens_needed # add to curr tokens as well
                 redis_client.hset(user_bucket_key, "tokens", tokens)
@@ -184,7 +185,7 @@ def shrink_user_bucket(user_id, tokens_used):
         redis_client.hset(GLOBAL_BUCKET_KEY, "tokens", new_global_tokens)
         print(f"Global bucket increased to {new_global_tokens} tokens.")
 
-############################## LLM API call #############################
+############################## LLM API call & RESPONSE #############################
 def call_openai(messages):
     # Make a call to the OpenAI API and track token usage
     try:
@@ -199,10 +200,32 @@ def call_openai(messages):
         print(f"OpenAI API call failed: {e}")
         return None
 
+def send_response(client_id, job_id, row, response):
+    publisher = pubsub_v1.PublisherClient()
+    publisher_path = publisher.topic_path(project_id, output_topic)
+
+    # Response must be a bytestring
+    message = response.encode("utf-8")
+    
+    # Define attributes as a dictionary
+    attributes = {
+        "Job_ID": f"{job_id}",
+        "Client_ID": f"{client_id}",
+        "Row_Number": f"{row}"
+    }
+
+    # Send out response via pub/sub
+    future = publisher.publish(publisher_path, message, **attributes)
+    future.result()
+    print("Sent response to reverse batch processor")
+
 # Batch process
 def process(batch):
+    print(batch)
     user_id = batch['client_id'] 
     message = batch['message']
+    job_id = batch['job_id']
+    row = batch['row']
 
     # format for openai
     messages=[
@@ -221,13 +244,16 @@ def process(batch):
     if get_tokens_from_user(user_id, tokens_needed):
         # Call LLM API
         print("Sufficient tokens available, calling OpenAI...")
-        response_content = "fake_response" # call_openai(messages)
+        response_content = "fake_respone" # call_openai(messages)
         print(f"Response: {response_content}")
 
+        # Old Response Logic for Testing
+        # llm_response_queue.put({"user": user_id, "response": response_content})
+        # print("Put response into response queue")
+        # reverse()
+
         # Response Logic
-        llm_response_queue.put({"user": user_id, "response": response_content})
-        print("Put response into response queue")
-        reverse()
+        send_response(user_id, job_id, row, response_content)
 
         # Shrink user bucket accordingly
         shrink_user_bucket(user_id,tokens_needed)
@@ -240,8 +266,8 @@ def process_message(message):
     batch = {
         'client_id': message.attributes['Client_ID'],
         'message': message.data.decode('utf-8'),
-        'row': message.attributes['Row number'],
-        'job_id': message.attributes['JobID']
+        'row': message.attributes['Row_Number'],
+        'job_id': message.attributes['Job_ID']
     }
 
     # Acknowledge the message
@@ -253,16 +279,7 @@ def process_message(message):
 def batch_receiver():
     # Initialize a subscriber client
     subscriber = pubsub_v1.SubscriberClient()
-    subscription_path = subscriber.subscription_path(project_id, subscription_id)
-    
-    # Pull a single message
-    # response = subscriber.pull(
-    #     request={
-    #         "subscription": subscription_path,
-    #         "max_messages": 1,  # Limit to one message
-    #     },
-    #     timeout=timeout  # Wait up to `timeout` seconds for a message
-    # )
+    subscription_path = subscriber.subscription_path(project_id, input_topic)
 
     # Subscribe to the topic
     streaming_pull_future = subscriber.subscribe(subscription_path, callback=process_message)
@@ -277,13 +294,11 @@ def batch_receiver():
 
 
 
-
-
 ##################### UNIT TESTS ######################################
 # Simple test
 def simple_test():
     # Delete user bucket for testing purposes
-    user_bucket_key = "user_bucket:user123"
+    user_bucket_key = "user_bucket:user1"
     if redis_client.exists(user_bucket_key): 
         redis_client.delete(user_bucket_key)
 
@@ -295,8 +310,10 @@ def simple_test():
 
     # Simulate batch data
     batch = {
-        'client_id': "user123",
-        'message': "Solve 1+1"
+        'client_id': "user1",
+        'message': "Solve: 1+1",
+        'job_id' : "1",
+        'row' : "1"
     }
 
     # Process batch
@@ -316,21 +333,20 @@ def simple_test():
 import concurrent.futures
 import time
 
-def process_batch(batch):
-    # Call the process function defined in your system
-    process(batch)
-
 def create_user_batches(user_id, message, num_batches):
     return [{
         'client_id': user_id,
-        'message': message
+        'message': message,
+        'job_id' : "1",
+        'row' : "1"
     } for i in range(num_batches)]
 
 def test_concurrency():
     # Clear existing user bucket for testing
-    user_bucket_key = "user_bucket:user123"
-    if redis_client.exists(user_bucket_key): 
-        redis_client.delete(user_bucket_key)
+    user_bucket_keys = ["user_bucket:user1", "user_bucket:user2"]
+    for user_bucket_key in user_bucket_keys:
+        if redis_client.exists(user_bucket_key): 
+            redis_client.delete(user_bucket_key)
 
     # Clear output bucket for same reason
     output_bucket.clear()
@@ -349,7 +365,7 @@ def test_concurrency():
 
     # Use ThreadPoolExecutor to simulate concurrent processing
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-        futures = {executor.submit(process_batch, batch): batch for batch in batches}
+        futures = {executor.submit(process, batch): batch for batch in batches}
 
         for future in concurrent.futures.as_completed(futures):
             batch = futures[future]
@@ -374,7 +390,7 @@ if __name__ == "__main__":
     init_global_bucket()
     batch_receiver()
 
-    # Simple test
+    # # Simple test
     # print("Performing simple test...")
     # simple_test()
     
