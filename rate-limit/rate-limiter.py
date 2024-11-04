@@ -23,7 +23,7 @@ tokenizer = tiktoken.encoding_for_model("gpt-3.5-turbo")  # Adjust for your mode
 api_key = ""
 client = OpenAI(api_key=api_key) 
 
-##################### TEST RESPONSE LOGIC #######################
+##################### OLD RESPONSE LOGIC FOR TESTING #######################
 from queue import Queue
 class SampleStorageBucket:
     def __init__(self):
