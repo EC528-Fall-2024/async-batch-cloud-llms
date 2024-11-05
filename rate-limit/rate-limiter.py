@@ -5,6 +5,19 @@ import tiktoken
 import time
 from google.cloud import pubsub_v1
 
+######################### FOR CLOUD DEPLOYMENT #######################
+from flask import Flask
+import threading
+
+app = Flask(__name__)
+
+@app.route("/")
+def health_check():
+    return "Running", 200
+
+def run_flask():
+    app.run(host="0.0.0.0", port=8080)
+
 ########################## GENERAL VARIABLES #########################
 # Pub/sub topic info for incoming batches
 project_id = "elated-scope-437703-h9"
@@ -384,6 +397,10 @@ def test_concurrency():
 
 # Run tests
 if __name__ == "__main__":
+    # Start Flask server to start rate limiter in cloud
+    threading.Thread(target=run_flask).start()
+
+    # Initialize local bucket & start the Pub/Sub subscriber
     init_global_bucket()
     batch_receiver()
 
