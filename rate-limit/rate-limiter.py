@@ -4,7 +4,11 @@ import redis
 import tiktoken
 import time
 import requests
+import math
+import random
 from google.cloud import pubsub_v1
+import sys
+import signal
 
 ######################### FOR CLOUD DEPLOYMENT #######################
 from flask import Flask
@@ -243,6 +247,12 @@ def call_openai(messages):
         print(f"Actually used {response.usage.total_tokens} tokens") # Print used tokens 
         return response.choices[0].message.content.strip()
     
+    # Attempt at exponential backoff
+    except openai.RateLimitError as e:
+        delay = random.uniform(1,2) ** (3 + min(10, 0.5 * math.log(1 + e.rate_limit / 10)))
+        print(f"OpenAI API rate limit has been reached. Retrying in delay {delay:.2f} seconds")
+        time.sleep(delay)
+        return call_openai(messages)
     # If want to have a timeout:
     # except requests.exceptions.Timeout as e:
     #     print(f"OpenAI API call timed out after {timeout} seconds: {e}")
@@ -264,8 +274,6 @@ def call_openai(messages):
             print(f"OpenAI Not Found error:{e}")
         elif isinstance(e, openai.PermissionDeniedError):
             print(f"OpenAI Permission Denied error:{e}")
-        elif isinstance(e, openai.RateLimitError):
-            print(f"OpenAI Rate Limit error:{e}")
         elif isinstance(e, openai.UnprocessableEntityError):
             print(f"OpenAI Unprocessed Entity error: {e}")
         else:
@@ -311,21 +319,26 @@ def process(batch):
 
     if not init_user_subbucket(user_id, tokens_needed):
         print("Failed to initialize sub-bucket. Aborting batch.")
+        return
 
     # try to run
     if get_tokens_from_user(user_id, tokens_needed):
         # Call LLM API
         print("Sufficient tokens available, calling OpenAI...")
-        response_content = "fake_response" # call_openai(messages)
+        # response_content = "fake_response"
+        response_content = call_openai(messages)
+        if response_content is None:
+            print("OpenAI API call failed, aborting")
+            return
         print(f"Response: {response_content}")
 
         # Old Response Logic for Testing
-        llm_response_queue.put({"user": user_id, "response": response_content})
-        print("Put response into response queue")
-        reverse()
+        # llm_response_queue.put({"user": user_id, "response": response_content})
+        # print("Put response into response queue")
+        # reverse()
 
         # Response Logic
-        # send_response(user_id, job_id, row, response_content)
+        send_response(user_id, job_id, row, response_content)
 
         # Shrink user bucket accordingly
         shrink_user_bucket(user_id,tokens_needed)
@@ -455,8 +468,27 @@ def test_concurrency():
     else:
         print("\nNo results were processed.")
 
+def signal_handler(sig, frame):
+    '''
+    Hanlder function for signal events (Ctrl C)
+    '''
+    print("\nSignal received, exiting...")
+    try:
+        with redis_client.lock('global_buck_lock'):
+            global_tokens = int(redis_client.hget(GLOBAL_BUCKET_KEY, 'tokens') or 0)
+            redis_client.hset(GLOBAL_BUCKET_KEY, 'tokens', global_tokens)
+        print('Returned all tokens to global bucket')
+    except redis.exceptions.RedisError as e:
+        print(f"Error returning tokens back to global bucket: {e}")
+    except Exception as e:
+        print(f"Unexpected error in return tokens to global bucket: {e}")
+    
+    sys.exit(0)
+
 # Run tests
 if __name__ == "__main__":
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
     # Start Flask server to start rate limiter in cloud
     threading.Thread(target=run_flask).start()
 
