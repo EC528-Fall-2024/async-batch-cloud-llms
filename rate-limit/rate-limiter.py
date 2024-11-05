@@ -1,8 +1,9 @@
 '''Rate-Limiting Module'''
-from openai import OpenAI
+import openai
 import redis
 import tiktoken
 import time
+import requests
 from google.cloud import pubsub_v1
 
 ######################### FOR CLOUD DEPLOYMENT #######################
@@ -93,109 +94,143 @@ def init_global_bucket():
     print(f"Global bucket initialized with {tpm} tokens")
 
 def get_tokens_from_global(amount):
-    # Withdraw tokens from the global bucket using Redis lock
-    with redis_client.lock("global_bucket_lock"):
-        # Let sub bucket consume tokens        
-        tokens = int(redis_client.hget(GLOBAL_BUCKET_KEY, "tokens") or 0)
-        print(f"Accessing global bucket. Currently has {tokens} out of {tpm} tokens")
+    try:
+        # Withdraw tokens from the global bucket using Redis lock
+        with redis_client.lock("global_bucket_lock"):
+            # Let sub bucket consume tokens        
+            tokens = int(redis_client.hget(GLOBAL_BUCKET_KEY, "tokens") or 0)
+            print(f"Accessing global bucket. Currently has {tokens} out of {tpm} tokens")
 
-        if tokens >= amount:
-            redis_client.hincrby(GLOBAL_BUCKET_KEY, "tokens", -amount)
-            print(f"Consumed {amount} tokens from global bucket. {tokens-amount} tokens remaining.")
-            return True  # Allocation succeeded
-        else:
-            print(f"Failed to consume {amount} tokens from global bucket.")
-            return False  # Insufficient tokens
+            if tokens >= amount:
+                redis_client.hincrby(GLOBAL_BUCKET_KEY, "tokens", -amount)
+                print(f"Consumed {amount} tokens from global bucket. {tokens-amount} tokens remaining.")
+                return True  # Allocation succeeded
+            else:
+                print(f"Failed to consume {amount} tokens from global bucket.")
+                return False  # Insufficient tokens
+    except redis.exceptions.RedisError as e:
+        print(f"Error accessing Redis globally with amount {amount}: {e}")
+        return False
+    except Exception as e:
+        print(f"Unexpected error for get_tokens_from_global with for amount {amount}: {e}")
+        return False 
 
 ################################ SUB BUCKET FUNCTIONS #####################################
 def init_user_subbucket(user_id, tokens_needed):
     user_bucket_key = f"user_bucket:{user_id}"
+    try:
+        with redis_client.lock(f"{user_bucket_key}_lock"):
+            # Check if the user bucket already exists
+            bucket_exists = redis_client.exists(user_bucket_key)
+            if bucket_exists:
+                print(f"Altering user {user_id}'s subbucket.")
+                max_tokens = int(redis_client.hget(user_bucket_key, "max_tokens") or 0)
 
-    with redis_client.lock(f"{user_bucket_key}_lock"):
-        # Check if the user bucket already exists
-        bucket_exists = redis_client.exists(user_bucket_key)
-        if bucket_exists:
-            print(f"Altering user {user_id}'s subbucket.")
-            max_tokens = int(redis_client.hget(user_bucket_key, "max_tokens") or 0)
+                # Calculate new max tokens
+                new_max = tokens_needed + max_tokens
+                print(f"User {user_id} needs {tokens_needed} more tokens.")
 
-            # Calculate new max tokens
-            new_max = tokens_needed + max_tokens
-            print(f"User {user_id} needs {tokens_needed} more tokens.")
+                # Try to withdraw additional tokens from global bucket
+                if get_tokens_from_global(tokens_needed):
+                    tokens = int(redis_client.hget(user_bucket_key, "tokens") or 0)
+                    tokens = tokens + tokens_needed # add to curr tokens as well
+                    redis_client.hset(user_bucket_key, "tokens", tokens)
+                    redis_client.hset(user_bucket_key, "max_tokens", new_max)
+                    print(f"Added {tokens_needed} tokens to {user_id}'s sub-bucket. Now has {new_max} maximum tokens.")
+                    return True
+                else:
+                    print(f"Insufficient global tokens to add {tokens_needed} tokens.")
+                    return False
 
-            # Try to withdraw additional tokens from global bucket
-            if get_tokens_from_global(tokens_needed):
-                tokens = int(redis_client.hget(user_bucket_key, "tokens") or 0)
-                tokens = tokens + tokens_needed # add to curr tokens as well
-                redis_client.hset(user_bucket_key, "tokens", tokens)
-                redis_client.hset(user_bucket_key, "max_tokens", new_max)
-                print(f"Added {tokens_needed} tokens to {user_id}'s sub-bucket. Now has {new_max} maximum tokens.")
-                return True
+            # If bucket doesn't exist, initialize a new one
             else:
-                print(f"Insufficient global tokens to add {tokens_needed} tokens.")
-                return False
-
-        # If bucket doesn't exist, initialize a new one
-        else:
-            if get_tokens_from_global(tokens_needed):
-                current_time = int(time.time())
-                redis_client.hset(user_bucket_key, "max_tokens", tokens_needed)
-                redis_client.hset(user_bucket_key, "tokens", tokens_needed)
-                redis_client.hset(user_bucket_key, "last_updated", current_time)
-                print(f"Initialized new sub-bucket for user {user_id} with {tokens_needed} tokens.")
-                return True
-            else:
-                print(f"Failed to initialize sub-bucket for {user_id}. Insufficient global tokens.")
-                return False
+                if get_tokens_from_global(tokens_needed):
+                    current_time = int(time.time())
+                    redis_client.hset(user_bucket_key, "max_tokens", tokens_needed)
+                    redis_client.hset(user_bucket_key, "tokens", tokens_needed)
+                    redis_client.hset(user_bucket_key, "last_updated", current_time)
+                    print(f"Initialized new sub-bucket for user {user_id} with {tokens_needed} tokens.")
+                    return True
+                else:
+                    print(f"Failed to initialize sub-bucket for {user_id}. Insufficient global tokens.")
+                    return False
+    except redis.exceptions.RedisError as e:
+        print(f"Error accessing Redis for user {user_id}: {e}")
+        return False
+    except Exception as e:
+        print(f"Unexpected error in init_user_subbucket for user {user_id}: {e}")
+        return False
 
 def get_tokens_from_user(user_id, tokens_needed):
     user_bucket_key = f"user_bucket:{user_id}"
+    try:
+        with redis_client.lock(f"{user_bucket_key}_lock"):
+            current_time = int(time.time())
+            last_updated = int(redis_client.hget(user_bucket_key, "last_updated") or 0)
 
-    with redis_client.lock(f"{user_bucket_key}_lock"):
-        current_time = int(time.time())
-        last_updated = int(redis_client.hget(user_bucket_key, "last_updated") or 0)
-
-        # Refill logic, if a minute has passed, reset to max tokens since tpm reset
-        if current_time - last_updated > 60:
-            max_tokens = int(redis_client.hget(user_bucket_key, "max_tokens") or 0)
-            redis_client.hset(user_bucket_key, "tokens", max_tokens)
-            redis_client.hset(user_bucket_key, "last_updated", current_time)
-            print(f"Refilled bucket for user {user_id} to {max_tokens} tokens.")
-        
-        # Consume tokens for job
-        tokens = int(redis_client.hget(user_bucket_key, "tokens") or 0)
-        if tokens >= tokens_needed:
-            redis_client.hincrby(user_bucket_key, "tokens", -tokens_needed)
-            print(f"Consumed {tokens_needed} tokens from {user_id}'s sub-bucket.")
-            return True
-        else:
-            print(f"Insufficient tokens in {user_id}'s bucket. Needed: {tokens_needed}, Available: {tokens}.")
-            return False
+            # Refill logic, if a minute has passed, reset to max tokens since tpm reset
+            if current_time - last_updated > 60:
+                max_tokens = int(redis_client.hget(user_bucket_key, "max_tokens") or 0)
+                redis_client.hset(user_bucket_key, "tokens", max_tokens)
+                redis_client.hset(user_bucket_key, "last_updated", current_time)
+                print(f"Refilled bucket for user {user_id} to {max_tokens} tokens.")
+            
+            # Consume tokens for job
+            tokens = int(redis_client.hget(user_bucket_key, "tokens") or 0)
+            if tokens >= tokens_needed:
+                redis_client.hincrby(user_bucket_key, "tokens", -tokens_needed)
+                print(f"Consumed {tokens_needed} tokens from {user_id}'s sub-bucket.")
+                return True
+            else:
+                print(f"Insufficient tokens in {user_id}'s bucket. Needed: {tokens_needed}, Available: {tokens}.")
+                return False
+    # Redis errors
+    except redis.exceptions.RedisError as e:
+        print(f"Error acessing Redis for user {user_id}: {e}")
+        return False
+    except Exception as e:
+        print(f"Unexpected error in get_tokens_from_user for user {user_id}: {e}")
+        return False
 
 def shrink_user_bucket(user_id, tokens_used):
     user_bucket_key = f"user_bucket:{user_id}"
+    
+    try:
+        with redis_client.lock(f"{user_bucket_key}_lock"):
+            # Get user bucket state
+            max_tokens = int(redis_client.hget(user_bucket_key, "max_tokens") or 0)
 
-    with redis_client.lock(f"{user_bucket_key}_lock"):
-        # Get user bucket state
-        max_tokens = int(redis_client.hget(user_bucket_key, "max_tokens") or 0)
-
-        # Update user max tokens
-        new_max = max_tokens - tokens_used
-        if new_max != 0:
-            redis_client.hset(user_bucket_key, "max_tokens", new_max)
-            print(f"Shrunk {user_id}'s bucket by {tokens_used} tokens. New max: {new_max}")
-        else:
-            redis_client.delete(user_bucket_key)
-            print(f"All batches for user {user_id} complete, destroyed bucket.")
+            # Update user max tokens
+            new_max = max_tokens - tokens_used
+            if new_max != 0:
+                redis_client.hset(user_bucket_key, "max_tokens", new_max)
+                print(f"Shrunk {user_id}'s bucket by {tokens_used} tokens. New max: {new_max}")
+            else:
+                redis_client.delete(user_bucket_key)
+                print(f"All batches for user {user_id} complete, destroyed bucket.")
+    except redis.exceptions.RedisError as e:
+        print(f"Error accessing Redis for shrinking buckets for user {user_id}: {e}")
+        return False
+    except Exception as e:
+        print(f"Unexpected error in shrinking the buckets for user {user_id}: {e}")
+        return False
 
     # Return tokens to global bucket 
-    with redis_client.lock("global_bucket_lock"):
-        # Get global bucket state
-        global_tokens = int(redis_client.hget(GLOBAL_BUCKET_KEY, "tokens") or 0)
+    try:
+        with redis_client.lock("global_bucket_lock"):
+            # Get global bucket state
+            global_tokens = int(redis_client.hget(GLOBAL_BUCKET_KEY, "tokens") or 0)
 
-        # Update global tokens
-        new_global_tokens = global_tokens + tokens_used
-        redis_client.hset(GLOBAL_BUCKET_KEY, "tokens", new_global_tokens)
-        print(f"Global bucket increased to {new_global_tokens} tokens.")
+            # Update global tokens
+            new_global_tokens = global_tokens + tokens_used
+            redis_client.hset(GLOBAL_BUCKET_KEY, "tokens", new_global_tokens)
+            print(f"Global bucket increased to {new_global_tokens} tokens.")
+    except redis.exceptions.RedisError as e:
+        print(f"Error returning tokens back into bucket for user {user_id}: {e}")
+        return False
+    except Exception as e:
+        print(f"Unexpected error in returning buckets for user {user_id}: {e}")
+        return False
 
 ############################## LLM API call & RESPONSE #############################
 def call_openai(messages):
@@ -207,9 +242,34 @@ def call_openai(messages):
         )
         print(f"Actually used {response.usage.total_tokens} tokens") # Print used tokens 
         return response.choices[0].message.content.strip()
-
+    
+    # If want to have a timeout:
+    # except requests.exceptions.Timeout as e:
+    #     print(f"OpenAI API call timed out after {timeout} seconds: {e}")
+    #     return None
     except Exception as e:
-        print(f"OpenAI API call failed: {e}")
+        if isinstance(e, openai.APIConnectionError):
+            print(f"OpenAI API Connection error: {e}")
+        elif isinstance(e, openai.APITimeoutError):
+            print(f"OpenAI API Timeout error:{e}")
+        elif isinstance(e, openai.AuthenticationError):
+            print(f"OpenAI Authentication error:{e}")
+        elif isinstance(e, openai.BadRequestError):
+            print(f"OpenAI Bad Request error:{e}")
+        elif isinstance(e, openai.ConflictError):
+            print(f"OpenAI Conflict error:{e}")
+        elif isinstance(e, openai.InternalServerError):
+            print(f"OpenAI Internal Server error:{e}")
+        elif isinstance(e, openai.NotFoundError):
+            print(f"OpenAI Not Found error:{e}")
+        elif isinstance(e, openai.PermissionDeniedError):
+            print(f"OpenAI Permission Denied error:{e}")
+        elif isinstance(e, openai.RateLimitError):
+            print(f"OpenAI Rate Limit error:{e}")
+        elif isinstance(e, openai.UnprocessableEntityError):
+            print(f"OpenAI Unprocessed Entity error: {e}")
+        else:
+            print(f"Unexpected erorr in call_openai: {e}")
         return None
 
 def send_response(client_id, job_id, row, response):
@@ -260,12 +320,12 @@ def process(batch):
         print(f"Response: {response_content}")
 
         # Old Response Logic for Testing
-        # llm_response_queue.put({"user": user_id, "response": response_content})
-        # print("Put response into response queue")
-        # reverse()
+        llm_response_queue.put({"user": user_id, "response": response_content})
+        print("Put response into response queue")
+        reverse()
 
         # Response Logic
-        send_response(user_id, job_id, row, response_content)
+        # send_response(user_id, job_id, row, response_content)
 
         # Shrink user bucket accordingly
         shrink_user_bucket(user_id,tokens_needed)
@@ -401,14 +461,14 @@ if __name__ == "__main__":
     threading.Thread(target=run_flask).start()
 
     # Initialize local bucket & start the Pub/Sub subscriber
-    init_global_bucket()
-    batch_receiver()
+    # init_global_bucket()
+    # batch_receiver()
 
     # # Simple test
-    # print("Performing simple test...")
-    # simple_test()
+    print("Performing simple test...")
+    simple_test()
     
     # # Concurrency Test
-    # print("-" * 50)
-    # print("Performing complex concurency test...")
-    # test_concurrency()
+    print("-" * 50)
+    print("Performing complex concurency test...")
+    test_concurrency()
