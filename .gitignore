@@ -130,7 +130,7 @@ ENV/
 env.bak/
 venv.bak/
 LLM_API/LLM_env
-
+rate-limit/rate-limit-env
 flink-demo/pyflink/flink-venv
 
 # Spyder project settings
