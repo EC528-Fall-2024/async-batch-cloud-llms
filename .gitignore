@@ -164,3 +164,6 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 API/OPENAI_API_KEY.txt
+
+# Batch-Processor
+/Batch-Processor/google-cloud-sdk
