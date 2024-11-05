@@ -4,10 +4,7 @@ import time
 import json
 import os
 from google.cloud import pubsub_v1
-from dotenv import load_dotenv
 from flask_cors import CORS
-
-load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
