@@ -14,4 +14,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Run Python script
-CMD python ReverseBatchProcessor.py
+CMD python app.py
