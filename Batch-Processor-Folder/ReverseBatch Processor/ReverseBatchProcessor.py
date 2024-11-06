@@ -4,7 +4,7 @@ from BigQueryWriter import write_response
 
 project_id = "elated-scope-437703-h9"
 subscription_id = "OutputData-sub"
-timeout = 60.0
+timeout = 3000.0
 
 subscriber = pubsub_v1.SubscriberClient()
 subscription_path = subscriber.subscription_path(project_id, subscription_id)
