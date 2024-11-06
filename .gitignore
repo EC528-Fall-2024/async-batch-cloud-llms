@@ -121,6 +121,8 @@ celerybeat.pid
 # SageMath parsed files
 *.sage.py
 
+rate-limit/test.py
+
 # Environments
 .env
 .venv

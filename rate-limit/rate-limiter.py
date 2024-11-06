@@ -39,7 +39,7 @@ tokenizer = tiktoken.encoding_for_model("gpt-3.5-turbo")  # Adjust for your mode
 
 # OpenAI client
 api_key = ""
-client = OpenAI(api_key=api_key) 
+client = openai.OpenAI(api_key=api_key) 
 
 ##################### OLD RESPONSE LOGIC FOR TESTING #######################
 from queue import Queue
