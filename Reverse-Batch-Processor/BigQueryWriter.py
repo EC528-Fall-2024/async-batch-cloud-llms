@@ -31,4 +31,4 @@ def write_response(row, response, project_id="elated-scope-437703-h9", dataset_i
         print(f"Error updating BigQuery: {e}")
 
 # Example usage:
-write_response(1, "hello mother")
+# write_response(1, "hello mother")

@@ -1,10 +1,23 @@
-from concurrent.futures import TimeoutError
 from google.cloud import pubsub_v1
 from BigQueryWriter import write_response
+import threading
 
+############ FOR CLOUD DEPLOYMENT ################
+from flask import Flask
+import threading
+
+app = Flask(__name__)
+
+@app.route("/")
+def health_check():
+    return "Running", 200
+
+def run_flask():
+    app.run(host="0.0.0.0", port=8080)
+
+##################### REVERSE BATCH PROCESSOR ###################
 project_id = "elated-scope-437703-h9"
 subscription_id = "OutputData-sub"
-timeout = 3000.0
 
 subscriber = pubsub_v1.SubscriberClient()
 subscription_path = subscriber.subscription_path(project_id, subscription_id)
@@ -30,15 +43,14 @@ def callback(message: pubsub_v1.subscriber.message.Message) -> None:
     # Write the message to a database
     write_response(row_number, data)
 
+# Start Flask server to start rate limiter in cloud
+threading.Thread(target=run_flask).start()
 
 streaming_pull_future = subscriber.subscribe(subscription_path, callback=callback)
 print(f"Listening for messages on {subscription_path}..\n")
 
 with subscriber:
     try:
-        # When `timeout` is not set, result() will block indefinitely,
-        # unless an exception is encountered first.
-        streaming_pull_future.result(timeout=timeout)
-    except TimeoutError:
-        streaming_pull_future.cancel()  # Trigger the shutdown.
-        streaming_pull_future.result()  # Block until the shutdown is complete.
+        streaming_pull_future.result()
+    except:
+        streaming_pull_future.cancel()  # Trigger the shutdown
