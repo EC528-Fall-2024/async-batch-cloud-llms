@@ -3,8 +3,12 @@ import uuid
 import time
 import json
 import os
+import requests
 from google.cloud import pubsub_v1
 from flask_cors import CORS
+
+# Batch Processor URL
+BATCH_PROCESSOR_URL = "https://0e3b-128-197-28-149.ngrok-free.app"
 
 app = Flask(__name__)
 CORS(app)
@@ -23,7 +27,18 @@ topic_path = publisher.topic_path(project_id, topic_id)
 
 
 # Function for submitting job
-def publish_job(job_data, job_id):
+def publish_job(job_data, job_id): 
+    # Activate batch processor
+    headers = {
+        "Content-Type": "application/json",
+    }
+    job_message = {
+        "Job_ID": job_id,
+        "Client_ID": job_data["client_id"],
+        "Database_Length": job_data["row_count"]
+    }
+    response = requests.post(f"{BATCH_PROCESSOR_URL}/go", json=job_message, headers=headers)
+
     data_str = {
         "job_id": job_id,
         "client_id": job_data["client_id"],
@@ -52,7 +67,7 @@ def publish_job(job_data, job_id):
     future = publisher.publish(topic_path, encoded_data, **attributes)
     
     print(future.result())
-    print("done")
+    print(response.json())
 
 
 # Function for checking if job_data is valid
