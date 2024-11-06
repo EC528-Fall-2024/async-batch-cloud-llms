@@ -1,0 +1,14 @@
+############# push container to gcloud ###############
+gcloud init
+gcloud auth configure-docker
+docker build -t batch-processor .
+docker tag rate-limiter-python-app gcr.io/elated-scope-437703-h9/batch-processor
+docker push gcr.io/elated-scope-437703-h9/batch-processor
+
+
+######################### deploy rate-limiter service whenever needed #################################
+gcloud run deploy batch-processor \
+  --image gcr.io/elated-scope-437703-h9/batch-processor \
+  --platform managed \
+  --region us-central1 \
+  --allow-unauthenticated 

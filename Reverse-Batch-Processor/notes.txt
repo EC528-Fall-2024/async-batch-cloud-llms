@@ -1,0 +1,16 @@
+############# push container to gcloud ###############
+gcloud init
+gcloud auth configure-docker
+docker build -t reverse-batch-processor .
+docker tag rate-limiter-python-app gcr.io/elated-scope-437703-h9/reverse-batch-processor
+docker push gcr.io/elated-scope-437703-h9/reverse-batch-processor
+
+
+######################### deploy reverse-batch-processor service whenever needed #################################
+gcloud run deploy reverse-batch-processor \
+  --image gcr.io/elated-scope-437703-h9/reverse-batch-processor \
+  --platform managed \
+  --region us-central1 \
+  --allow-unauthenticated 
+
+# Revise the cloud run service to have "CPU is always allocated" enabled

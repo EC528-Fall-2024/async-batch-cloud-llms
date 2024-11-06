@@ -6,7 +6,6 @@ export GOOGLE_APPLICATION_CREDENTIALS="/c/Users/rayan/AppData/Local/Packages/Pyt
 gcloud init
 gcloud auth configure-docker
 docker build -t rate-limiter-python-app .
-docker run rate-limiter-python-app
 docker tag rate-limiter-python-app gcr.io/elated-scope-437703-h9/rate-limiter-python-app
 docker push gcr.io/elated-scope-437703-h9/rate-limiter-python-app
 

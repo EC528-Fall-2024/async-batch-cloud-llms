@@ -29,7 +29,7 @@ def acked(err, msg):
 
 def main():
     # Create producer
-    conf = {'bootstrap.servers': 'localhost:9092',
+    conf = {'.bootstrapservers': 'localhost:9092',
         'client.id': socket.gethostname()}
     producer = Producer(conf)
     topic = 'inbound-data'
