@@ -32,7 +32,7 @@ def go():
 
 # Run the app
 if __name__ == "__main__":
-    app.run(port=5004, debug=True)
+    app.run(port=8080, debug=True)
     
     
     
