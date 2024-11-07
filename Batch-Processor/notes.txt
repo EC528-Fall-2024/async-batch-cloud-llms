@@ -12,3 +12,49 @@ gcloud run deploy batch-processor \
   --platform managed \
   --region us-central1 \
   --allow-unauthenticated 
+
+
+
+
+
+
+
+
+############ VM Notes lmao
+
+## Commands to connect to ssh
+gcloud compute ssh --zone "us-central1-a" "instance-20241107-000832" --project "elated-scope-437703-h9"
+
+
+## VM Commands
+sudo apt update
+sudo apt install python3-pip
+sudo apt install git -y
+
+git clone https://github.com/EC528-Fall-2024/async-batch-cloud-llms.git
+
+
+cd’d into Batch Processor
+
+sudo apt install python3-venv -y
+python3 -m venv myenv
+source myenv/bin/activate
+
+pip install flask
+pip install google-auth google-cloud
+pip install google-cloud-bigquery
+pip install google-cloud-pubsub
+
+
+
+
+###### Commands on the VM
+
+## How to run the API
+nohup gunicorn -b 0.0.0.0:8080 app:app &
+
+## How to search for the process
+ps aux | grep gunicorn
+
+## How to 
+kill <PID>

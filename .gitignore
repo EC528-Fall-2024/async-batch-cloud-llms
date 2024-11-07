@@ -168,4 +168,4 @@ cython_debug/
 API/OPENAI_API_KEY.txt
 
 # Batch-Processor
-/Batch-Processor/google-cloud-sdk
+google-cloud-sdk
