@@ -2,9 +2,30 @@ from google.cloud import bigquery
 
 
 # This function will query the Big Query Table given a row. It will return the value of "prompt_and_text"
-# Inputs: row
+# Inputs: 
+# Passed Parameter row
+
+# Testing
+# In Project Contents:
+# project_id = "elated-scope-437703-h9"
+# dataset_id = "test_dataset"
+# table_id = "test_table"
+
+# Andrew's Out Of Project Contents:
+# project_id = "sampleproject-440900"
+# dataset_id = "11_05_dataset"
+# table_id = "testing-purposes"
+
+# Noah's Other out of project contents: sailing-map-411015.user_dataset.input_table
+# project_id = "sailing-map-411015"
+# dataset_id = "user_dataset"
+# table_id = "input_table"
+
 # Outputs: prompt_and_text
-def read_from_database(row, project_id = "elated-scope-437703-h9", dataset_id = "test_dataset", table_id = "test_table"):
+#def read_from_database(row, project_id = "elated-scope-437703-h9", dataset_id = "test_dataset", table_id = "test_table"):
+def read_from_database(row, project_id = "sampleproject-440900", dataset_id = "user_dataset", table_id = "input_table"):
+#def read_from_database(row, project_id = "elated-scope-437703-h9", dataset_id = "test_dataset", table_id = "test_table"):
+
 
     # Initialize BigQuery client
     client = bigquery.Client(project=project_id)

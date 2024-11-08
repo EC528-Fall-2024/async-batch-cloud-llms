@@ -16,7 +16,35 @@ gcloud run deploy batch-processor \
 
 
 
+### Gcloud Login
 
+## Auth for logins
+## Command: gcloud auth application-default login
+## Use: When you’re writing applications that need to authenticate programmatically using Google Cloud 
+client libraries (e.g., for Python, Java, Node.js).
+## Extra Commands: gcloud auth list
+
+
+## Login for CLI 
+## Command: gcloud auth login
+## Use: When you need to authenticate the Google Cloud CLI (gcloud) for managing 
+resources, running commands, and deploying apps via the command line.
+
+
+## Command to show creditensl of a dataset
+bq show --format=prettyjson project_id:dataset_id
+bq show --format=prettyjson user_dataset:input_table
+
+
+
+## Run from root (async-batch......)
+gcloud auth activate-service-account --key-file=ServiceAccountKeys/elated-scope-437703-h9-b02b7351cc26.json
+
+gcloud auth application-default print-access-token
+
+
+
+API Key is: ServiceAccountKeys/elated-scope-437703-h9-b02b7351cc26.json
 
 
 
