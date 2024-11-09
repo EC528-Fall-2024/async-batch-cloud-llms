@@ -246,6 +246,10 @@ def shrink_user_bucket(user_id, tokens_used):
 
 ############################## LLM API call & RESPONSE #############################
 def call_openai(messages, user_id, tokens_needed, api_key, delay = 1):
+    # Assume this job needs to be dropped
+    if(delay>120):
+        print("Unexpected error in call_openai")
+        return None
     # Make a call to the OpenAI API and track token usage
     try:
         response = client.chat.completions.create(
@@ -267,6 +271,7 @@ def call_openai(messages, user_id, tokens_needed, api_key, delay = 1):
         if delay > 1: # no delay initially
             print(f"Trying to run request again for {user_id} after {delay} seconds") # LOGGING
             time.sleep(delay)
+
         return call_openai(messages, user_id, tokens_needed, api_key, delay*2) # double delay on each call - exponential backoff
     
     # If want to have a timeout:
