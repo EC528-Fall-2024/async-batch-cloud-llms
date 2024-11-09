@@ -34,8 +34,12 @@ redis_client = redis.Redis(host='localhost', port=6379, db=0)
 GLOBAL_BUCKET_KEY = "global_token_bucket"
 model = "gpt-3.5-turbo"
 role = "You are a helpful assistant."
+
+chunks = 10 # break load across minute
+
 tpm = 200000 # 200,000 tpm rate for gpt3.5
-refill_time = 60 # every minute refill
+token_limit = tpm/chunks
+refill_time = 60/chunks # every minute, tpm resets
 
 # Initialize OpenAI tokenizer
 tokenizer = tiktoken.encoding_for_model("gpt-3.5-turbo")  # Adjust for your model
@@ -96,13 +100,13 @@ def init_global_bucket():
     key_type = redis_client.type(GLOBAL_BUCKET_KEY)
     if key_type != b'hash':
         redis_client.delete(GLOBAL_BUCKET_KEY)
-    redis_client.hset(GLOBAL_BUCKET_KEY, "tokens", tpm) 
+    redis_client.hset(GLOBAL_BUCKET_KEY, "tokens", token_limit) 
     redis_client.hset(GLOBAL_BUCKET_KEY, "last_updated", int(time.time()))
-    print(f"Global bucket initialized with {tpm} tokens") # LOGGING HERE
+    print(f"Global bucket initialized with {token_limit} tokens") # LOGGING HERE
 
 ################################ SUB BUCKET FUNCTIONS #####################################
 def get_tokens_from_global(amount, user_id): 
-    # Withdraw tokens from the global bucket using Redis lock, we assume amount < tpm
+    # Withdraw tokens from the global bucket using Redis lock, we assume amount < token_limit
     try:
         with redis_client.lock("global_bucket_lock"):
             # Let sub bucket consume tokens        
@@ -263,8 +267,8 @@ def call_openai(messages, user_id, tokens_needed, api_key, delay = 1):
     except openai.RateLimitError as e:
         print(f"OpenAI API rate limit has been reached, increasing {user_id}'s token bucket before retrying...") # LOGGING
         
-        # If rate limit error, add tokens to the user bucket
-        tokens_needed = min(int(redis_client.hget(GLOBAL_BUCKET_KEY, "tokens") or 0)-tokens_needed, tokens_needed)
+        # If rate limit error, add tokens to the user bucket, caps at token_limit
+        tokens_needed = min(token_limit-tokens_needed, tokens_needed)
         if not init_user_subbucket(user_id, tokens_needed):
             print("Failed to update sub-bucket. Aborting batch.")
             return
