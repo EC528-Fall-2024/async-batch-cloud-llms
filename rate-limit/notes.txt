@@ -15,6 +15,7 @@ gcloud run deploy rate-limiter-python-app \
   --image gcr.io/elated-scope-437703-h9/rate-limiter-python-app \
   --platform managed \
   --region us-central1 \
-  --allow-unauthenticated 
+  --allow-unauthenticated \
+  --min-instances=1
 
 # Revise the cloud run service to have "CPU is always allocated" enabled
