@@ -159,6 +159,7 @@ def init_user_subbucket(user_id, tokens_needed):
                 # 'Allocate tokens'
                 current_time = int(time.time())
                 redis_client.hset(user_bucket_key, "max_tokens", tokens_needed)
+                redis_client.hset(user_bucket_key, "max_tokens_at_update", tokens_needed)
                 redis_client.hset(user_bucket_key, "tokens", tokens_needed)
                 redis_client.hset(user_bucket_key, "last_updated", current_time)
                 print(f"Initialized new sub-bucket for user {user_id} with {tokens_needed} tokens.") # LOGGING
@@ -182,7 +183,9 @@ def get_tokens_from_user(user_id, tokens_needed):
             # Refill logic, if a refill_time has passed, reset to max tokens
             if current_time - last_updated > refill_time:
                 max_tokens = int(redis_client.hget(user_bucket_key, "max_tokens") or 0)
-                redis_client.hset(user_bucket_key, "tokens", max_tokens)
+                old_max_tokens = int(redis_client.hget(user_bucket_key, "max_tokens_at_update") or 0)
+                redis_client.hset(user_bucket_key, "tokens", old_max_tokens)
+                redis_client.hset(user_bucket_key, "max_tokens_at_update", max_tokens)
                 redis_client.hset(user_bucket_key, "last_updated", current_time)
                 print(f"Refilled bucket for user {user_id} to {max_tokens} tokens.") # LOGGING
             
