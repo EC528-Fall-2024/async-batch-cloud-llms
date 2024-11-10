@@ -35,11 +35,9 @@ GLOBAL_BUCKET_KEY = "global_token_bucket"
 model = "gpt-3.5-turbo"
 role = "You are a helpful assistant."
 
-chunks = 10 # break load across minute
-
 tpm = 200000 # 200,000 tpm rate for gpt3.5
-token_limit = tpm/chunks
-refill_time = 60/chunks # every minute, tpm resets
+token_limit = tpm
+refill_time = 60 # every minute, tpm resets
 
 # Initialize OpenAI tokenizer
 tokenizer = tiktoken.encoding_for_model("gpt-3.5-turbo")  # Adjust for your model
@@ -117,7 +115,7 @@ def get_tokens_from_global(amount, user_id):
                 print(f"{user_id} waiting for tokens from global bucket.") # LOGGING
             while tokens<amount:
                 tokens = int(redis_client.hget(GLOBAL_BUCKET_KEY, "tokens") or 0)
-                time.sleep(0.5) # brief sleep between checks
+                time.sleep(60) # brief sleep between checks
 
             # take tokens
             redis_client.hincrby(GLOBAL_BUCKET_KEY, "tokens", -amount)
@@ -209,7 +207,19 @@ def get_tokens_from_user(user_id, tokens_needed):
         print(f"Unexpected error in get_tokens_from_user for user {user_id}: {e}")
         return False
 
-def shrink_user_bucket(user_id, tokens_used):
+def ret_used_tokens(tokens):
+    # wait minute
+    time.sleep(1)
+
+    # return used tokens to global bucket
+    with redis_client.lock("global_increase"):
+        redis_client.hincrby(GLOBAL_BUCKET_KEY, "tokens", tokens)
+
+    # log status
+    global_tokens = int(redis_client.hget(GLOBAL_BUCKET_KEY, "tokens") or 0)
+    print(f"Global bucket increased to {global_tokens} tokens.") # LOGGING
+
+def shrink_user_bucket(user_id, tokens_used, actual_used):
     user_bucket_key = f"user_bucket:{user_id}"
     try:
         with redis_client.lock(f"{user_bucket_key}_lock"):
@@ -235,10 +245,18 @@ def shrink_user_bucket(user_id, tokens_used):
 
     # Return tokens to global bucket 
     try:
-        # Update global tokens
-        global_tokens = int(redis_client.hget(GLOBAL_BUCKET_KEY, "tokens") or 0)
-        redis_client.hset(GLOBAL_BUCKET_KEY, "tokens", global_tokens + tokens_used)
-        print(f"Global bucket increased to {global_tokens+tokens_used} tokens.") # LOGGING
+        # Return unused tokens immediately
+        if(tokens_used-actual_used>0):
+            with redis_client.lock("global_increase"):
+                redis_client.hincrby(GLOBAL_BUCKET_KEY, "tokens", max(tokens_used-actual_used,0))
+                # log status
+                global_tokens = int(redis_client.hget(GLOBAL_BUCKET_KEY, "tokens") or 0)
+                print(f"Global bucket increased to {global_tokens} tokens.") # LOGGING
+
+        # Return used tokens a minute later
+        used = min(actual_used, tokens_used)
+        if used > 0:
+            thread = threading.Thread(target=ret_used_tokens, args=(used,)).start()
     
     # uncontrollable errors - LOGGING
     except redis.exceptions.RedisError as e:
@@ -249,7 +267,7 @@ def shrink_user_bucket(user_id, tokens_used):
         return False
 
 ############################## LLM API call & RESPONSE #############################
-def call_openai(messages, user_id, tokens_needed, api_key, delay = 1):
+def call_openai(messages, user_id, tokens_needed, api_key, counter = 1, delay = 5):
     # Assume this job needs to be dropped
     if(delay>120):
         print("Unexpected error in call_openai")
@@ -260,11 +278,11 @@ def call_openai(messages, user_id, tokens_needed, api_key, delay = 1):
             model=model,
             messages=messages
         )
-        # print(f"Actually used {response.usage.total_tokens} tokens") # Print used tokens 
-        return response.choices[0].message.content.strip()
+        actual = response.usage.total_tokens
+        return response.choices[0].message.content.strip(), actual, counter
     
     # If openai_api call fails, assume incorrect prediction of tokens
-    except openai.RateLimitError as e:
+    except openai.RateLimitError as e: 
         print(f"OpenAI API rate limit has been reached, increasing {user_id}'s token bucket before retrying...") # LOGGING
         
         # If rate limit error, add tokens to the user bucket, caps at token_limit
@@ -272,11 +290,13 @@ def call_openai(messages, user_id, tokens_needed, api_key, delay = 1):
         if not init_user_subbucket(user_id, tokens_needed):
             print("Failed to update sub-bucket. Aborting batch.")
             return
-        if delay > 1: # no delay initially
+        if delay > 5: # no delay initially
             print(f"Trying to run request again for {user_id} after {delay} seconds") # LOGGING
             time.sleep(delay)
 
-        return call_openai(messages, user_id, tokens_needed, api_key, delay*2) # double delay on each call - exponential backoff
+        # double delay on each call - exponential backoff
+        # note the size of bucket expanding via counter (size = counter*tokens_needed)
+        return call_openai(messages, user_id, tokens_needed, api_key, counter+1, delay*2)
     
     # If want to have a timeout:
     # except requests.exceptions.Timeout as e:
@@ -306,7 +326,7 @@ def call_openai(messages, user_id, tokens_needed, api_key, delay = 1):
         else:
             error_message = f"Unexpected error in call_openai: {e}"
         print(error_message) # LOGGING
-        return None
+        return None, tokens_needed, counter
 
 def send_response(client_id, job_id, row, response):
     publisher = pubsub_v1.PublisherClient()
@@ -353,11 +373,12 @@ def process(batch):
     if get_tokens_from_user(user_id, tokens_needed):
         # Call LLM API
         print("Attempting to call OpenAI...") # LOGGING
-        response_content = "fake_response" # for testing
-        time.sleep(0.1) # simulate delay for testing
-        # response_content = call_openai(messages, user_id, tokens_needed, api_key)
+        # response_content, actual_tokens, counter = "fake_response", tokens_needed, 1 # for testing
+        # time.sleep(0.1) # simulate delay for testing
+        response_content, actual_tokens, counter = call_openai(messages, user_id, tokens_needed, api_key)
         if response_content is None:
-            print("OpenAI API call failed, aborting") # FIX
+            print("OpenAI API call failed, sending back tokens & aborting")
+            shrink_user_bucket(user_id,min(tokens_needed*counter,token_limit), actual_tokens)
             return
         print(f"Received Response: {response_content}") # LOGGING
 
@@ -370,7 +391,7 @@ def process(batch):
         send_response(user_id, job_id, row, response_content)
 
         # Shrink user bucket accordingly since job complete
-        shrink_user_bucket(user_id,tokens_needed)
+        shrink_user_bucket(user_id,min(tokens_needed*counter,token_limit), actual_tokens)
     else:
         print("Issue with accessing tokens from user bucket. Aborting batch")
 
