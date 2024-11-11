@@ -1,6 +1,9 @@
 from google.cloud import bigquery
+import time
+import random
 
-def write_response(row, response, project_id="elated-scope-437703-h9", dataset_id="test_dataset", table_id="test_table"):
+def write_response(row, response, project_id="elated-scope-437703-h9", dataset_id="test_dataset", table_id="test_table", delay = 0):
+    time.sleep(delay)
     # Initialize BigQuery client
     client = bigquery.Client(project=project_id)
 
@@ -28,7 +31,9 @@ def write_response(row, response, project_id="elated-scope-437703-h9", dataset_i
         query_job.result()  # Wait for the job to complete
         print("Response updated successfully.")
     except Exception as e:
-        print(f"Error updating BigQuery: {e}")
+        wait = random.randint(1,10)
+        print(f"Error updating BigQuery: {e}. Trying again after {wait} seconds.")
+        write_response(row=row,response=response,delay=wait)
 
 # Example usage:
 # write_response(1, "hello mother")
