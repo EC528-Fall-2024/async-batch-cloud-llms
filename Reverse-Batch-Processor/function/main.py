@@ -19,9 +19,9 @@ def reverse(cloud_event):
         print(f"Row_Number: {row_number}")
 
         # Write the message to a database 
-        write_response(row_number, data)
+        write_response(data, row_number, job_id, client_id)
     
     except Exception as e:
-        print(f"Error processing message: {e}")
+        print(f"Error processing message in reverse batch processor: {e}") 
         raise
     
