@@ -1,0 +1,5 @@
+redis==5.1.0
+openai
+tiktoken
+google-cloud-pubsub
+functions-framework==3.*

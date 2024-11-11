@@ -1,0 +1,7 @@
+gcloud functions deploy reverse-batch-processor \
+--gen2 \
+--region=us-central1 \
+--runtime=python312 \
+--source=. \
+--entry-point=pubsub_event \
+--trigger-topic=InputData
