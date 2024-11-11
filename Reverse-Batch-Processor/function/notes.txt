@@ -2,6 +2,7 @@ gcloud functions deploy reverse-batch-processor \
 --gen2 \
 --region=us-central1 \
 --runtime=python312 \
+--timeout=3600 \
 --source=. \
 --entry-point=reverse \
 --trigger-topic=OutputData
