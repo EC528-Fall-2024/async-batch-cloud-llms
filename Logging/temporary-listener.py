@@ -4,9 +4,9 @@ import threading
 
 # Prepare all three topics
 project_id = "elated-scope-437703-h9"
-logging_id = "General-Logs"
-progress_id = "Progress-Logs"
-error_id = "Error-Logs"
+logging_id = "GeneralLogs-sub"
+progress_id = "ProgressLogs-sub"
+error_id = "ErrorLogs-sub"
 
 # Callback for each type of log
 def log(message):
