@@ -3,6 +3,8 @@ from google.cloud import pubsub_v1
 import time
 import random
 
+microservice = "ReverseBatchProcessor"
+
 # send log messages to job orchestrator
 def log_message(message, job_id, client_id, row, topic_id):
     project_id = "elated-scope-437703-h9"
@@ -15,6 +17,7 @@ def log_message(message, job_id, client_id, row, topic_id):
     attributes = {
         "Job_ID": f"{job_id}",
         "Client_ID": f"{client_id}",
+        "Microservice:": f"{microservice}",
         "Row_Number": f"{row}"
     }
 
@@ -48,7 +51,7 @@ def write_response(response, row, job_id, client_id, project_id="elated-scope-43
     try:
         query_job = client.query(query, job_config=job_config)
         query_job.result()  # Wait for the job to complete
-        message=f"Response for row {row} updated successfully by reverse batch processor."
+        message=f"Response for row {row} updated successfully."
         print(message)
         log_message(message, job_id, client_id, row, "ProgressLogs") # send message to job orchestrator
     except Exception as e:
