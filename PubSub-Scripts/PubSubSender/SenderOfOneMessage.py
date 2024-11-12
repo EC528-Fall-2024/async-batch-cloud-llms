@@ -4,9 +4,9 @@ def pubSubSender(message):
     project_id = "elated-scope-437703-h9"
     
     # CHANGE FOR INPUT/OUTPUT
-    topic_id = "InputData"
+    # topic_id = "InputData"
     # topic_id = "OutputData"
-    # topic_id = "StartJob"
+    topic_id = "StartJob"
 
 
     publisher = pubsub_v1.PublisherClient()
