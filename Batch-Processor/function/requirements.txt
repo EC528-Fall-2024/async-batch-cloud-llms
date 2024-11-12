@@ -1,4 +1,4 @@
+functions-framework>=3.0.0
 google-cloud-bigquery
 google-cloud-pubsub
 flask
-gunicorn==20.1.0

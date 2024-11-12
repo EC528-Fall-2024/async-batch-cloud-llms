@@ -4,8 +4,9 @@ def pubSubSender(message):
     project_id = "elated-scope-437703-h9"
     
     # CHANGE FOR INPUT/OUTPUT
-    # topic_id = "InputData"
-    topic_id = "OutputData"
+    topic_id = "InputData"
+    # topic_id = "OutputData"
+    # topic_id = "StartJob"
 
 
     publisher = pubsub_v1.PublisherClient()
@@ -17,12 +18,19 @@ def pubSubSender(message):
     # Data must be a bytestring
     data = data_str.encode("utf-8")
     
-        # Define attributes as a dictionary
+    # Define attributes as a dictionary
+    # attributes = {
+    #     "Job_ID": "wolf",
+    #     "Client_ID": "richard",
+    #     "Row_Number": "1"
+    # }
+    
     attributes = {
         "Job_ID": "wolf",
         "Client_ID": "richard",
-        "Row_Number": "1"
     }
+    
+    
 
     # Pass the attributes to the publish method
     future = publisher.publish(topic_path, data, **attributes)

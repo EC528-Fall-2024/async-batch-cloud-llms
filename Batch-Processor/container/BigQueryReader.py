@@ -21,6 +21,7 @@ from google.cloud import bigquery
 # dataset_id = "user_dataset"
 # table_id = "input_table"
 
+
 # Outputs: prompt_and_text
 #def read_from_database(row, project_id = "elated-scope-437703-h9", dataset_id = "test_dataset", table_id = "test_table"):
 def read_from_database(row, project_id = "sampleproject-440900", dataset_id = "user_dataset", table_id = "input_table"):
