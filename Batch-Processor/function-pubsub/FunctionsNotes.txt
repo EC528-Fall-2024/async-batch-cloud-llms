@@ -9,6 +9,7 @@ gcloud functions deploy batchprocessor \
   --source=. \
   --entry-point=go \
   --trigger-topic=StartJob \
+  --allow-unauthenticated \
   --verbosity=debug
 
 
