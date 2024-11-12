@@ -35,11 +35,13 @@ GLOBAL_BUCKET_KEY = "global_token_bucket"
 REQUEST_KEY = "request_limiter"
 
 tpm = 200000 # 200,000 tpm rate for gpt3.5
-token_limit = 200000
+token_limit = tpm
 refill_time = 60 # every minute, tpm resets
 
-max_requests = 2 # n requests
-request_timer = 5 # t seconds
+rpm = 500 # 500 rpm rate fot gpt3.5
+chunks = 30 # split request limit across minute via chunks
+max_requests = rpm/chunks # n requests
+request_timer = 60/chunks # t seconds
 
 # Initialize OpenAI tokenizer
 tokenizer = tiktoken.encoding_for_model("gpt-3.5-turbo")  # Adjust for your model
@@ -122,7 +124,6 @@ def incr_request():
         with redis_client.lock("request_lock"):
             last_updated = int(redis_client.hget(REQUEST_KEY, "last_reset") or 0)
             current_requests = int(redis_client.hget(REQUEST_KEY, "request_count") or 0)
-            print(current_requests)
             # need to wait till request timer resets if no more requests allowed during this period
             if current_requests >= max_requests:
                 # wait until reset period met
@@ -178,7 +179,7 @@ def get_tokens_from_global(amount, user_id):
                 print(f"{user_id} waiting for tokens from global bucket.") # LOGGING
                 while tokens<amount:
                     tokens = int(redis_client.hget(GLOBAL_BUCKET_KEY, "tokens") or 0)
-                    time.sleep(60) # brief sleep between checks
+                    time.sleep(0.1) # brief sleep between checks
 
             # take tokens
             redis_client.hincrby(GLOBAL_BUCKET_KEY, "tokens", -amount)
@@ -275,7 +276,7 @@ def get_tokens_from_user(user_id, tokens_needed):
 
 def ret_used_tokens(tokens):
     # wait minute
-    time.sleep(1)
+    time.sleep(refill_time)
 
     # return used tokens to global bucket
     with redis_client.lock("global_increase"):
@@ -459,12 +460,12 @@ def process(batch):
         print(f"Received Response: {response_content}") # LOGGING
 
         # Old Response Logic for Testing
-        llm_response_queue.put({"user": user_id, "response": response_content})
-        print("Put response into response queue")
-        reverse()
+        # llm_response_queue.put({"user": user_id, "response": response_content})
+        # print("Put response into response queue")
+        # reverse()
 
         # Response Logic
-        # send_response(user_id, job_id, row, response_content)
+        send_response(user_id, job_id, row, response_content)
 
         # Shrink user bucket accordingly since job complete
         shrink_user_bucket(user_id,min(tokens_needed*counter,token_limit), actual_tokens)
@@ -597,18 +598,18 @@ def test_concurrency():
 ############################### MAIN ###################################
 if __name__ == "__main__":
     # Start Flask server to start rate limiter in cloud
-    # threading.Thread(target=run_flask).start()
+    threading.Thread(target=run_flask).start()
 
-    # # Initialize limiters
-    # if not init_global_bucket():
-    #     print("Failed to initialize global bucket... service shutting down")
-    #     quit() # shut down
-    # if not init_request_limiter:
-    #     print("Failed to initialize request limiter... service shutting down")
-    #     quit() # shut down
+    # Initialize limiters
+    if not init_global_bucket():
+        print("Failed to initialize global bucket... service shutting down")
+        quit() # shut down
+    if not init_request_limiter:
+        print("Failed to initialize request limiter... service shutting down")
+        quit() # shut down
 
-    # # Start Pub/Sub subscriber for input batches
-    # batch_receiver()
+    # Start Pub/Sub subscriber for input batches
+    batch_receiver()
 
     # Comment in/out tests as needed
     # # Simple test
@@ -616,6 +617,6 @@ if __name__ == "__main__":
     # simple_test()
     
     # Concurrency Test
-    print("-" * 50)
-    print("Performing complex concurency test...")
-    test_concurrency()
+    # print("-" * 50)
+    # print("Performing complex concurency test...")
+    # test_concurrency()
