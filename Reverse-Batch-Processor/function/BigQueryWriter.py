@@ -55,8 +55,15 @@ def write_response(response, row, job_id, client_id, project_id="elated-scope-43
         print(message)
         log_message(message, job_id, client_id, row, "ProgressLogs") # send message to job orchestrator
     except Exception as e:
-        wait = random.randint(1,10)
-        message = f"Error updating BigQuery for row {row}: {e}. Trying again after {wait} seconds."
-        print(message)
-        log_message(message, job_id, client_id, row, "ErrorLogs") # send message to job orchestrator
-        write_response(response, row, job_id, client_id ,delay=wait)
+        # concurrency error --> retry
+        if "concurrent update" in str(e):
+            wait = random.randint(1,5) # delay before trying to write again
+            message = f"Concurrency error updating BigQuery for row {row}: {e}. Trying again after {wait} seconds."
+            print(message)
+            log_message(message, job_id, client_id, row, "GeneralLogs") # send message to job orchestrator
+            write_response(response, row, job_id, client_id ,delay=wait)
+        # unexpected error --> shutdown
+        else:
+            message = f"Unexpected error updating BigQuery for row {row}: {e}\n Shutting down..."
+            print(message)
+            log_message(message, job_id, client_id, row, "ErrorLogs") # send message to job orchestrator
