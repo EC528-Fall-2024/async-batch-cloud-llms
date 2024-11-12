@@ -1,17 +1,17 @@
-# Use a lightweight Python image
+# Use an official Python runtime as a parent image
 FROM python:3.9-slim
 
-# Set the working directory inside the container
+# Set the working directory
 WORKDIR /app
 
-# Copy the requirements.txt into the container
-COPY requirements.txt .
+# Copy the current directory contents into the container at /app
+COPY . /app
 
-# Install Python dependencies
+# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the code into the container
-COPY . .
+# Expose port 8080 for Cloud Run
+EXPOSE 8080
 
-# Run Python script
-CMD python app.py
+# Run the application
+CMD ["gunicorn", "-b", "0.0.0.0:8080", "app:app"]
