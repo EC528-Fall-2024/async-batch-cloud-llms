@@ -1,47 +1,8 @@
 from google.cloud import bigquery
-
-# Steps
-# 1. Move the handle go to this file
-# Add Logging function
-
-#GeneralLogs
-#ProgressLogs
-#ErrorLogs
-
-## Progress Format
-# Topic: ProgressLogs
-# message=f"Prompt and Text for row {row} read successfully."
-
-
-## Error Logs Format
-# Topic: ErrorLogs
-##message = f"Error Reading BigQuery for row {row}: {e}."
-
-
-
-# send log messages to job orchestrator
-def log_message(message, job_id, client_id, row, topic_id):
-    project_id = "elated-scope-437703-h9"
-    publisher = pubsub_v1.PublisherClient()
-    topic_path = publisher.topic_path(project_id, topic_id)
-
-    message = f"{message}".encode("utf-8")
-    
-    # Define attributes as a dictionary
-    attributes = {
-        "Job_ID": f"{job_id}",
-        "Client_ID": f"{client_id}",
-        "Microservice:": f"{microservice}",
-        "Row_Number": f"{row}"
-    }
-
-    publisher.publish(topic_path, message, **attributes)
-    print(f"Sent {topic_id} message to job orchestrator.")
-
-
+from ErrorLogger import error_message
 
 # Outputs: prompt_and_text
-def read_from_database(row, project_id = "elated-scope-437703-h9", dataset_id = "test_dataset", table_id = "test_table"):
+def read_from_database(row, Job_ID, Client_ID, project_id = "elated-scope-437703-h9", dataset_id = "test_dataset", table_id = "test_table"):
 # def read_from_database(row, project_id = "sampleproject-440900", dataset_id = "user_dataset", table_id = "input_table"):
 #def read_from_database(row, project_id = "elated-scope-437703-h9", dataset_id = "test_dataset", table_id = "test_table"):
 
@@ -67,37 +28,16 @@ def read_from_database(row, project_id = "elated-scope-437703-h9", dataset_id = 
 
         # Get the single row result
         for row in results:
+            print(f"Prompt and Text for row {row} read successfully.")
             return row.prompt_and_text
-        
-        message=f"Prompt and Text for row {row} read successfully."
-        log_message(message, job_id, client_id, row, topic_id)
         
         return None  # Return None if no row is found
 
+    # Drop the current row if unexpected error present
     except Exception as e:
-        (f"Error querying BigQuery: {e}")
+        message = f"Unexpected error querying BigQuery for row {row}: {e}"
+        print(message)
+
+        # send message to job orchestrator that this row was dropped
+        error_message(message, Job_ID, Client_ID, "RowDropped", row, "ErrorLogs")
         return None
-    
-
-
-# Testing for out of Project Tables
-
-# This function will query the Big Query Table given a row. It will return the value of "prompt_and_text"
-# Inputs: 
-# Passed Parameter row
-
-# Testing
-# In Project Contents:
-# project_id = "elated-scope-437703-h9"
-# dataset_id = "test_dataset"
-# table_id = "test_table"
-
-# Andrew's Out Of Project Contents:
-# project_id = "sampleproject-440900"
-# dataset_id = "11_05_dataset"
-# table_id = "testing-purposes"
-
-# Noah's Other out of project contents: sailing-map-411015.user_dataset.input_table
-# project_id = "sailing-map-411015"
-# dataset_id = "user_dataset"
-# table_id = "input_table"

@@ -1,3 +1,4 @@
+# Deploy reverse batch processor function
 gcloud functions deploy reverse-batch-processor \
 --gen2 \
 --region=us-central1 \

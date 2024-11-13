@@ -42,7 +42,7 @@ def write_response(response, row, job_id, client_id, project_id="elated-scope-43
 
         # Drop the current row if unexpected error present
         else:
-            message = f"Unexpected error updating BigQuery for row {row}: {e}\n Dropping row..."
+            message = f"Unexpected error updating BigQuery for row {row}: {e}"
             print(message)
             
             # send message to job orchestrator that this row was dropped

@@ -1,19 +1,7 @@
-
-## Deploy 
-#The folowing command deploys the function from the terminal
-gcloud functions deploy batch-processor-http \
---runtime=python312 \
---region=us-central1 \
---source=. \
---entry-point=go \
---trigger-http \
---allow-unauthenticated
-
-
 ## Testing Locally
 
 # How to check and see what the URL is:
-gcloud functions describe python-http-function --gen2 --region us-central1 --format="value(url)"
+gcloud functions describe batch-processor-http --gen2 --region us-central1 --format="value(url)"
 
 # The following command will run the function locally. Move into the functions folder and run the following command
 functions-framework --target=go
