@@ -4,15 +4,10 @@ import threading
 
 # Prepare all three topics
 project_id = "elated-scope-437703-h9"
-logging_id = "GeneralLogs-sub"
 progress_id = "ProgressLogs-sub"
 error_id = "ErrorLogs-sub"
 
 # Callback for each type of log
-def log(message):
-    print(f"Received log message: {message}")
-    message.ack()
-
 def progress(message):
     print(f"Received progress message: {message}")
     message.ack()
@@ -22,17 +17,6 @@ def error(message):
     message.ack()
 
 # Functions to subscribe
-def log_subscribe():
-    subscriber = pubsub_v1.SubscriberClient()
-    log_path = subscriber.subscription_path(project_id, logging_id)
-    streaming_pull_future = subscriber.subscribe(f"{log_path}", callback=log)
-    print(f"Listening for messages on {log_path}..\n")
-    with subscriber:
-        try:
-            streaming_pull_future.result()
-        except:
-            streaming_pull_future.cancel() 
-
 def progress_subscribe():
     subscriber = pubsub_v1.SubscriberClient()
     progress_path = subscriber.subscription_path(project_id, progress_id)
@@ -57,7 +41,6 @@ def error_subscribe():
 
 if __name__ == "__main__":
     # start continuous subscribers as three separate threads 
-    threading.Thread(target=log_subscribe).start()
     threading.Thread(target=progress_subscribe).start()
     threading.Thread(target=error_subscribe).start()
 

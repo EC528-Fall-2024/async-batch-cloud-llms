@@ -2,7 +2,7 @@
 gcloud init
 gcloud auth configure-docker
 docker build -t batch-processor .
-docker tag rate-limiter-python-app gcr.io/elated-scope-437703-h9/batch-processor
+docker tag batch-processor gcr.io/elated-scope-437703-h9/batch-processor
 docker push gcr.io/elated-scope-437703-h9/batch-processor
 
 
@@ -14,26 +14,33 @@ gcloud run deploy batch-processor \
   --allow-unauthenticated 
 
 
+## Docker Commands
+docker ps  # for running containers only. -a will give all, even stopped containers running
+docker run -p 8080:8080 batch-processor # run a container
+
+
+
+
+
 
 
 ### Gcloud Login
 
 ## Auth for logins
-## Command: gcloud auth application-default login
-## Use: When you’re writing applications that need to authenticate programmatically using Google Cloud 
+# Command: gcloud auth application-default login
+# Use: When you’re writing applications that need to authenticate programmatically using Google Cloud 
 client libraries (e.g., for Python, Java, Node.js).
-## Extra Commands: gcloud auth list
 
 
 ## Login for CLI 
-## Command: gcloud auth login
-## Use: When you need to authenticate the Google Cloud CLI (gcloud) for managing 
+# Command: gcloud auth login
+# Use: When you need to authenticate the Google Cloud CLI (gcloud) for managing 
 resources, running commands, and deploying apps via the command line.
 
 
 ## Command to show creditensl of a dataset
 bq show --format=prettyjson project_id:dataset_id
-bq show --format=prettyjson user_dataset:input_table
+bq show --format=prettyjson sampleproject-440900:user_dataset
 
 
 
@@ -65,13 +72,17 @@ git clone https://github.com/EC528-Fall-2024/async-batch-cloud-llms.git
 cd’d into Batch Processor
 
 sudo apt install python3-venv -y
-python3 -m venv myenv
-source myenv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+
 
 pip install flask
-pip install google-auth google-cloud
+# pip install google-auth google-cloud
 pip install google-cloud-bigquery
 pip install google-cloud-pubsub
+pip install gunicorn
 
 
 
@@ -86,3 +97,9 @@ ps aux | grep gunicorn
 
 ## How to 
 kill <PID>
+
+## SSH Key
+/home/noahrobitshek/.ssh/id_rsa.pub
+
+
+

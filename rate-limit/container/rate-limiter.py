@@ -29,20 +29,26 @@ project_id = "elated-scope-437703-h9"
 input_topic = "InputData-sub"
 output_topic = "OutputData"
 
-# Initialize Redis connection and bucket info
+# Initialize Redis connection and roken bucket/request counter info
 redis_client = redis.Redis(host='localhost', port=6379, db=0)
 GLOBAL_BUCKET_KEY = "global_token_bucket"
-model = "gpt-3.5-turbo"
-role = "You are a helpful assistant."
+REQUEST_KEY = "request_limiter"
 
 tpm = 200000 # 200,000 tpm rate for gpt3.5
 token_limit = tpm
 refill_time = 60 # every minute, tpm resets
 
+rpm = 500 # 500 rpm rate fot gpt3.5
+chunks = 30 # split request limit across minute via chunks
+max_requests = rpm/chunks # n requests
+request_timer = 60/chunks # t seconds
+
 # Initialize OpenAI tokenizer
 tokenizer = tiktoken.encoding_for_model("gpt-3.5-turbo")  # Adjust for your model
 
 # OpenAI client
+model = "gpt-3.5-turbo"
+role = "You are a helpful assistant."
 api_key = ""
 client = openai.OpenAI(api_key=api_key) 
 
@@ -92,15 +98,73 @@ def openai_tokenizer(messages) -> int:
 
     return total_tokens
     
+############################### REQUEST COUNTER ######################
+def init_request_limiter():
+    try:
+        # Initialize request limiter
+        key_type = redis_client.type(REQUEST_KEY)
+        if key_type != b'hash':
+            redis_client.delete(REQUEST_KEY)
+        redis_client.hset(REQUEST_KEY, "request_count", 0) 
+        redis_client.hset(REQUEST_KEY, "last_reset", int(time.time()))
+        print("Initialized request limiter")
+        return True
+
+    # uncontrollable errors - LOGGING
+    except redis.exceptions.RedisError as e:
+        print(f"Error accessing Redis globally: {e}")
+        return False
+    except Exception as e:
+        print(f"Unexpected error for get_tokens_from_global: {e}")
+        return False 
+
+def incr_request():
+    # Approve request under request limiter
+    try:
+        with redis_client.lock("request_lock"):
+            last_updated = int(redis_client.hget(REQUEST_KEY, "last_reset") or 0)
+            current_requests = int(redis_client.hget(REQUEST_KEY, "request_count") or 0)
+            # need to wait till request timer resets if no more requests allowed during this period
+            if current_requests >= max_requests:
+                # wait until reset period met
+                print("Waiting until next request reset period")
+                while int(time.time()) - last_updated < request_timer:
+                    time.sleep(0.1) # pass time
+                redis_client.hset(REQUEST_KEY, "request_count", 0) # reset request count to 0
+                redis_client.hset(REQUEST_KEY, "last_reset", int(time.time())) # update last updated time
+            
+            # increment 
+            redis_client.hincrby(REQUEST_KEY, "request_count", 1)
+            return True
+        
+    # uncontrollable errors - LOGGING
+    except redis.exceptions.RedisError as e:
+        print(f"Error accessing Redis globally: {e}")
+        return False
+    except Exception as e:
+        print(f"Unexpected error for get_tokens_from_global: {e}")
+        return False 
+
+    
 ##################### GLOBAL BUCKET FUNCTIONS ########################
 def init_global_bucket():
-    # Initialize or reset the global bucket to 200000 tokens
-    key_type = redis_client.type(GLOBAL_BUCKET_KEY)
-    if key_type != b'hash':
-        redis_client.delete(GLOBAL_BUCKET_KEY)
-    redis_client.hset(GLOBAL_BUCKET_KEY, "tokens", token_limit) 
-    redis_client.hset(GLOBAL_BUCKET_KEY, "last_updated", int(time.time()))
-    print(f"Global bucket initialized with {token_limit} tokens") # LOGGING HERE
+    try:
+        # Initialize or reset the global bucket to 200000 tokens
+        key_type = redis_client.type(GLOBAL_BUCKET_KEY)
+        if key_type != b'hash':
+            redis_client.delete(GLOBAL_BUCKET_KEY)
+        redis_client.hset(GLOBAL_BUCKET_KEY, "tokens", token_limit) 
+        redis_client.hset(GLOBAL_BUCKET_KEY, "last_updated", int(time.time()))
+        print(f"Global bucket initialized with {token_limit} tokens") 
+        return True
+
+    # uncontrollable errors - LOGGING
+    except redis.exceptions.RedisError as e:
+        print(f"Error accessing Redis globally: {e}")
+        return False
+    except Exception as e:
+        print(f"Unexpected error for get_tokens_from_global: {e}")
+        return False 
 
 ################################ SUB BUCKET FUNCTIONS #####################################
 def get_tokens_from_global(amount, user_id): 
@@ -113,9 +177,9 @@ def get_tokens_from_global(amount, user_id):
             # wait until tokens in global bucket
             if tokens<amount:
                 print(f"{user_id} waiting for tokens from global bucket.") # LOGGING
-            while tokens<amount:
-                tokens = int(redis_client.hget(GLOBAL_BUCKET_KEY, "tokens") or 0)
-                time.sleep(60) # brief sleep between checks
+                while tokens<amount:
+                    tokens = int(redis_client.hget(GLOBAL_BUCKET_KEY, "tokens") or 0)
+                    time.sleep(0.1) # brief sleep between checks
 
             # take tokens
             redis_client.hincrby(GLOBAL_BUCKET_KEY, "tokens", -amount)
@@ -212,7 +276,7 @@ def get_tokens_from_user(user_id, tokens_needed):
 
 def ret_used_tokens(tokens):
     # wait minute
-    time.sleep(1)
+    time.sleep(refill_time)
 
     # return used tokens to global bucket
     with redis_client.lock("global_increase"):
@@ -296,6 +360,10 @@ def call_openai(messages, user_id, tokens_needed, api_key, counter = 1, delay = 
         if delay > 5: # no delay initially
             print(f"Trying to run request again for {user_id} after {delay} seconds") # LOGGING
             time.sleep(delay)
+            # Get request approved by request limiter before retry
+            if not incr_request():
+                print("Error with request limiter, aborting batch")
+                return
 
         # double delay on each call - exponential backoff
         # note the size of bucket expanding via counter (size = counter*tokens_needed)
@@ -374,11 +442,17 @@ def process(batch):
 
     # try to run
     if get_tokens_from_user(user_id, tokens_needed):
-        # Call LLM API
         print("Attempting to call OpenAI...") # LOGGING
-        # response_content, actual_tokens, counter = "fake_response", tokens_needed, 1 # for testing
-        # time.sleep(0.1) # simulate delay for testing
-        response_content, actual_tokens, counter = call_openai(messages, user_id, tokens_needed, api_key)
+
+        # Get request approved by request limiter before retry
+        if not incr_request():
+            print("Error with request limiter, aborting batch")
+            return
+        
+        # Call LLM API
+        response_content, actual_tokens, counter = "fake_response", tokens_needed, 1 # for testing
+        time.sleep(0.1) # simulate delay for testing
+        # response_content, actual_tokens, counter = call_openai(messages, user_id, tokens_needed, api_key)
         if response_content is None:
             print("OpenAI API call failed, sending back tokens & aborting")
             shrink_user_bucket(user_id,min(tokens_needed*counter,token_limit), actual_tokens)
@@ -443,6 +517,7 @@ def simple_test():
 
     # Initialize global bucket
     init_global_bucket()
+    init_request_limiter()
 
     # Simulate batch data
     batch = {
@@ -487,6 +562,7 @@ def test_concurrency():
 
     # Initialize global bucket
     init_global_bucket()
+    init_request_limiter()
 
     # Prepare batch data
     user_id = "user1"
@@ -524,15 +600,23 @@ if __name__ == "__main__":
     # Start Flask server to start rate limiter in cloud
     threading.Thread(target=run_flask).start()
 
-    # Initialize local bucket & start the Pub/Sub subscriber
-    init_global_bucket()
+    # Initialize limiters
+    if not init_global_bucket():
+        print("Failed to initialize global bucket... service shutting down")
+        quit() # shut down
+    if not init_request_limiter:
+        print("Failed to initialize request limiter... service shutting down")
+        quit() # shut down
+
+    # Start Pub/Sub subscriber for input batches
     batch_receiver()
 
+    # Comment in/out tests as needed
     # # Simple test
     # print("Performing simple test...")
     # simple_test()
     
-    # # Concurrency Test
+    # Concurrency Test
     # print("-" * 50)
     # print("Performing complex concurency test...")
     # test_concurrency()
