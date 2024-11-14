@@ -10,4 +10,5 @@ gcloud functions deploy batch-processor-http \
 --source=. \
 --entry-point=go \
 --trigger-http \
---allow-unauthenticated
+--allow-unauthenticated \
+--service-account=batch-processor@elated-scope-437703-h9.iam.gserviceaccount.com

@@ -10,9 +10,5 @@ gcloud functions deploy reverse-batch-processor \
 --max-instances=10 \
 --source=. \
 --entry-point=reverse \
---trigger-topic=OutputData
-
-11:11
-Got writing to datatable to work; have to set up non-free tier billing
-Have to grant Job User or User to gserviceaccount (or other account/emails associated with this project that wants write access)
-Job User/User status is a project-wide permission, there is 
+--trigger-topic=OutputData \
+--service-account=batch-processor@elated-scope-437703-h9.iam.gserviceaccount.com

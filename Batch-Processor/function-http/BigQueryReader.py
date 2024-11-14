@@ -2,7 +2,7 @@ from google.cloud import bigquery
 from ErrorLogger import error_message
 
 # Outputs: prompt_and_text
-def read_from_database(row, Job_ID, Client_ID, project_id = "elated-scope-437703-h9", dataset_id = "test_dataset", table_id = "test_table"):
+def read_from_database(row, Job_ID, Client_ID, project_id = "sampleproject-440900", dataset_id = "user_dataset", table_id = "input_table"):
 # def read_from_database(row, project_id = "sampleproject-440900", dataset_id = "user_dataset", table_id = "input_table"):
 #def read_from_database(row, project_id = "elated-scope-437703-h9", dataset_id = "test_dataset", table_id = "test_table"):
 
@@ -41,3 +41,7 @@ def read_from_database(row, Job_ID, Client_ID, project_id = "elated-scope-437703
         # send message to job orchestrator that this row was dropped
         error_message(message, Job_ID, Client_ID, "RowDropped", row, "ErrorLogs")
         return None
+
+# # Need to update permissions to BQ Data View and BQ Job User
+# if __name__ == "__main__":
+#     read_from_database(row=1, Job_ID=1, Client_ID=1,project_id="sampleproject-440900",dataset_id='user_dataset',table_id='input_table')
