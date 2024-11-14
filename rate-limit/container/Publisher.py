@@ -1,5 +1,7 @@
 '''Send Messages to Reverse Batch Processor'''
 from google.cloud import pubsub_v1
+from RowProgress import incr_rows
+from logger import progress_message
 
 # Project information
 project_id = "elated-scope-437703-h9"
@@ -21,3 +23,12 @@ def send_response(client_id, job_id, row, response):
     # Send out response via pub/sub
     publisher.publish(publisher_path, message, **attributes)
     print("Sent response to reverse batch processor") 
+
+    # Update rows 
+    processed_rows = incr_rows(job_id)
+    if processed_rows is None:
+        print(f"Error updating processed rows for job id: {job_id}")
+    else:
+        message = f"{processed_rows} rows processed for job id: {job_id}"
+        print(message)
+        progress_message(message, job_id, client_id, processed_rows)
