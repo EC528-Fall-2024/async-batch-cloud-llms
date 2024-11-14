@@ -35,4 +35,5 @@ def batch_receiver():
     try:
         streaming_pull_future.result()
     except:
+        print("Streaming pull feature on input topic failed")
         streaming_pull_future.cancel()

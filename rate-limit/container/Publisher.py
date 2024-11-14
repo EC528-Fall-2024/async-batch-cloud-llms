@@ -3,7 +3,7 @@ from google.cloud import pubsub_v1
 
 # Project information
 project_id = "elated-scope-437703-h9"
-output_topic = "OutputData-sub"
+output_topic = "OutputData"
 
 # send message to reverse batch processor
 def send_response(client_id, job_id, row, response):
