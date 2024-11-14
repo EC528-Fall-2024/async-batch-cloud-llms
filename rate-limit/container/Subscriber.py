@@ -13,7 +13,12 @@ def process_message(message):
         'client_id': message.attributes['Client_ID'],
         'message': message.data.decode('utf-8'),
         'row': message.attributes['Row_Number'],
-        'job_id': message.attributes['Job_ID']
+        'job_id': message.attributes['Job_ID'],
+        'user_project_id': message.attributes['User_Project_ID'],
+        'user_dataset_id': message.attributes['User_Dataset_ID'],
+        'output_table_id': message.attributes['Output_Table_ID'],
+        'model': message.attributes['Model'],
+        'api_key': message.attributes['API-key']
     }
     print("Rate-limiter received message from batch processor.") 
 

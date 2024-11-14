@@ -2,7 +2,7 @@
 from tokenizer import openai_tokenizer
 from RequestLimiter import incr_request
 from UserBucket import update_user_bucket, get_tokens_from_user, shrink_user_bucket
-from CallOpenAI import call_openai
+from CallOpenAI import call_openai, valid_model, format_messages
 from Publisher import send_response
 
 token_limit = 200000 # token/min
@@ -13,15 +13,22 @@ def rate_limit(batch):
     user_id = batch['client_id'] 
     message = batch['message']
     job_id = batch['job_id']
+    user_project_id = batch['user_project_id']
     row = batch['row']
-    model = "gpt-3.5-turbo"
-    api_key = None
+    model = batch['model']
+    user_dataset_id = batch['user_dataset_id']
+    output_table_id = batch['output_table_id']
+    model = batch['model']
+    api_key = batch['api_key']
+    if api_key == "":
+        api_key = None
+
+    if not valid_model(model):
+        print(f"Invalid model {model}, dropping row for {job_id}")
+        return
 
     # Format message for OpenAI
-    messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": message},
-            ]
+    messages = format_messages(message)
     
     # Predict needed tokens
     tokens_needed = openai_tokenizer(messages, model)
@@ -47,10 +54,10 @@ def rate_limit(batch):
             print("OpenAI API call failed, sending back tokens & aborting")
             shrink_user_bucket(user_id,min(tokens_needed*counter,token_limit), actual_tokens, refill_time)
             return
-        print(f"Received Response: {response_content}") # LOGGING
+        print(f"Received Response: {response_content}")
 
         # Response Logic
-        send_response(user_id, job_id, row, response_content)
+        send_response(user_id, job_id, row, response_content, user_project_id, user_dataset_id, output_table_id)
 
         # Shrink user bucket accordingly since job complete
         shrink_user_bucket(user_id,min(tokens_needed*counter,token_limit), actual_tokens,refill_time)
