@@ -24,7 +24,7 @@ def log_message(message, job_id, client_id, row, topic_id):
     publisher.publish(topic_path, message, **attributes)
     print(f"Sent {topic_id} message to job orchestrator.")
 
-def write_response(response, row, job_id, client_id, project_id="elated-scope-437703-h9", dataset_id="test_dataset", table_id="test_table", delay = 0):
+def write_response(response: str, row: int, job_id, client_id, project_id="elated-scope-437703-h9", dataset_id="test_dataset", table_id="test_table", delay = 0):
     time.sleep(delay)
     # Initialize BigQuery client
     client = bigquery.Client(project=project_id)
@@ -60,3 +60,8 @@ def write_response(response, row, job_id, client_id, project_id="elated-scope-43
         print(message)
         log_message(message, job_id, client_id, row, "ErrorLogs") # send message to job orchestrator
         write_response(response, row, job_id, client_id ,delay=wait)
+
+# Testing locally
+# sampleproject-440900.user_dataset.output_response
+if __name__ == "__main__":
+    write_response("This is a dummy response!","1",1,"client_1",project_id="sampleproject-440900", dataset_id="user_dataset", table_id="output_response")
