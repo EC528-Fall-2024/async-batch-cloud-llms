@@ -1,7 +1,0 @@
-gcloud functions deploy rate-limiter \
---gen2 \
---region=us-central1 \
---runtime=python312 \
---source=. \
---entry-point=pubsub_event \
---trigger-topic=InputData
