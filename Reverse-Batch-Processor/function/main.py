@@ -11,6 +11,12 @@ def reverse(cloud_event):
         job_id = cloud_event.data["message"]["attributes"]["Job_ID"]
         client_id = cloud_event.data["message"]["attributes"]["Client_ID"]
         row_number = cloud_event.data["message"]["attributes"]["Row_Number"]
+        
+        # New atributes, still hardcoded
+        project_ID = cloud_event.data["message"]["attributes"]["Project_ID"]
+        dataset_ID = cloud_event.data["message"]["attributes"]["Dataset_ID"]
+        table_ID = cloud_event.data["message"]["attributes"]["Table_ID"]
+        
 
         # Print received message and attributes 
         print(f"Received message: {data}, Job_ID: {job_id}, Client_ID: {client_id}, Row_Number: {row_number}") 
