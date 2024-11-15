@@ -1,6 +1,5 @@
 '''Flask App to run in background in Cloud'''
 from flask import Flask
-import threading
 
 app = Flask(__name__)
 

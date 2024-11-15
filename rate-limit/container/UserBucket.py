@@ -129,7 +129,7 @@ def shrink_user_bucket(user_id, tokens_used, actual_used, refill_time):
         # Return used tokens a minute later
         used = min(actual_used, tokens_used)
         if used > 0:
-            thread = threading.Thread(target=ret_used_tokens, args=(used,refill_time,)).start()
+            threading.Thread(target=ret_used_tokens, args=(used,refill_time,)).start()
     
     # uncontrollable errors
     except redis.exceptions.RedisError as e:

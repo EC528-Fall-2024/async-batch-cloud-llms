@@ -4,6 +4,7 @@ from RequestLimiter import incr_request
 from UserBucket import update_user_bucket, get_tokens_from_user, shrink_user_bucket
 from CallOpenAI import call_openai, valid_model, format_messages
 from Publisher import send_response
+from logger import error_message
 
 token_limit = 200000 # token/min
 refill_time = 60 # min
@@ -22,10 +23,12 @@ def rate_limit(batch):
     model = batch['model']
     api_key = batch['api_key']
     if api_key == "":
-        api_key = None
+        api_key = None # to trigger sample response
 
     if not valid_model(model):
-        print(f"Invalid model {model}, dropping row for {job_id}")
+        errormessage = f"Invalid model {model}. Aborting row {row}"
+        print(errormessage)
+        error_message(errormessage, job_id, user_id, "RowDropped", row)
         return
 
     # Format message for OpenAI
@@ -37,7 +40,9 @@ def rate_limit(batch):
 
     # Try to initialize/update that user's subbucket
     if not update_user_bucket(user_id, tokens_needed):
-        print("Failed to initialize sub-bucket. Aborting batch.")
+        errormessage = f"Failed to update user bucket. Aborting row {row}"
+        print(errormessage)
+        error_message(errormessage, job_id, user_id, "RowDropped", row)
         return
 
     # Try to call LLM API
@@ -46,13 +51,17 @@ def rate_limit(batch):
 
         # Get request approved by request limiter before retry
         if not incr_request():
-            print("Error with request limiter, aborting batch")
+            errormessage = f"Error with request limiter. Aborting row {row}"
+            print(errormessage)
+            error_message(errormessage, job_id, user_id, "RowDropped", row)
             return
         
         # Call LLM API
         response_content, actual_tokens, counter = call_openai(messages, user_id, tokens_needed, token_limit, api_key, model)
         if response_content is None:
-            print("OpenAI API call failed, sending back tokens & aborting")
+            errormessage = f"OpenAI API call failed, sending back tokens & aborting row {row}"
+            print(errormessage)
+            error_message(errormessage, job_id, user_id, "RowDropped", row)
             shrink_user_bucket(user_id,min(tokens_needed*counter,token_limit), actual_tokens, refill_time)
             return
         print(f"Received Response: {response_content}")
@@ -63,4 +72,6 @@ def rate_limit(batch):
         # Shrink user bucket accordingly since job complete
         shrink_user_bucket(user_id,min(tokens_needed*counter,token_limit), actual_tokens,refill_time)
     else:
-        print("Issue with accessing tokens from user bucket. Aborting batch")
+        errormessage = f"Issue with accessing tokens from user bucket. Aborting row {row}"
+        print(errormessage)
+        error_message(errormessage, job_id, user_id, "RowDropped", row)
