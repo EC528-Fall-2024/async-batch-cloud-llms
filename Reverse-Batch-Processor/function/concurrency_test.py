@@ -1,6 +1,6 @@
 from google.cloud import pubsub_v1
 
-def pubSubSender(row, message, Job_ID, Client_ID):
+def pubSubSender(row, message, Job_ID, Client_ID, project_ID, dataset_ID, table_ID):
     project_id = "elated-scope-437703-h9"
     topic_id = "OutputData"
 
@@ -13,7 +13,10 @@ def pubSubSender(row, message, Job_ID, Client_ID):
     attributes = {
         "Job_ID": str(Job_ID),
         "Client_ID": str(Client_ID),
-        "Row_Number": str(row)
+        "Row_Number": str(row),
+        'User_Project_ID': str(project_ID),
+        'User_Dataset_ID': str(dataset_ID),
+        'Output_Table_ID': str(table_ID)
     }
 
     # Pass the attributes to the publish method
@@ -23,8 +26,8 @@ def pubSubSender(row, message, Job_ID, Client_ID):
     print(future.result())
     print("Message published to Pub/Sub")
     print("The Topic is: " + topic_id)
-    # print("The Data is: " + f"{message}")
+    print("The Data is: " + f"{message}")
 
 for i in range(1, 14): 
     # Read the database
-    pubSubSender(i,"null","1", "user1")
+    pubSubSender(i,f"sending in random message of {i**3}","1", "user1",'sampleproject-440900','user_dataset','output_2')
