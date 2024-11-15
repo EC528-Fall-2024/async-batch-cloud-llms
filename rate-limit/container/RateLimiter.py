@@ -13,6 +13,7 @@ def rate_limit(batch):
     user_id = batch['client_id'] 
     message = batch['message']
     job_id = batch['job_id']
+    job_length = int(batch['job_length'])
     user_project_id = batch['user_project_id']
     row = batch['row']
     model = batch['model']
@@ -57,7 +58,7 @@ def rate_limit(batch):
         print(f"Received Response: {response_content}")
 
         # Response Logic
-        send_response(user_id, job_id, row, response_content, user_project_id, user_dataset_id, output_table_id)
+        send_response(user_id, job_id, job_length, row, response_content, user_project_id, user_dataset_id, output_table_id)
 
         # Shrink user bucket accordingly since job complete
         shrink_user_bucket(user_id,min(tokens_needed*counter,token_limit), actual_tokens,refill_time)

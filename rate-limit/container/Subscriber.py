@@ -16,6 +16,7 @@ def process_message(message):
         'job_id': message.attributes['Job_ID'],
         'user_project_id': message.attributes['User_Project_ID'],
         'user_dataset_id': message.attributes['User_Dataset_ID'],
+        'job_length': message.attributes['Job_Length'],
         'output_table_id': message.attributes['Output_Table_ID'],
         'model': message.attributes['Model'],
         'api_key': message.attributes['API-key']

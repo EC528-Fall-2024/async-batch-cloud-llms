@@ -26,3 +26,19 @@ def incr_rows(job_id):
     except Exception as e:
         print(f"Unexpected error incrementing processed rows for job id {job_id}: {e}")
         return None 
+    
+# Delete redis data on job_id once all rows processed
+def del_rows(job_id):
+    try:
+        with redis_client.lock(f"{job_id}_lock"):
+            key = str(job_id)
+            redis_client.delete(key)
+            return True
+
+    # uncontrollable errors
+    except redis.exceptions.RedisError as e:
+        print(f"Error accessing Redis for processed rows for job id {job_id}: {e}")
+        return False
+    except Exception as e:
+        print(f"Unexpected error incrementing processed rows for job id {job_id}: {e}")
+        return False 
