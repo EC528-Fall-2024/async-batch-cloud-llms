@@ -89,4 +89,4 @@ def insert_rows(response, row, project_id="your-project-id", dataset_id="your-da
         print("Rows have been inserted.")
 
 if __name__ == "__main__":
-    insert_rows(response="hello",row=1, project_id="sampleproject-440900",dataset_id='user_dataset',table_id='output_2')
+    insert_rows(response="testing_dataset",row=1, project_id="sampleproject-440900",dataset_id='user_dataset',table_id='output_2')
