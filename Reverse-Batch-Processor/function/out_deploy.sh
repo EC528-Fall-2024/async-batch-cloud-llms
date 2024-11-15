@@ -10,4 +10,5 @@ gcloud functions deploy reverse-batch-processor \
 --max-instances=10 \
 --source=. \
 --entry-point=reverse \
---trigger-topic=OutputData 
+--trigger-topic=OutputData \
+--service-account=batch-processor@elated-scope-437703-h9.iam.gserviceaccount.com
