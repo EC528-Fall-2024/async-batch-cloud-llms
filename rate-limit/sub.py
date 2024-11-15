@@ -3,7 +3,7 @@ import time
 
 
 # Pulls one message from a Pub/Sub subscription, processes it, and acknowledges it.
-def dequeue_one_message(project_id, subscription_id, timeout=2):
+def dequeue_one_message(project_id, subscription_id, timeout=3):
     
     # Initialize a subscriber client
     subscriber = pubsub_v1.SubscriberClient()

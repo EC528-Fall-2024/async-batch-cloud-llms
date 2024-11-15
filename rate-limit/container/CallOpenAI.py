@@ -4,6 +4,22 @@ import time
 from UserBucket import update_user_bucket
 from RequestLimiter import incr_request
 
+# Ensure model is supported by this solution
+def valid_model(model):
+    if model == "gpt-3.5-turbo":
+        return True
+    else:
+        return False
+    
+# Format messages for OpenAI
+def format_messages(message):
+    messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": message},
+            ]
+    return messages
+
+# Attempt to call OpenAI API
 def call_openai(messages, user_id, tokens_needed, token_limit, api_key, model, counter = 1, delay = 5):
     if api_key is not None:
         try:
