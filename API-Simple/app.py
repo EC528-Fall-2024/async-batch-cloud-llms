@@ -15,6 +15,10 @@ CORS(app)
 
 app.config['DEBUG'] = os.environ.get('FLASK_DEBUG')
 
+# Example user database
+USERS = {"test_user": "test_password"}
+API_KEYS = {}  # Store API keys for simplicity; consider using a database in production
+
 
 # Set up pub/sub publisher for IncomingJob topic
 project_id = "elated-scope-437703-h9"
@@ -25,6 +29,30 @@ publisher = pubsub_v1.PublisherClient()
 # in the form `projects/{project_id}/topics/{topic_id}`
 topic_path = publisher.topic_path(project_id, topic_id)
 
+# Helper function for API key validation
+def require_api_key(func):
+    def wrapper(*args, **kwargs):
+        api_key = request.headers.get("x-api-key")
+        if api_key not in API_KEYS.values():
+            return jsonify({"error": "Unauthorized. Invalid API key."}), 401
+        return func(*args, **kwargs)
+    wrapper.__name__ = func.__name__  # Ensure Flask can identify the route's name
+    return wrapper
+
+@app.route('/get_api_key', methods=['POST'])
+def get_api_key():
+    auth_data = request.json
+    username = auth_data.get("username")
+    password = auth_data.get("password")
+
+    # Authenticate user
+    if USERS.get(username) == password:
+        # Generate and store an API key
+        api_key = str(uuid.uuid4())
+        API_KEYS[username] = api_key
+        return jsonify({"api_key": api_key}), 200
+    else:
+        return jsonify({"error": "Invalid username or password"}), 401
 
 # Function for submitting job
 def publish_job(job_data, job_id): 
@@ -80,6 +108,7 @@ def check_valid_job(job_data):
 
 # Route for submitting a new job
 @app.route('/submit_job', methods=['POST'])
+#@require_api_key
 def submit_job():
     job_data = request.json
     if (check_valid_job(job_data)):
@@ -96,6 +125,7 @@ def submit_job():
 
 # Route for checking 
 @app.route('/job_status/<job_id>', methods=['GET'])
+#@require_api_key
 def job_status(job_id):
     job = None
     if (job is None):
