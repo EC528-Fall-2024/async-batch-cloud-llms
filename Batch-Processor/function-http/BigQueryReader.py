@@ -2,10 +2,8 @@ from google.cloud import bigquery
 from ErrorLogger import error_message
 
 # Outputs: prompt_and_text
-def read_from_database(row, Job_ID, Client_ID, project_id = "sampleproject-440900", dataset_id = "user_dataset", table_id = "input_table"):
-# def read_from_database(row, project_id = "sampleproject-440900", dataset_id = "user_dataset", table_id = "input_table"):
-#def read_from_database(row, project_id = "elated-scope-437703-h9", dataset_id = "test_dataset", table_id = "test_table"):
-
+def read_from_database(row, Job_ID, Client_ID, project_id, dataset_id, table_id):
+    
     # Initialize BigQuery client
     client = bigquery.Client(project=project_id)
     full_table_id = f"{project_id}.{dataset_id}.{table_id}"
@@ -28,7 +26,10 @@ def read_from_database(row, Job_ID, Client_ID, project_id = "sampleproject-44090
 
         # Get the single row result
         for row in results:
-            print(f"Prompt and Text for row {row} read successfully.")
+            print("///////")
+            print(f"{row}")
+            print("///////")
+            # print(f"Prompt and Text for row {row} read successfully.")
             return row.prompt_and_text
         
         return None  # Return None if no row is found
