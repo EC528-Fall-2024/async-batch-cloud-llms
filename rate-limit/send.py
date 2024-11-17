@@ -18,10 +18,10 @@ def pubSubSender(message):
         "Job_ID": "test",
         "Client_ID": "user1",
         "Row_Number": "1",
-        "User_Project_ID": "test",
-        "User_Dataset_ID": "test",
+        "User_Project_ID": "sampleproject-440900",
+        "User_Dataset_ID": "user_dataset",
         "Job_Length": "1",
-        'Output_Table_ID': "test",
+        'Output_Table_ID': "output_2",
         'Model': "gpt-3.5-turbo",
         'API-key': ""
     }
