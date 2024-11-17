@@ -10,3 +10,14 @@ pip install -r requirements.txt
 
 // Deploying the Container
 gcloud run deploy --source .
+
+// VM notes
+gcloud compute ssh --zone "us-central1-a" "performance-api" --project "elated-scope-437703-h9"
+
+
+// Screen
+screen -S my-session
+screen -r my-session
+Ctrl + A, then D
+screen -X -S session-name kill
+screen -ls

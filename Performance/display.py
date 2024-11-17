@@ -3,7 +3,12 @@ import time
 
 # Define the URL for the endpoints
 # base_url = "http://localhost:8084"
+
+# Container URL
 base_url = "https://performance-api-1069651367433.us-central1.run.app"
+
+# VM URL
+base_url = "http://34.27.114.71:8080"
 
 # Function to get batch processor count
 def get_batch_processor_load():

@@ -1,11 +1,14 @@
 import requests
 import time
 
+# Local URL
+# base_url = "http://127.0.0.1:8084"
 
-base_url = "http://127.0.0.1:8084"
+# VM URL
+base_url = "http://34.27.114.71:8080"
+
+# Container URL
 # base_url = "something deployed"
-
-
 
 
 ###################
@@ -159,6 +162,11 @@ def decrementReverseBatchProcessor():
     return "Error"
     
     
+    
+# INSTRUCTIONS
+# Below is a Mock of of the microservices
+# As you can see the microervices will first reset the system 
+# Then they will start incrementing and decremeting.
 if (__name__ == "__main__"):
     
     time.sleep(2)
