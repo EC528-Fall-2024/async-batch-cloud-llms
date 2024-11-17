@@ -9,10 +9,11 @@ gcloud run deploy rate-limiter \
   --platform managed \
   --region us-central1 \
   --allow-unauthenticated \
-  --min-instances=1 \
-  --max-instances=1 \
-  --timeout=3600 \
-  --memory=512Mi \
-  --cpu=1 \
-  --concurrency=1000 
+  --min-instances 1 \
+  --max-instances 1 \
+  --timeout 3600 \
+  --memory 512Mi \
+  --cpu 1 \
+  --concurrency 1000 \
+  --network default
   
