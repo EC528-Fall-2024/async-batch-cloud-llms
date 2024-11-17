@@ -20,4 +20,4 @@ COPY . .
 EXPOSE 6379
 
 # Start Redis in the background and then run your Python script
-CMD redis-server --daemonize yes && python rate-limiter.py
+CMD redis-server --daemonize yes && python main.py

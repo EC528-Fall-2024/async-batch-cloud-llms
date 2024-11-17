@@ -1,6 +1,7 @@
 import base64
 import functions_framework
 from BigQueryWriter import write_response
+from out_BigQueryWriter import insert_rows
 
 # Triggered from a message on a Cloud Pub/Sub topic.
 @functions_framework.cloud_event
@@ -12,11 +13,20 @@ def reverse(cloud_event):
         client_id = cloud_event.data["message"]["attributes"]["Client_ID"]
         row_number = cloud_event.data["message"]["attributes"]["Row_Number"]
 
+        # not doing anything w this until out of project bigquery writes working
+        project_ID = cloud_event.data["message"]["attributes"]["User_Project_ID"]
+        dataset_ID = cloud_event.data["message"]["attributes"]["User_Dataset_ID"]
+        table_ID = cloud_event.data["message"]["attributes"]["Output_Table_ID"]
+        
+
         # Print received message and attributes 
         print(f"Received message: {data}, Job_ID: {job_id}, Client_ID: {client_id}, Row_Number: {row_number}") 
 
         # Write the message to a database 
-        write_response(data, row_number, job_id, client_id)
+        # write_response(data, row_number, job_id, client_id)
+        
+        # This one I think is better?
+        insert_rows(response=data,row=row_number, project_id=project_ID,dataset_id=dataset_ID,table_id=table_ID)
     
     except Exception as e:
         print(f"Error processing message in reverse batch processor: {e}") 

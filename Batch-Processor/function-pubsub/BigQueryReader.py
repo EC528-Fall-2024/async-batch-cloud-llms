@@ -77,7 +77,10 @@ def read_from_database(row, project_id = "elated-scope-437703-h9", dataset_id = 
     except Exception as e:
         (f"Error querying BigQuery: {e}")
         return None
-    
+
+# sampleproject-440900.user_dataset.input_table
+# if __name__ == "__main__":
+#     read_from_database(row=1, project_id="sampleproject-440900",dataset_id='user_dataset',table_id='input_table')
 
 
 # Testing for out of Project Tables

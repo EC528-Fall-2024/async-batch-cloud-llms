@@ -3,7 +3,7 @@ from ErrorLogger import error_message
 import time
 import random
 
-def write_response(response, row, job_id, client_id, project_id="elated-scope-437703-h9", dataset_id="test_dataset", table_id="test_table", delay = 0):
+def write_response(response, row=1, job_id=1, client_id=1, project_id="elated-scope-437703-h9", dataset_id="test_dataset", table_id="test_table", delay = 0):
     time.sleep(delay)
     # Initialize BigQuery client
     client = bigquery.Client(project=project_id)
@@ -46,4 +46,4 @@ def write_response(response, row, job_id, client_id, project_id="elated-scope-43
             print(message)
             
             # send message to job orchestrator that this row was dropped
-            error_message(message, job_id, client_id, "RowDropped", row, "ErrorLogs") 
+            error_message(message, job_id, client_id, "RowDropped", row, "ErrorLogs")

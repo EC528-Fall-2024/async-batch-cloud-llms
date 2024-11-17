@@ -15,9 +15,15 @@ def pubSubSender(message):
     
     # Define attributes as a dictionary
     attributes = {
-        "Job_ID": "1",
+        "Job_ID": "test",
         "Client_ID": "user1",
-        "Row_Number": "1"
+        "Row_Number": "1",
+        "User_Project_ID": "test",
+        "User_Dataset_ID": "test",
+        "Job_Length": "1",
+        'Output_Table_ID': "test",
+        'Model': "gpt-3.5-turbo",
+        'API-key': ""
     }
 
     # Pass the attributes to the publish method
@@ -25,8 +31,6 @@ def pubSubSender(message):
     
     print(future.result())
     print("done")
-
-    
 
 # Example usage
 if __name__ == "__main__":

@@ -45,3 +45,6 @@ def pubSubSender(row, message, Job_ID, Client_ID):
     print(future.result())
     print("Message published to Pub/Sub")
     
+
+if __name__ == "__main__":
+    handleGo('job_1', 'client_1', 13)

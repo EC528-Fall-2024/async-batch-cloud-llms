@@ -11,6 +11,29 @@ headers = {
     "Content-Type": "application/json",
 }
 
+def retrieve_api_key():
+    """
+    Retrieve API key from the Flask API using username and password.
+    """
+    username = input("Enter your username: ")
+    password = input("Enter your password: ")
+
+    auth_data = {"username": username, "password": password}
+    try:
+        response = requests.post(f"{API_BASE_URL}/get_api_key", json=auth_data, headers=headers, timeout=10)
+        if response.status_code == 200:
+            api_key = response.json().get("api_key")
+            logging.info(f"API key retrieved successfully: {api_key}")
+            # Update headers to include the API key for future requests
+            headers["x-api-key"] = api_key
+            return api_key
+        else:
+            logging.error(f"Error retrieving API key: {response.status_code} - {response.text}")
+            return None
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Network error while retrieving API key: {e}")
+        return None
+
 def get_job_data_from_user():
     # Collect job information from the user
     client_id = input("Enter client ID: ")
@@ -70,6 +93,12 @@ def check_job_status(job_id):
     return None
 
 def main():
+    api_key = retrieve_api_key()
+
+    if not api_key:
+        logging.error("Failed to retrieve API key. Exiting...")
+        return
+    
     job_id = submit_job()
  
     if job_id:

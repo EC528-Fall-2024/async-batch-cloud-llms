@@ -1,5 +1,5 @@
 import functions_framework
-from handleGo import handleGo
+from goHandle import goHandle
 from flask import jsonify
 
 # Triggered by an HTTP request
@@ -11,10 +11,14 @@ def go(request):
         data = request.get_json()  # Parse JSON data from request body
         print(data['Job_ID'])
         print(data['Client_ID'])
-        # print(data['Database_Length'])
-
-        # Call the handleGo function
-        jobStatus = handleGo(data['Job_ID'], data['Client_ID'], 13)
+        print(data['User_Project_ID'])
+        print(data['User_Dataset_ID'])
+        print(data['Input_Table_ID'])
+        print(data['Output_Table_ID'])
+        print(data['Model'])
+        print(data['API_key'])
+            
+        jobStatus = goHandle(data['Job_ID'], data['Client_ID'], data['User_Project_ID'],data['User_Dataset_ID'], data['Input_Table_ID'], data['Output_Table_ID'], data['Model'], data['API_key'], )
 
         # Return a success response
         return jsonify({

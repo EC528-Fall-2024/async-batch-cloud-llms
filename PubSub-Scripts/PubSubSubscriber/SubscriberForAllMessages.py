@@ -3,8 +3,8 @@ from google.cloud import pubsub_v1
 
 # TODO(developer)
 project_id = "elated-scope-437703-h9"
-# subscription_id = "InputData-sub"
-subscription_id = "ProgressLogs-sub"
+subscription_id = "InputData-sub"
+# subscription_id = "ProgressLogs-sub"
 
 timeout = 200.0
 

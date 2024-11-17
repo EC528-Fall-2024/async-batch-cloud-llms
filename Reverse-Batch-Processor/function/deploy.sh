@@ -10,4 +10,4 @@ gcloud functions deploy reverse-batch-processor \
 --max-instances=10 \
 --source=. \
 --entry-point=reverse \
---trigger-topic=OutputData
+--trigger-topic=OutputData 

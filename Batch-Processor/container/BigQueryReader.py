@@ -23,7 +23,7 @@ from google.cloud import bigquery
 
 
 # Outputs: prompt_and_text
-#def read_from_database(row, project_id = "elated-scope-437703-h9", dataset_id = "test_dataset", table_id = "test_table"):
+# def read_from_database(row, project_id = "elated-scope-437703-h9", dataset_id = "test_dataset", table_id = "test_table"):
 def read_from_database(row, project_id = "sampleproject-440900", dataset_id = "user_dataset", table_id = "input_table"):
 #def read_from_database(row, project_id = "elated-scope-437703-h9", dataset_id = "test_dataset", table_id = "test_table"):
 
@@ -41,6 +41,7 @@ def read_from_database(row, project_id = "sampleproject-440900", dataset_id = "u
         WHERE row = {row}
         LIMIT 1
     """
+    print(f"Value of query is {query}")
 
     # Set up query parameters
     job_config = bigquery.QueryJobConfig(
@@ -64,3 +65,5 @@ def read_from_database(row, project_id = "sampleproject-440900", dataset_id = "u
         print(f"Error querying BigQuery: {e}")
         return None
     
+if __name__ == "__main__":
+    read_from_database(row=1)
