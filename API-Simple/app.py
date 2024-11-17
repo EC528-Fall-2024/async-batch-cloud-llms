@@ -8,7 +8,7 @@ from google.cloud import pubsub_v1
 from flask_cors import CORS
 
 # Batch Processor URL
-BATCH_PROCESSOR_URL = "https://0e3b-128-197-28-149.ngrok-free.app"
+BATCH_PROCESSOR_URL = "http://104.154.35.234:8080"
 
 app = Flask(__name__)
 CORS(app)

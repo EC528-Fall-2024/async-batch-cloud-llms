@@ -1,37 +1,54 @@
-from sqlalchemy import text
-import json
 import os
+import json
 from google.cloud.sql.connector import Connector, IPTypes
 import sqlalchemy
+from flask import Flask
+from google.cloud import pubsub_v1
+import threading
 
+app = Flask(__name__)
 
-# initialize Connector object
-connector = Connector()
+@app.route('/')
+def home():
+    main()
+    return "Job processing complete", 200
 
+# Environment variables
+db_user = os.environ["DB_USER"]
+db_pass = os.environ["DB_PASS"]
+db_name = os.environ["DB_NAME"]
+db_instance_connection_name = os.environ["INSTANCE_CONNECTION_NAME"]
+project_id = os.environ["PROJECT_ID"]
 
-# function to return the database connection object
-def getconn():
-    conn = connector.connect(
-        "elated-scope-437703-h9:us-east5:job-orchestration-database",
-        "pg8000",
-        user="orchestrator",
-        password="m~o'I39?A@8cu?;P",
-        db="job-orchestration-database"
-    )
-    return conn
+# Initialize Connector object
+connector = None
+pool = None
 
+# Pubsub topic IDs
+progress_id = "ProgressLogs-sub"
+error_id = "ErrorLogs-sub"
+job_topic_id = "IncomingJob"
 
-# create connection pool with 'creator' argument to our connection object function
-pool = sqlalchemy.create_engine(
-    "postgresql+pg8000://",
-    creator=getconn,
-)
+def init_pool(connector):
+    def getconn():
+        connection = connector.connect(
+            f"{db_instance_connection_name}",
+            "pg8000",
+            user=db_user,
+            password=db_pass,
+            db=db_name,
+            ip_type=IPTypes.PUBLIC,  #IPTypes.PRIVATE for Private IP
+        )
+        return connection
+    # create connection pool
+    engine = sqlalchemy.create_engine("postgresql+pg8000://", creator=getconn)
+    return engine
 
 
 # Function for creating the jobs table
-def create_table():
+def create_table(pool):
     with pool.connect() as conn:
-        conn.execute(text("""
+        conn.execute(sqlalchemy.text("""
             CREATE TABLE IF NOT EXISTS jobs (
                 job_id VARCHAR(255) PRIMARY KEY,
                 client_id VARCHAR(255),
@@ -41,9 +58,9 @@ def create_table():
                 rows_processed INTEGER NOT NULL DEFAULT 0,
                 row_count INTEGER NOT NULL DEFAULT 0,
                 table_key JSON,
-                table_id VARCHAR(255),
+                input_table_id VARCHAR(255),
                 project_id VARCHAR(255),
-                table_id VARCHAR(255),
+                output_table_id VARCHAR(255),
                 llm_model VARCHAR(255),
                 error_list TEXT[],
                 request_column INTEGER NOT NULL DEFAULT 0,
@@ -58,16 +75,17 @@ def create_table():
 
 
 # Function for writing new job to job-data database
-def insert_job(job_data):
+def insert_job(pool, job_data):
     with pool.connect() as conn:
-        conn.execute(text("""
+        conn.execute(sqlalchemy.text("""
             INSERT INTO jobs (
                 job_id,
                 client_id,
                 table_key,
                 project_id,
                 dataset_id,
-                table_id,
+                input_table_id,
+                output_table_id,
                 row_count,
                 request_column,
                 response_column,
@@ -107,7 +125,7 @@ def insert_job(job_data):
 
 
 # Function for updating job with specified job_id
-def update_job(job_id, **kwargs):
+def update_job(pool, job_id, **kwargs):
     updates = []
     parameters = {"job_id": job_id}
     for key, value in kwargs.items():
@@ -116,7 +134,7 @@ def update_job(job_id, **kwargs):
             parameters[key] = value
     with pool.connect() as conn:
         if updates:  # Proceed only if there are updates to be made
-            conn.execute(text(f"""
+            conn.execute(sqlalchemy.text(f"""
                 UPDATE jobs
                 SET {', '.join(updates)}, updated_at = CURRENT_TIMESTAMP
                 WHERE job_id = :job_id
@@ -125,9 +143,9 @@ def update_job(job_id, **kwargs):
 
 
 # Function for reading all job data
-def read_job(job_id):
+def read_job(pool, job_id):
     with pool.connect() as conn:
-        result = conn.execute(text("""
+        result = conn.execute(sqlalchemy.text("""
             SELECT *
             FROM jobs
             WHERE job_id = :job_id
@@ -138,8 +156,12 @@ def read_job(job_id):
 # Main function
 def main():
     try:
+        global connector, pool
+        if not pool:
+            connector = Connector()
+            pool = init_pool(connector)
         # Connect to the database and create the table
-        create_table()
+        create_table(pool)
         print("Table created successfully.")
 
         # Create fake job data
@@ -159,7 +181,7 @@ def main():
         }
 
         # Insert the fake job data
-        insert_job(fake_job_data)
+        insert_job(pool, fake_job_data)
         print(f"Job inserted successfully with ID: {fake_job_data['job_id']}")
 
         # Read the inserted job data
@@ -175,5 +197,59 @@ def main():
         print(f"An error occurred: {e}")
 
 
+def error(message):
+    print(f"Received error message: {message}")
+    message.ack()
+
+
+def error_subscribe():
+    subscriber = pubsub_v1.SubscriberClient()
+    error_path = subscriber.subscription_path(project_id, error_id)
+    streaming_pull_future = subscriber.subscribe(f"{error_path}", callback=error)
+    print(f"Listening for messages on {error_path}..\n")
+    with subscriber:
+        try:
+            streaming_pull_future.result()
+        except:
+            streaming_pull_future.cancel() 
+
+
+def progress(message):
+    print(f"Received progress message: {message}")
+    message.ack()
+
+
+def progress_subscribe():
+    subscriber = pubsub_v1.SubscriberClient()
+    progress_path = subscriber.subscription_path(project_id, progress_id)
+    streaming_pull_future = subscriber.subscribe(f"{progress_path}", callback=progress)
+    print(f"Listening for messages on {progress_path}..\n")
+    with subscriber:
+        try:
+            streaming_pull_future.result()
+        except:
+            streaming_pull_future.cancel() 
+
+
+def job():
+    pass
+
+
+def job_subscribe():
+    subscriber = pubsub_v1.SubscriberClient()
+    job_path = subscriber.subscription_path(project_id, job_topic_id)
+    streaming_pull_future = subscriber.subscribe(f"{job_path}", callback=job)
+    print(f"Listening for messages on {job_path}..\n")
+    with subscriber:
+        try:
+            streaming_pull_future.result()
+        except:
+            streaming_pull_future.cancel() 
+
+
 if __name__ == "__main__":
+    threading.Thread(target=progress_subscribe).start()
+    threading.Thread(target=error_subscribe).start()
+    threading.Thread(target=job_subscribe).start()
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
     main()

@@ -15,7 +15,7 @@ def submit_job():
         "dataset_id": "example_dataset_id",
         "table_id": "example_table_id",
         "table_key": {},
-        "row_count": 100,
+        "row_count": 13,
         "request_column": 0,
         "response_column": 1,
         "llm_model": "gpt-3.5",
@@ -40,14 +40,14 @@ def main():
         print(f"Job submitted successfully. Job ID: {job_id}")
       
         # Poll for job status
-        while True:
-            status = check_job_status(job_id)
-            if status:
-                print(f"Job status: {status['status']}")
-                if status['status'] == "completed":
-                    print("Job completed successfully!")
-                    break
-            time.sleep(5)  # Wait for 5 seconds before checking again
+        #while True:
+        #    status = check_job_status(job_id)
+        #   if status:
+        #        print(f"Job status: {status['status']}")
+        #       if status['status'] == "completed":
+        #            print("Job completed successfully!")
+        #            break
+        #    time.sleep(5)  # Wait for 5 seconds before checking again
 
 
 if __name__ == "__main__":
