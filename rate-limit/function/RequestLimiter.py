@@ -5,7 +5,7 @@ from RedisClient import redis_client, REQUEST_KEY
 
 # Request limiting variables
 rpm = 500 # 500 request/min
-chunks = 30 # split request limit across minute via chunks
+chunks = 60 # split request limit across minute via chunks
 max_requests = rpm/chunks # n requests
 request_timer = 60/chunks # t seconds
 

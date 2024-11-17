@@ -33,7 +33,7 @@ def send_response(client_id, job_id, job_length, row, response, user_project_id,
         print(f"Error updating processed rows for job {job_id}")
     else:
         message = f"{processed_rows} rows processed out of {job_length} rows for job {job_id}"
-        if processed_rows == job_length:
+        if processed_rows >= job_length:
             if del_rows(job_id):
                 print(f"Job {job_id} data deleted since all rows processed")
             else:
