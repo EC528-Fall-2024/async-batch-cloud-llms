@@ -5,7 +5,7 @@ import time
 # base_url = "http://localhost:8084"
 
 # Container URL
-base_url = "https://performance-api-1069651367433.us-central1.run.app"
+# base_url = "https://performance-api-1069651367433.us-central1.run.app"
 
 # VM URL
 base_url = "http://34.27.114.71:8080"
