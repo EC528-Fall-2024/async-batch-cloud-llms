@@ -23,9 +23,9 @@ payload = json.dumps({
   "User_Project_ID": "sampleproject-440900",
   "User_Dataset_ID": "user_dataset",
   "Input_Table_ID": "input_table",
-  "Output_Table_ID": "output2",
-  "Model": "model_v1",
-  "API_key": "modelKey"
+  "Output_Table_ID": "output_2",
+  "Model": "gpt-3.5-turbo",
+  "API_key": ""
 })
 headers = {
   'Content-Type': 'application/json'

@@ -18,7 +18,7 @@ def process_message(cloud_event):
             'job_length': cloud_event.data["message"]["attributes"]["Job_Length"],
             'output_table_id': cloud_event.data["message"]["attributes"]["Output_Table_ID"],
             'model': cloud_event.data["message"]["attributes"]["Model"],
-            'api_key': cloud_event.data["message"]["attributes"]["API-key"]
+            'api_key': cloud_event.data["message"]["attributes"]["API_key"]
         }
         print(f"Rate-limiter received message for row {batch['row']} for job {batch['job_id']} from batch processor.") 
 

@@ -19,7 +19,7 @@ def process_message(message):
         'job_length': message.attributes['Job_Length'],
         'output_table_id': message.attributes['Output_Table_ID'],
         'model': message.attributes['Model'],
-        'api_key': message.attributes['API-key']
+        'api_key': message.attributes['API_key']
     }
     print("Rate-limiter received message from batch processor.") 
 

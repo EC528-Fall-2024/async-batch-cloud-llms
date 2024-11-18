@@ -23,7 +23,7 @@ def pubSubSender(message):
         "Job_Length": "1",
         'Output_Table_ID': "output_2",
         'Model': "gpt-3.5-turbo",
-        'API-key': ""
+        'API_key': ""
     }
 
     # Pass the attributes to the publish method
