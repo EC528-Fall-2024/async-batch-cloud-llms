@@ -5,3 +5,7 @@ README.md
 *.pyd
 __pycache__
 .pytest_cache
+.env
+service_account.json
+.vscode/
+.idea/

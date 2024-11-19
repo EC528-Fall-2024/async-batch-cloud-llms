@@ -1,2 +1,6 @@
-runtime: python311
-entrypoint: gunicorn -b :$PORT app:app
+runtime: python39
+entrypoint: gunicorn -w 4 -b :$PORT app:app
+
+env_variables:
+  FLASK_DEBUG: true
+  GOOGLE_APPLICATION_CREDENTIALS: /app/service_account.json

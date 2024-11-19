@@ -8,7 +8,7 @@ from google.cloud import pubsub_v1
 from flask_cors import CORS
 
 # Batch Processor URL
-BATCH_PROCESSOR_URL = "http://104.154.35.234:8080"
+BATCH_PROCESSOR_URL = "https://us-central1-elated-scope-437703-h9.cloudfunctions.net/batch-processor-http"
 
 app = Flask(__name__)
 CORS(app)
@@ -168,24 +168,44 @@ def submit_job():
 @app.route('/job_status/<job_id>', methods=['GET'])
 @require_api_key
 def job_status(job_id):
-    job = None
-    if (job is None):
-        return jsonify({"error": "Job not found"}), 404
-    if job:
-        # Simulate job progress
-        elapsed_time = time.time() - job['created_at']
-        if elapsed_time > 30:
-            job['status'] = "completed"
-        elif elapsed_time > 10:
-            job['status'] = "processing"
+    """
+    Get the status of a job, including counts and timing data.
+    """
+    try:
+        # Firestore client
+        db = firestore.Client()
         
-        return jsonify({
+        # Retrieve counts from Firestore
+        count_data = getAllFirestore(db, job_id)
+        
+        # Retrieve timestamps and calculate stats
+        stats = queryStats(db, job_id)
+        
+        # Determine job status based on counts and stats
+        if stats['start_time'] == 0:
+            status = "not started"
+        elif stats['end_time'] == 0:
+            status = "processing"
+        else:
+            status = "completed"
+        
+        # Construct the response
+        response = {
             "job_id": job_id,
-            "status": job['status'],
-            "data": job['data']
-        })
-    else:
-        return jsonify({"error": "Job not found"}), 404
+            "status": status,
+            "counts": count_data.to_dict(),
+            "stats": {
+                "start_time": stats['start_time'],
+                "end_time": stats['end_time'],
+                "total_time": stats['total_time'],
+                "average_time": stats['average_time']
+            }
+        }
+        return jsonify(response), 200
+
+    except Exception as e:
+        return jsonify({"error": "Failed to retrieve job status", "details": str(e)}), 500
+
 
 
 if __name__ == '__main__':
