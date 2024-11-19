@@ -73,6 +73,7 @@ def publish_job(job_data, job_id):
         "project_id": job_data["project_id"],
         "dataset_id": job_data["dataset_id"],
         "table_id": job_data["table_id"],
+        "output_table_id":job_data["output_id"],
         "table_key": job_data["table_key"],
         "row_count": job_data["row_count"],
         "request_column": job_data["request_column"],
@@ -120,14 +121,24 @@ def submit_job():
 
         # Call batch processor
         payload = {
+
             "Job_ID": job_id,
-            "Client_ID": job_data.get("client_id", "unknown"),
-            "User_Project_ID": job_data.get("project_id", "sampleproject-440900"),
-            "User_Dataset_ID": job_data.get("dataset_id", "user_dataset"),
-            "Input_Table_ID": job_data.get("input_table_id", "input_table"),
-            "Output_Table_ID": job_data.get("output_table_id", "output_2"),
-            "Model": job_data.get("llm_model", "gpt-3.5-turbo"),
-            "API_key": job_data.get("api_key", ""),
+            "Client_ID": "rick sorkin",
+            "User_Project_ID": "sampleproject-440900",
+            "User_Dataset_ID": "user_dataset",
+            "Input_Table_ID": "input_table",
+            "Output_Table_ID": "output_2",
+            "Model": "gpt-3.5-turbo",
+            "API_key": ""
+
+            # "Job_ID": job_id,
+            # "Client_ID": job_data.get("client_id", "rick sorkin"),
+            # "User_Project_ID": job_data.get("project_id", "sampleproject-440900"),
+            # "User_Dataset_ID": job_data.get("dataset_id", "user_dataset"),
+            # "Input_Table_ID": job_data.get("table_id", "input_table"),
+            # "Output_Table_ID": job_data.get("output_table_id", "output_2"),
+            # "Model": job_data.get("llm_model", "gpt-3.5-turbo"),
+            # "API_key": job_data.get("api_key", ""),
         }
         headers = {'Content-Type': 'application/json'}
 
