@@ -79,6 +79,23 @@ def setBatchProcessorCount():
     return jsonify({"response": 'The batch_processor_count set' }), 200
 
 
+# Set the "total" of the batch processor (Called from the batch processor)
+@app.route('/setStartTime')
+def setBatchProcessorCount():
+    global batch_processor_count  # Declare as global to modify the outer variable
+
+    data = request.get_json()
+    
+    job_ID = data.get("Job_ID")
+    total_count = data.get("batch_processor_count")
+
+    
+    setCount(db, job_ID, "batch_processor_count",total_count)
+
+    return jsonify({"response": 'The batch_processor_count set' }), 200
+
+
+
 ################
 # Decrementers #
 ################

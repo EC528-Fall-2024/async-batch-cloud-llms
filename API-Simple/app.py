@@ -81,6 +81,7 @@ def publish_job(job_data, job_id):
         "prompt_prefix": job_data["prompt_prefix"],
         "prompt_postfix": job_data["prompt_postfix"]
     }
+    
     # Data must be a bytestring
     json_data = json.dumps(data_str)
     encoded_data = json_data.encode('utf-8')

@@ -11,9 +11,12 @@ def goHandle(Job_ID:str, Client_ID:str, User_Project_ID:str, User_Dataset_ID:str
     Database_Length = 13
     
     # Performance calls
-    resetSystem(Job_ID)
-    setBatchProcessor(Job_ID)
-    setTotalCount(Job_ID)
+    try:
+        resetSystem(Job_ID)
+        setBatchProcessor(Job_ID)
+        setTotalCount(Job_ID)
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
     
     for i in range(1, int(Database_Length) + 1): 
         # Read the database
@@ -23,9 +26,12 @@ def goHandle(Job_ID:str, Client_ID:str, User_Project_ID:str, User_Dataset_ID:str
             pubSubSender(i,rowFromDatabase,Job_ID, Client_ID, User_Project_ID, User_Dataset_ID, Output_Table_ID, Model, API_key, Database_Length)
             print(f"Prompt and Text for row {i} read successfully.")
             
-            # Performance calls
-            decrementBatchProcessor(Job_ID)
-            incrementQueue1(Job_ID)
+            # # Performance calls
+            try:
+                decrementBatchProcessor(Job_ID)
+                incrementQueue1(Job_ID)
+            except Exception as e:
+                print(f"An unexpected error occurred: {e}")
 
             
 
