@@ -8,10 +8,12 @@ import threading
 
 app = Flask(__name__)
 
+
 @app.route('/')
 def home():
     main()
     return "Job processing complete", 200
+
 
 # Environment variables
 db_user = os.environ["DB_USER"]
@@ -27,7 +29,9 @@ pool = None
 # Pubsub topic IDs
 progress_id = "ProgressLogs-sub"
 error_id = "ErrorLogs-sub"
-job_topic_id = "IncomingJob"
+job_topic_id = "IncomingJob-sub"
+start_topic_id = "StartJob"
+
 
 def init_pool(connector):
     def getconn():
@@ -47,6 +51,7 @@ def init_pool(connector):
 
 # Function for creating the jobs table
 def create_table(pool):
+    print("Creating table if does not exist...")
     with pool.connect() as conn:
         conn.execute(sqlalchemy.text("""
             CREATE TABLE IF NOT EXISTS jobs (
@@ -60,14 +65,16 @@ def create_table(pool):
                 table_key JSON,
                 input_table_id VARCHAR(255),
                 project_id VARCHAR(255),
+                dataset_id VARCHAR(255),
                 output_table_id VARCHAR(255),
                 llm_model VARCHAR(255),
-                error_list TEXT[],
+                error_list JSON[],
+                progress JSON[],
                 request_column INTEGER NOT NULL DEFAULT 0,
                 response_column INTEGER NOT NULL DEFAULT 0,
                 prompt_prefix VARCHAR(255),
                 prompt_postfix VARCHAR(255),
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                job_started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """))
@@ -99,7 +106,8 @@ def insert_job(pool, job_data):
                 :table_key,
                 :project_id,
                 :dataset_id,
-                :table_id,
+                :input_table_id,
+                :output_table_id,
                 :row_count,
                 :request_column,
                 :response_column,
@@ -113,7 +121,8 @@ def insert_job(pool, job_data):
             "table_key": job_data["table_key"],
             "project_id": job_data["project_id"],
             "dataset_id": job_data["dataset_id"],
-            "table_id": job_data["table_id"],
+            "input_table_id": job_data["input_table_id"],
+            "output_table_id": job_data["output_table_id"],
             "row_count": job_data["row_count"],
             "request_column": job_data["request_column"],
             "response_column": job_data["response_column"],
@@ -231,8 +240,30 @@ def progress_subscribe():
             streaming_pull_future.cancel() 
 
 
-def job():
-    pass
+def job(message):
+    print("Received incoming job: ")
+    print(message)
+
+    try:
+        # Decode the message data
+        job_data = json.loads(message.data.decode('utf-8'))
+        
+        # Insert the job data into the database
+        insert_job(pool, job_data)
+        
+        print(f"Job inserted successfully with ID: {job_data.get('job_id', 'Unknown')}")
+        
+        # Acknowledge the message
+        message.ack()
+    except json.JSONDecodeError as e:
+        print(f"Error decoding message data: {e}")
+        message.nack()  # Negative acknowledgment
+    except KeyError as e:
+        print(f"Missing required field in job data: {e}")
+        message.nack()
+    except Exception as e:
+        print(f"Error processing job: {e}")
+        message.nack()
 
 
 def job_subscribe():
@@ -244,12 +275,21 @@ def job_subscribe():
         try:
             streaming_pull_future.result()
         except:
-            streaming_pull_future.cancel() 
+            streaming_pull_future.cancel()
 
 
 if __name__ == "__main__":
+    print("Starting orchestrator...")
+    if not pool:
+        connector = Connector()
+        pool = init_pool(connector)
+    # Connect to the database and create the table
+    create_table(pool)
+    print("Table created successfully.")
+    start_job_publisher = pubsub_v1.PublisherClient()
+    start_topic_path = start_job_publisher.topic_path(project_id, start_topic_id)
     threading.Thread(target=progress_subscribe).start()
     threading.Thread(target=error_subscribe).start()
     threading.Thread(target=job_subscribe).start()
+    print("Started subscriber threads")
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
-    main()

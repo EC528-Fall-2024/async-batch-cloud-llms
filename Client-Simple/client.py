@@ -1,7 +1,7 @@
 import requests
 import time
 
-API_BASE_URL = "https://flask-api-1069651367433.us-east4.run.app"
+API_BASE_URL = "https://user-api-1069651367433.us-east4.run.app"
 API_KEY = "secret-api-key"
 
 headers = {
@@ -13,7 +13,8 @@ def submit_job():
         "client_id":  "example_client",
         "project_id": "example_project_id",
         "dataset_id": "example_dataset_id",
-        "table_id": "example_table_id",
+        "input_table_id": "example_input_table_id",
+        "output_table_id": "example_output_table_id",
         "table_key": {},
         "row_count": 13,
         "request_column": 0,
