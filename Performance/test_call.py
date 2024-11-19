@@ -42,7 +42,6 @@ def setTotalCount(Job_ID):
     
     if response.status_code == 200:
         print("Success") # remove for implemetation
-    return "Error"
 
 def setBatchProcessor(Job_ID):
     
@@ -57,7 +56,6 @@ def setBatchProcessor(Job_ID):
     
     if response.status_code == 200:
         print("Success") # remove for implemetation
-    return "Error"
 
 
 
@@ -92,7 +90,6 @@ def decrementBatchProcessor(Job_ID):
     
     if response.status_code == 200:
         print("Success") # remove for implemetation
-    return "Error"
 
 # queue calls
 def incrementQueue1(Job_ID):

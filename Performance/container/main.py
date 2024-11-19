@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from google.cloud import firestore
 import os
 
-from firebase_helper_files import clear_counts, setCount, incrementFirestore, decrementFirestore, getAllFirestore, getMicroserviceCount
+from firebase_helper_files import clear_counts, setCount, incrementFirestore, decrementFirestore, getAllFirestore, getMicroserviceCount, calculateStats, queryStats
 
 app = Flask(__name__)
 
@@ -46,6 +46,32 @@ def resetSystem():
     
     return jsonify({"response": 'All counts have been reset' }), 200
 
+#############
+# Analytics #
+#############
+@app.route('/setStats')
+def setStats():
+
+    data = request.get_json()
+    job_ID = data.get("Job_ID")
+    
+    calculateStats(db, job_ID)
+
+    print("Resetting the system")
+    
+    return jsonify({"stats": 'all stats have been calculated' }), 200
+
+@app.route('/getStats')
+def getStats():
+
+    data = request.get_json()
+    job_ID = data.get("Job_ID")
+    
+    returnData = queryStats(db, job_ID)
+    print(returnData)
+    
+    return jsonify({"returnData": returnData }), 200
+
 
 ###########
 # Setters #
@@ -66,8 +92,6 @@ def setTotalCount():
 # Set the "total" of the batch processor (Called from the batch processor)
 @app.route('/setBatchProcessorCount')
 def setBatchProcessorCount():
-    global batch_processor_count  # Declare as global to modify the outer variable
-
     data = request.get_json()
     
     job_ID = data.get("Job_ID")
@@ -76,24 +100,7 @@ def setBatchProcessorCount():
     
     setCount(db, job_ID, "batch_processor_count",total_count)
 
-    return jsonify({"response": 'The batch_processor_count set' }), 200
-
-
-# Set the "total" of the batch processor (Called from the batch processor)
-@app.route('/setStartTime')
-def setStartTime():
-    global batch_processor_count  # Declare as global to modify the outer variable
-
-    data = request.get_json()
-    
-    job_ID = data.get("Job_ID")
-    total_count = data.get("batch_processor_count")
-
-    
-    setCount(db, job_ID, "batch_processor_count",total_count)
-
-    return jsonify({"response": 'The batch_processor_count set' }), 200
-
+    return jsonify({"response": 'The batch_processor_count set' }), 200 
 
 
 ################
@@ -122,7 +129,6 @@ def incrementService():
     data = request.get_json()
     job_ID = data.get("Job_ID")
     microservice = data.get("Microservice")
-
     
     status = incrementFirestore(db, job_ID, microservice)
     
