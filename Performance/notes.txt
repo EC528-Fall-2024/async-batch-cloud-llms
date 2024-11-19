@@ -16,7 +16,7 @@ gcloud compute ssh --zone "us-central1-a" "performance-api" --project "elated-sc
 
 
 // Screen
-screen -S my-session
+screen -S my-sessi
 screen -r my-session
 Ctrl + A, then D
 screen -X -S session-name kill

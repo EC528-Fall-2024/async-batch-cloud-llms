@@ -1,8 +1,9 @@
 import requests
 import json
 
-# url = "http://127.0.0.1:8080"
-url = "https://us-central1-elated-scope-437703-h9.cloudfunctions.net/batch-processor-http"
+#CHANGE IF WRONT LOL
+url = "http://127.0.0.1:8080"
+# url = "https://us-central1-elated-scope-437703-h9.cloudfunctions.net/batch-processor-http"
 
 # external 
 #   "User_Project_ID": "sampleproject-440900",
@@ -18,7 +19,7 @@ url = "https://us-central1-elated-scope-437703-h9.cloudfunctions.net/batch-proce
 
 
 payload = json.dumps({
-  "Job_ID": "12345",
+  "Job_ID": "1",
   "Client_ID": "rick sorkin",
   "User_Project_ID": "sampleproject-440900",
   "User_Dataset_ID": "user_dataset",

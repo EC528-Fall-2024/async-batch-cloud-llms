@@ -89,11 +89,7 @@ def decrementService():
     job_ID = data.get("Job_ID")
     microservice = data.get("Microservice")
     
-    
     status = decrementFirestore(db, job_ID, microservice)
-    
-    # batch_processor_count = batch_processor_count - 1
-    # print("Decrementing the Batch Processor")
     
     return jsonify({"Status": (microservice + ': ' +  str(status))}), 200
 
@@ -113,9 +109,6 @@ def incrementService():
     
     status = incrementFirestore(db, job_ID, microservice)
     
-    # batch_processor_count = batch_processor_count - 1
-    # print("Decrementing the Batch Processor")
-    
     return jsonify({"Status": (microservice + ': ' +  str(status))}), 200
 
 
@@ -134,7 +127,6 @@ def getBatchProcessorLoad():
     countValue = getMicroserviceCount(db, job_ID, microservice)
 
     return jsonify({(microservice + "_count"): countValue}), 200
-
 
 
 ## Currentlu broken
@@ -160,6 +152,6 @@ def not_found(error):
 
 if __name__ == "__main__":
     # testCalls()
-    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8089)))
 
     # app.run(port= 8084, debug=True)

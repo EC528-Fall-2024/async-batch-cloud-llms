@@ -15,7 +15,16 @@ def clear_counts(db, Job_ID):
         "total_count": 0,
         "batch_processor_count": 0,
         "reverse_batch_processor_count": 0,
-        "rate_limiter_count": 0
+        "rate_limiter_count": 0,
+        "queue_1_count": 0,
+        "queue_2_count": 0
+    })
+    
+    doc_ref = db.collection("Jobs").document("Job "+ str(Job_ID)).collection("Job Data").document("Time Stamps")
+        # doc_ref.set({"first": "Ada", "last": "Lovelace", "born": 1815})
+    doc_ref.set({
+        "start_time": 0,
+        "end_time": 0
     })
     
     
