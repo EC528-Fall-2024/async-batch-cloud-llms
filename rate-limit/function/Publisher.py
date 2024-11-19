@@ -2,6 +2,7 @@
 from google.cloud import pubsub_v1
 from RowProgress import incr_rows, del_rows
 from logger import progress_message
+from performance import decrementRateLimiter, incrementQueue2
 
 # Project information
 project_id = "elated-scope-437703-h9"
@@ -26,6 +27,13 @@ def send_response(client_id, job_id, job_length, row, response, user_project_id,
     # Send out response via pub/sub
     publisher.publish(publisher_path, message, **attributes)
     print("Sent response to reverse batch processor") 
+
+    # Increment Output Queue, Decrement Rate Limiter for Performance Metrics
+    try:
+        incrementQueue2(job_id)
+        decrementRateLimiter(job_id)
+    except Exception as e:
+        print(f"Error updating performance metrics: {e}...")
 
     # Update rows 
     processed_rows = incr_rows(job_id)

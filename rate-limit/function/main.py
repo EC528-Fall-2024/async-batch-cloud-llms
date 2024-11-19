@@ -2,6 +2,7 @@
 import base64
 import functions_framework
 from RateLimiter import rate_limit
+from performance import decrementQueue1, incrementRateLimiter
 
 # Convert input to batch format
 @functions_framework.cloud_event
@@ -21,6 +22,13 @@ def process_message(cloud_event):
             'api_key': cloud_event.data["message"]["attributes"]["API_key"]
         }
         print(f"Rate-limiter received message for row {batch['row']} for job {batch['job_id']} from batch processor.") 
+
+        # Decrement Input Queue, Increment Rate Limiter for Performance Metrics
+        try:
+            decrementQueue1(batch['job_id'])
+            incrementRateLimiter(batch['job_id'])
+        except Exception as e:
+            print(f"Error updating performance metrics: {e}...")
 
         # Process the batch
         rate_limit(batch)
