@@ -81,7 +81,7 @@ def setBatchProcessorCount():
 
 # Set the "total" of the batch processor (Called from the batch processor)
 @app.route('/setStartTime')
-def setBatchProcessorCount():
+def setStartTime():
     global batch_processor_count  # Declare as global to modify the outer variable
 
     data = request.get_json()

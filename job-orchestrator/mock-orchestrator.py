@@ -33,7 +33,6 @@ url = "http://127.0.0.1:8080"
 
 
 timeout = 200.0
-
 subscriber = pubsub_v1.SubscriberClient()
 # The `subscription_path` method creates a fully qualified identifier
 # in the form `projects/{project_id}/subscriptions/{subscription_id}`
