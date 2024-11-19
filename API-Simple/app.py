@@ -8,7 +8,7 @@ from google.cloud import pubsub_v1
 from flask_cors import CORS
 
 # Batch Processor URL
-BATCH_PROCESSOR_URL = "http://104.154.35.234:8080"
+BATCH_PROCESSOR_URL = "https://us-central1-elated-scope-437703-h9.cloudfunctions.net/batch-processor-http"
 
 app = Flask(__name__)
 CORS(app)
@@ -81,6 +81,7 @@ def publish_job(job_data, job_id):
         "prompt_prefix": job_data["prompt_prefix"],
         "prompt_postfix": job_data["prompt_postfix"]
     }
+    
     # Data must be a bytestring
     json_data = json.dumps(data_str)
     encoded_data = json_data.encode('utf-8')
@@ -106,45 +107,105 @@ def check_valid_job(job_data):
         return False
 
 
-# Route for submitting a new job
 @app.route('/submit_job', methods=['POST'])
-#@require_api_key
+@require_api_key
 def submit_job():
+    """
+    Updated implementation to call the batch processor directly
+    """
     job_data = request.json
-    if (check_valid_job(job_data)):
-        # If valid, generate job ID, post job, and notify batch processor
+    if check_valid_job(job_data):
+        # Generate job ID
         job_id = str(uuid.uuid4())
-        publish_job(job_data, job_id)
 
-        # Return job ID to user and indicate that job is submitted
-        return jsonify({"job_id": job_id, "status": "submitted"})
+        # Call batch processor
+        payload = {
+            "Job_ID": job_id,
+            "Client_ID": job_data.get("client_id", "unknown"),
+            "User_Project_ID": job_data.get("project_id", "sampleproject-440900"),
+            "User_Dataset_ID": job_data.get("dataset_id", "user_dataset"),
+            "Input_Table_ID": job_data.get("input_table_id", "input_table"),
+            "Output_Table_ID": job_data.get("output_table_id", "output_2"),
+            "Model": job_data.get("llm_model", "gpt-3.5-turbo"),
+            "API_key": job_data.get("api_key", ""),
+        }
+        headers = {'Content-Type': 'application/json'}
+
+        try:
+            response = requests.post(BATCH_PROCESSOR_URL, headers=headers, json=payload)
+            response_data = response.json()
+        except requests.exceptions.RequestException as e:
+            return jsonify({"error": "Failed to call batch processor", "details": str(e)}), 500
+
+        # Log response and return job submission status
+        print(response_data)
+        return jsonify({"job_id": job_id, "status": "submitted", "batch_processor_response": response_data}), 200
     else:
-        # Job was not valid
         return jsonify({"error": "Job not valid"}), 400
+
+# Original implementation (commented out for future use using pub/sub)
+# @app.route('/submit_job', methods=['POST'])
+# @require_api_key
+# def submit_job():
+#     """
+#     Original implementation that uses Pub/Sub and notifies batch processor
+#     """
+#     job_data = request.json
+#     if (check_valid_job(job_data)):
+#         # If valid, generate job ID, post job, and notify batch processor
+#         job_id = str(uuid.uuid4())
+#         publish_job(job_data, job_id)
+
+#         # Return job ID to user and indicate that job is submitted
+#         return jsonify({"job_id": job_id, "status": "submitted"}), 200
+#     else:
+#         # Job was not valid
+#         return jsonify({"error": "Job not valid"}), 400
+
 
 
 # Route for checking 
 @app.route('/job_status/<job_id>', methods=['GET'])
-#@require_api_key
+@require_api_key
 def job_status(job_id):
-    job = None
-    if (job is None):
-        return jsonify({"error": "Job not found"}), 404
-    if job:
-        # Simulate job progress
-        elapsed_time = time.time() - job['created_at']
-        if elapsed_time > 30:
-            job['status'] = "completed"
-        elif elapsed_time > 10:
-            job['status'] = "processing"
+    """
+    Get the status of a job, including counts and timing data.
+    """
+    try:
+        # Firestore client
+        db = firestore.Client()
         
-        return jsonify({
+        # Retrieve counts from Firestore
+        count_data = getAllFirestore(db, job_id)
+        
+        # Retrieve timestamps and calculate stats
+        stats = queryStats(db, job_id)
+        
+        # Determine job status based on counts and stats
+        if stats['start_time'] == 0:
+            status = "not started"
+        elif stats['end_time'] == 0:
+            status = "processing"
+        else:
+            status = "completed"
+        
+        # Construct the response
+        response = {
             "job_id": job_id,
-            "status": job['status'],
-            "data": job['data']
-        })
-    else:
-        return jsonify({"error": "Job not found"}), 404
+            "status": status,
+            "counts": count_data.to_dict(),
+            "stats": {
+                "start_time": stats['start_time'],
+                "end_time": stats['end_time'],
+                "total_time": stats['total_time'],
+                "average_time": stats['average_time']
+            }
+        }
+        return jsonify(response), 200
+
+    except Exception as e:
+        return jsonify({"error": "Failed to retrieve job status", "details": str(e)}), 500
+
 
 
 if __name__ == '__main__':

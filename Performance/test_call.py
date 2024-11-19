@@ -14,9 +14,9 @@ base_url = "http://34.27.114.71:8080"
 ###################
 # Set/Reset Calls #
 ###################
-def resetSystem():
+def resetSystem(Job_ID):
     
-    json_body = {"Job_ID": 1}
+    json_body = {"Job_ID": Job_ID}
     headers = {"Content-Type": "application/json"}
 
     response = requests.get(
@@ -29,9 +29,9 @@ def resetSystem():
         print("Success") # remove for implemetation
     return "Error"
 
-def setTotalCount():
+def setTotalCount(Job_ID):
     
-    json_body = {"Job_ID": 1, "total_count": 10}
+    json_body = {"Job_ID": Job_ID, "total_count": 13}
     headers = {"Content-Type": "application/json"}
 
     response = requests.get(
@@ -42,11 +42,10 @@ def setTotalCount():
     
     if response.status_code == 200:
         print("Success") # remove for implemetation
-    return "Error"
 
-def setBatchProcessor():
+def setBatchProcessor(Job_ID):
     
-    json_body = {"Job_ID": 1, "batch_processor_count": 10}
+    json_body = {"Job_ID": 1, "batch_processor_count": 13}
     headers = {"Content-Type": "application/json"}
 
     response = requests.get(
@@ -57,16 +56,15 @@ def setBatchProcessor():
     
     if response.status_code == 200:
         print("Success") # remove for implemetation
-    return "Error"
 
 
 
 #########################
 # Batch Processor Calls #
 #########################
-def incrementBatchProcessor():
+def incrementBatchProcessor(Job_ID):
     
-    json_body = {"Job_ID": 1,"Microservice": "batch_processor"}
+    json_body = {"Job_ID": Job_ID,"Microservice": "batch_processor"}
     headers = {"Content-Type": "application/json"}
 
     response = requests.get(
@@ -79,9 +77,57 @@ def incrementBatchProcessor():
         print("Success") # remove for implemetation
     return "Error"
 
-def decrementBatchProcessor():
+def decrementBatchProcessor(Job_ID):
     
-    json_body = {"Job_ID": 1,"Microservice": "batch_processor"}
+    json_body = {"Job_ID": Job_ID,"Microservice": "batch_processor"}
+    headers = {"Content-Type": "application/json"}
+
+    response = requests.get(
+        f"{base_url}/decrementService",
+        json=json_body,  # Add JSON body
+        headers=headers   # Add headers
+    )
+    
+    if response.status_code == 200:
+        print("Success") # remove for implemetation
+
+# queue calls
+def incrementQueue1(Job_ID):
+    
+    json_body = {"Job_ID": Job_ID,"Microservice": "queue_1"}
+    headers = {"Content-Type": "application/json"}
+
+    response = requests.get(
+        f"{base_url}/incrementService",
+        json=json_body,  # Add JSON body
+        headers=headers   # Add headers
+    )
+    
+    if response.status_code == 200:
+        print("Success") # remove for implemetation
+    return "Error"
+
+######################
+# Rate Limiter Calls #
+######################
+def incrementRateLimiter(Job_ID):
+    
+    json_body = {"Job_ID": Job_ID,"Microservice": "rate_limiter"}
+    headers = {"Content-Type": "application/json"}
+
+    response = requests.get(
+        f"{base_url}/incrementService",
+        json=json_body,  # Add JSON body
+        headers=headers   # Add headers
+    )
+    
+    if response.status_code == 200:
+        print("Success") # remove for implemetation
+    return "Error"
+
+def decrementRateLimiter(Job_ID):
+    
+    json_body = {"Job_ID": Job_ID,"Microservice": "rate_limiter"}
     headers = {"Content-Type": "application/json"}
 
     response = requests.get(
@@ -94,12 +140,10 @@ def decrementBatchProcessor():
         print("Success") # remove for implemetation
     return "Error"
 
-######################
-# Rate Limiter Calls #
-######################
-def incrementRateLimiter():
+# queue calls
+def incrementQueue2(Job_ID):
     
-    json_body = {"Job_ID": 1,"Microservice": "rate_limiter"}
+    json_body = {"Job_ID": Job_ID,"Microservice": "queue_2"}
     headers = {"Content-Type": "application/json"}
 
     response = requests.get(
@@ -112,9 +156,9 @@ def incrementRateLimiter():
         print("Success") # remove for implemetation
     return "Error"
 
-def decrementRateLimiter():
+def decrementQueue1(Job_ID):
     
-    json_body = {"Job_ID": 1,"Microservice": "rate_limiter"}
+    json_body = {"Job_ID": Job_ID,"Microservice": "queue_1"}
     headers = {"Content-Type": "application/json"}
 
     response = requests.get(
@@ -130,9 +174,9 @@ def decrementRateLimiter():
 ################################
 # Reverse Batch Processor Call #
 ################################
-def incrementReverseBatchProcessor():
+def incrementReverseBatchProcessor(Job_ID):
     
-    json_body = {"Job_ID": 1,"Microservice": "reverse_batch_processor"}
+    json_body = {"Job_ID": Job_ID,"Microservice": "reverse_batch_processor"}
     headers = {"Content-Type": "application/json"}
 
     response = requests.get(
@@ -146,9 +190,25 @@ def incrementReverseBatchProcessor():
     return "Error"
 
 
-def decrementReverseBatchProcessor():
+def decrementReverseBatchProcessor(Job_ID):
     
-    json_body = {"Job_ID": 1,"Microservice": "reverse_batch_processor"}
+    json_body = {"Job_ID": Job_ID,"Microservice": "reverse_batch_processor"}
+    headers = {"Content-Type": "application/json"}
+
+    response = requests.get(
+        f"{base_url}/decrementService",
+        json=json_body,  # Add JSON body
+        headers=headers   # Add headers
+    )
+    
+    if response.status_code == 200:
+        print("Success") # remove for implemetation
+    return "Error"
+
+
+def decrementQueue2(Job_ID):
+    
+    json_body = {"Job_ID": Job_ID,"Microservice": "queue_2"}
     headers = {"Content-Type": "application/json"}
 
     response = requests.get(
@@ -168,27 +228,51 @@ def decrementReverseBatchProcessor():
 # As you can see the microervices will first reset the system 
 # Then they will start incrementing and decremeting.
 if (__name__ == "__main__"):
+    job_id = 1
+    
+    timeDelay = .3
     
     time.sleep(2)
     
-    resetSystem()
+    resetSystem(job_id)
     time.sleep(2)
 
     #init the system
-    setTotalCount()
-    setBatchProcessor()
+    setTotalCount(job_id)
+    setBatchProcessor(job_id)
     time.sleep(2)
 
-
-    # decrement batch processor, increment rate limiter
-    for i in range(10):
-        decrementBatchProcessor()
-        incrementRateLimiter()
-        time.sleep(1)
+    # Batch Processor
+    # decrement batch processor, increment queue_1
+    for i in range(13):
+        decrementBatchProcessor(job_id)
+        incrementQueue1(job_id)
         
-    # decrement rate limiter, decrement rate limiter
-    for i in range(10):
-        decrementRateLimiter()
-        incrementReverseBatchProcessor()
-        time.sleep(1)
+        time.sleep(timeDelay)
+    
+    # Rate Limiter
+    # decrement queue_1, increment rate limiter
+    for i in range(13):
+        decrementQueue1(job_id)
+        incrementRateLimiter(job_id)
+        
+        time.sleep(timeDelay)
+    
+    # Rate Limiter   
+    # decrement rate limiter, increment queue_2
+    for i in range(13):
+        decrementRateLimiter(job_id)
+        incrementQueue2(job_id)
+        
+        time.sleep(timeDelay)
+        
+    # Reverse Batch Processor
+    # decrement queue_2, increment reverse batch processor
+    for i in range(13):
+        decrementQueue2(job_id)
+        incrementReverseBatchProcessor(job_id)
+        
+        time.sleep(timeDelay)
+        
+        
 
