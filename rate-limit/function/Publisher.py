@@ -28,7 +28,7 @@ def send_response(client_id, job_id, job_length, row, response, user_project_id,
     publisher.publish(publisher_path, message, **attributes)
     print("Sent response to reverse batch processor") 
 
-    # Increment Output Queue, Decrement Rate Limiter for Performance Metrics
+    # Send Performance Metrics
     try:
         incrementQueue2(job_id)
         decrementRateLimiter(job_id)

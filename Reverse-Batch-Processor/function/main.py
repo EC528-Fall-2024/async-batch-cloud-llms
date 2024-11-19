@@ -1,6 +1,7 @@
 import base64
 import functions_framework
 from BigQueryWriter import insert_rows
+from performance import incrementReverseBatchProcessor, decrementQueue2
 
 # Triggered from a message on a Cloud Pub/Sub topic.
 @functions_framework.cloud_event
@@ -21,6 +22,13 @@ def reverse(cloud_event):
 
         # Write the message to a database 
         insert_rows(response=data, row=row_number, job_id=job_id, client_id=client_id, project_id=project_ID, dataset_id=dataset_ID, table_id=table_ID)
+        
+        # Send Performance metrics 
+        try:
+            incrementReverseBatchProcessor(job_id)
+            decrementQueue2(job_id)
+        except Exception as e:
+            print(f"Error updating performance metrics: {e}...")
     
     except Exception as e:
         print(f"Error processing message in reverse batch processor: {e}") 

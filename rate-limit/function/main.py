@@ -23,7 +23,7 @@ def process_message(cloud_event):
         }
         print(f"Rate-limiter received message for row {batch['row']} for job {batch['job_id']} from batch processor.") 
 
-        # Decrement Input Queue, Increment Rate Limiter for Performance Metrics
+        # Send Performance Metrics
         try:
             decrementQueue1(batch['job_id'])
             incrementRateLimiter(batch['job_id'])
