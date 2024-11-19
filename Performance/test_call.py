@@ -230,7 +230,7 @@ def decrementQueue2(Job_ID):
 if (__name__ == "__main__"):
     job_id = 1
     
-    timeDelay = .75
+    timeDelay = .3
     
     time.sleep(2)
     

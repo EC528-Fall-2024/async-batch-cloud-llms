@@ -61,7 +61,7 @@ def incrementFirestore(db, Job_ID, Microservice):
     })
     
     # If the microservice is "rate limiter" and counts match, call `setTime`
-    if Microservice == "rate_limiter" and (current_count + 1) == total_count:
+    if Microservice == "reverse_batch_processor" and (current_count + 1) == total_count:
         # Call setTime to update the timestamp in the "Time Stamps" document
         setTime(db, Job_ID, "end_time", firestore.SERVER_TIMESTAMP)
     
