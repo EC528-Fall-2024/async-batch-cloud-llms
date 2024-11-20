@@ -3,7 +3,6 @@ from ErrorLogger import error_message
 from pubSubSender import pubSubSender
 from performance import decrementBatchProcessor, incrementQueue1, setBatchProcessor, setTotalCount, resetSystem
 
-
 def goHandle(Job_ID:str, Client_ID:str, User_Project_ID:str, User_Dataset_ID:str, Input_Table_ID:str, Output_Table_ID:str, Model:str, API_key:str):
     
     # Currently hardcoded, will be quried soon
@@ -31,8 +30,6 @@ def goHandle(Job_ID:str, Client_ID:str, User_Project_ID:str, User_Dataset_ID:str
                 incrementQueue1(Job_ID)
             except Exception as e:
                 print(f"An unexpected error occurred: {e}")
-
-            
 
     # Return status
     return True

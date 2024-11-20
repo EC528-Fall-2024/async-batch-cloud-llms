@@ -1,5 +1,5 @@
 from google.cloud import bigquery
-from ErrorLogger import error_message
+from Logger import log
 
 # Outputs: prompt_and_text
 def read_from_database(row, Job_ID, Client_ID, project_id, dataset_id, table_id):
@@ -40,7 +40,7 @@ def read_from_database(row, Job_ID, Client_ID, project_id, dataset_id, table_id)
         print(message)
 
         # send message to job orchestrator that this row was dropped
-        error_message(message, Job_ID, Client_ID, "RowDropped", row, "ErrorLogs")
+        log(message, Job_ID, Client_ID, "RowDropped", row)
         return None
 
 # # Need to update permissions to BQ Data View and BQ Job User

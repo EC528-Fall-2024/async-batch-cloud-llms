@@ -13,13 +13,13 @@ def log(message, job_id, client_id, error_type, row):
     # Define attributes as a dictionary
     attributes = {
         "Log_Type": "Error",
-        "Microservice:": f"{microservice}",
+        "Microservice": f"{microservice}",
         "Job_ID": f"{job_id}",
-        "Client_ID": f"{client_id}",
+        "Client_ID" : f"{client_id}",
         "Row_Number": f"{row}",
         "Num_Rows" : "", # empty since error log
         "Error_Type": f"{error_type}",
     }
 
     publisher.publish(topic_path, message, **attributes)
-    print(f"Sent log message to job orchestrator.")
+    print(f"Sent error log message to job orchestrator.")

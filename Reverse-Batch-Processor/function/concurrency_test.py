@@ -14,7 +14,7 @@ def pubSubSender(row, message, Job_ID, Client_ID, project_ID, dataset_ID, table_
         "Job_ID": str(Job_ID),
         "Client_ID": str(Client_ID),
         "Row_Number": str(row),
-        'User_Project_ID': str(project_ID),
+        'User_Project_ID': str(project_ID)+"fkelnkgen",
         'User_Dataset_ID': str(dataset_ID),
         'Output_Table_ID': str(table_ID)
     }
@@ -28,6 +28,6 @@ def pubSubSender(row, message, Job_ID, Client_ID, project_ID, dataset_ID, table_
     print("The Topic is: " + topic_id)
     print("The Data is: " + f"{message}")
 
-for i in range(1, 14): 
+for i in range(1): 
     # Read the database
     pubSubSender(i,f"sending in random message of {i**3}","1", "user1",'sampleproject-440900','user_dataset','output_2')
