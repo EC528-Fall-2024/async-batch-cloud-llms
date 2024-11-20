@@ -3,41 +3,46 @@ from google.cloud import pubsub_v1
 
 project_id = "elated-scope-437703-h9"
 microservice = "RateLimiter"
-error_topic = "ErrorLogs"
-progress_topic = "ProgressLogs"
+topic = "Logs"
 
 # send log messages to job orchestrator
 def error_message(message, job_id, client_id, error_type, row):
     publisher = pubsub_v1.PublisherClient()
-    topic_path = publisher.topic_path(project_id, error_topic)
+    topic_path = publisher.topic_path(project_id, topic)
 
     message = f"{message}".encode("utf-8")
 
     # Define attributes as a dictionary
     attributes = {
+        "Log_Type": "Error",
+        "Microservice": f"{microservice}",
         "Job_ID": f"{job_id}",
-        "Client_ID": f"{client_id}",
-        "Microservice:": f"{microservice}",
-        "Error_Type": f"{error_type}",
-        "Row_Number": f"{row}"
+        "Client_ID" : f"{client_id}",
+        "Row_Number": f"{row}",
+        "Num_Rows" : "", # empty since error log
+        "Error_Type": f"{error_type}"
     }
 
     publisher.publish(topic_path, message, **attributes)
-    print(f"Sent {error_topic} message to job orchestrator.")
+    print(f"Sent error message to job orchestrator.")
 
 def progress_message(message, job_id, client_id, num_rows):
     project_id = "elated-scope-437703-h9"
     publisher = pubsub_v1.PublisherClient()
-    topic_path = publisher.topic_path(project_id, progress_topic)
+    topic_path = publisher.topic_path(project_id, topic)
 
     message = f"{message}".encode("utf-8")
 
     # Define attributes as a dictionary
     attributes = {
+        "Log_Type": "Error",
+        "Microservice": f"{microservice}",
         "Job_ID": f"{job_id}",
-        "Client_ID": f"{client_id}",
-        "Num_Rows": f"{num_rows}"
+        "Client_ID" : f"{client_id}",
+        "Row_Number": "", # empty since progress log
+        "Num_Rows" : f"{num_rows}",
+        "Error_Type": "" # empty since progress log
     }
 
     publisher.publish(topic_path, message, **attributes)
-    print(f"Sent {progress_topic} message to job orchestrator.")
+    print(f"Sent progress message to job orchestrator.")
