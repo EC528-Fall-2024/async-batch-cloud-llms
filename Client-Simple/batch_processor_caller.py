@@ -34,7 +34,7 @@ def call_batch_processor():
     "Input_Table_ID": "input_table",
     "Output_Table_ID": "output_2",
     "Model": "gpt-3.5-turbo",
-    "API_key": "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"
+    "API_key": ""
   })
   headers = {
     'Content-Type': 'application/json'
