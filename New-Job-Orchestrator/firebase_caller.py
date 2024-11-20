@@ -1,6 +1,6 @@
 
 
-from firebase_helper_files import writeJobOrchestratorInformation
+from firebase_helper_files import writeJobOrchestratorInformation, logProgressWriter
 from google.cloud import firestore
 
 
@@ -21,7 +21,12 @@ Attributes = {
 
 db = firestore.Client()
 
-writeJobOrchestratorInformation(db, Attributes["Job_ID"], Attributes["Client_ID"], Message_Data["User_Project_ID"], Message_Data["User_Dataset_ID"], Message_Data["Input_Table_ID"], Message_Data["Output_Table_ID"], Message_Data["Model"], Message_Data["API_key"])
+# Uncomment to write Num_Rows to firebase
+Num_Row = 14
+logProgressWriter(db, Attributes["Job_ID"], Attributes["Client_ID"], Num_Row)
+
+# Uncomment to write meta data to firebase
+# writeJobOrchestratorInformation(db, Attributes["Job_ID"], Attributes["Client_ID"], Message_Data["User_Project_ID"], Message_Data["User_Dataset_ID"], Message_Data["Input_Table_ID"], Message_Data["Output_Table_ID"], Message_Data["Model"], Message_Data["API_key"])
 
 
 

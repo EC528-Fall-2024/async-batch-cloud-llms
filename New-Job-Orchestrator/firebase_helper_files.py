@@ -20,5 +20,14 @@ def writeJobOrchestratorInformation(db, Job_ID:int, Client_ID:str, User_Project_
 	    "Client_ID": "Client_1"
     })
     
+    
+def logProgressWriter(db, Job_ID:int, Client_ID:str, Num_Rows:int):
+    # db = firestore.Client()
+    # [START firestore_setup_dataset_pt1]
+    doc_ref = db.collection("Jobs").document("Job "+ str(Job_ID)).collection("Job Data").document("Progress")
+        # doc_ref.set({"first": "Ada", "last": "Lovelace", "born": 1815})
+    doc_ref.update({
+        "current_row": Num_Rows,
+    })
 
     
