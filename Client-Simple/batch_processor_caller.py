@@ -11,8 +11,8 @@ import json
 #####
 
 #CHANGE IF WRONT LOL
-url = "http://127.0.0.1:8080"
-# url = "https://us-central1-elated-scope-437703-h9.cloudfunctions.net/batch-processor-http"
+# url = "http://127.0.0.1:8080"
+url = "https://us-central1-elated-scope-437703-h9.cloudfunctions.net/batch-processor-http"
 
 # external 
 #   "User_Project_ID": "sampleproject-440900",
@@ -34,7 +34,7 @@ def call_batch_processor():
     "Input_Table_ID": "input_table",
     "Output_Table_ID": "output_2",
     "Model": "gpt-3.5-turbo",
-    "API_key": ""
+    "API_key": "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"
   })
   headers = {
     'Content-Type': 'application/json'

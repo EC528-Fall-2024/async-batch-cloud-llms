@@ -8,7 +8,7 @@ def pubSubSender():
     # topic_id = "InputData"
     # topic_id = "OutputData"
     # topic_id = "StartJob"
-    topic_id = "IncomingJob"
+    topic_id = "ErrorLogs"
 
     data = {
         "Table_Key": "json_key",
