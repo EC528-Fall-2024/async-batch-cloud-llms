@@ -20,7 +20,8 @@
 [Sprint2 Demo](https://drive.google.com/file/d/1NjymlgsvtWI8tLfMjFaLiHEr-3TgZ8N5/view?usp=sharing)  
 [Sprint3 Demo](https://drive.google.com/file/d/16_lV_df1BlzsAY3tFrf_6CKKA9yntzWA/view?usp=sharing)  
 [Sprint4 Demo](https://drive.google.com/file/d/1QWUBAF8ekrdv3lGSUJAmf5UFGnswtPHv/view?usp=sharing)  
-Sprint5 Demo 
+[Sprint5 Demo](https://drive.google.com/file/d/1RQ4_SbEfUcaeZkxm-eQ1F-HGWp4ByRd0/view?usp=sharing)  
+Sprint6 Demo
 
 
 ## Sprint Demo Slideshows:
@@ -28,7 +29,8 @@ Sprint5 Demo
 [Sprint2 Slideshow](https://docs.google.com/presentation/d/1h4vzF_IGO_7xRFhTZ4Gz1gRdLEJGcvXHZI2-pYbjRF4/edit?usp=sharing)   
 [Sprint3 Slideshow](https://docs.google.com/presentation/d/1f_77tuTC3z717qgW_xtFdsB0G6VBBOTUwqp2TKolrZM/edit?usp=sharing)  
 [Sprint4 Slideshow](https://docs.google.com/presentation/d/1LCoCL9HCC0GMx4awD1OfVJdlpK0LxsRrhhtyRrBAN9M/edit?usp=sharing)  
-Sprint5 Slideshow  
+[Sprint5 Slideshow](https://docs.google.com/presentation/d/1nKVr_AxejMW-zizcu4_F4WmSpvvAdPP4nAIwX2-5RAw/edit?usp=sharing)  
+Sprint6 Slideshow
 
 ## 1. The Problem
 
