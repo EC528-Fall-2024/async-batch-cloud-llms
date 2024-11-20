@@ -1,5 +1,5 @@
 from google.cloud import bigquery
-from ErrorLogger import error_message
+from Logger import log
 import time
 import random
 
@@ -22,7 +22,7 @@ def insert_rows(response, row, job_id, client_id, project_id="your-project-id", 
         if errors:
             message = f"Encountered errors for updating row {row}:\n {errors}"
             print(message)
-            error_message(message, job_id, client_id, "RowDropped", row, "ErrorLogs") # send message to job orchestrator
+            log(message, job_id, client_id, "RowDropped", row, "ErrorLogs") # send message to job orchestrator
 
         # Successfully updated rows
         else:
@@ -39,4 +39,4 @@ def insert_rows(response, row, job_id, client_id, project_id="your-project-id", 
         else:
             message = f"Unexpected error updating BigQuery for row {row}: {e}"
             print(message)
-            error_message(message, job_id, client_id, "RowDropped", row, "ErrorLogs") # send message to job orchestrator
+            log(message, job_id, client_id, "RowDropped", row) # send message to job orchestrator
