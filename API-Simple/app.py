@@ -143,7 +143,7 @@ def submit_job():
         headers = {'Content-Type': 'application/json'}
 
         try:
-            response = requests.post(BATCH_PROCESSOR_URL, headers=headers, json=payload)
+            response = requests.request("POST", BATCH_PROCESSOR_URL, headers=headers, data=payload)
             response_data = response.json()
         except requests.exceptions.RequestException as e:
             return jsonify({"error": "Failed to call batch processor", "details": str(e)}), 500
@@ -154,7 +154,7 @@ def submit_job():
     else:
         return jsonify({"error": "Job not valid"}), 400
 
-# Original implementation (commented out for future use using pub/sub)
+# Original implementation (commented out for future use using pub/sub)  
 # @app.route('/submit_job', methods=['POST'])
 # @require_api_key
 # def submit_job():
