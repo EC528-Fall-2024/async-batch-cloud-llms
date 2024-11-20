@@ -4,7 +4,7 @@ import requests
 base_url = "http://34.27.114.71:8080"
 
 # Local
-base_url = "http://localhost:8089"
+# base_url = "http://localhost:8089"
 
 
 
