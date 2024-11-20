@@ -18,7 +18,7 @@ def log(message, job_id, client_id, error_type, row):
         "Client_ID" : f"{client_id}",
         "Row_Number": f"{row}",
         "Num_Rows" : "", # empty since error log
-        "Error_Type": f"{error_type}",
+        "Error_Type": f"{error_type}"
     }
 
     publisher.publish(topic_path, message, **attributes)

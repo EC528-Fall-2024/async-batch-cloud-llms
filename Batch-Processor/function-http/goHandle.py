@@ -1,5 +1,4 @@
 from BigQueryReader import read_from_database
-from ErrorLogger import error_message
 from pubSubSender import pubSubSender
 from performance import decrementBatchProcessor, incrementQueue1, setBatchProcessor, setTotalCount, resetSystem
 
