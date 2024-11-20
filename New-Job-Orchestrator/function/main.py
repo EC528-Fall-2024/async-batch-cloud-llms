@@ -1,6 +1,7 @@
 import base64
 import functions_framework
 from InvokeBatchProcessor import call_batch_processor
+from FirestoreWriter import writeJobOrchestratorInformation
 
 # Triggered from a message on a Cloud Pub/Sub topic
 @functions_framework.cloud_event
@@ -21,7 +22,7 @@ def start_job(cloud_event):
         print(f"Processing {data} for {client_id}'s job {job_id}")
 
         # Write metadata to database
-        # ..... to be written
+        writeJobOrchestratorInformation(job_id, client_id, project_ID, dataset_ID, input_table_ID, output_table_ID, model, API_key)
 
         # Invoke Batch Processor
         call_batch_processor(job_id, client_id, project_ID, dataset_ID, input_table_ID, output_table_ID, model, API_key)

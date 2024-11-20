@@ -22,7 +22,8 @@ def pubSubSender(message):
         'API_key': ""
     }
 
-    publisher.publish(topic_path, message, **attributes)
+    future = publisher.publish(topic_path, message, **attributes)
+    print(future.result())
 
 # Example usage
 if __name__ == "__main__":
