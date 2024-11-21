@@ -23,7 +23,6 @@ def log(cloud_event):
 
         # Write to firebase here
         elif log_type == "Progress":
-            print("Hello")
             logProgressWriter(str(job_id), client_id, int(row), int(num_rows))
 
     except Exception as e:
