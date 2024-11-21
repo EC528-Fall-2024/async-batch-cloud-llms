@@ -35,7 +35,7 @@ def progress_message(message, job_id, client_id, rows_processed, job_length):
 
     # Define attributes as a dictionary
     attributes = {
-        "Log_Type": "Error",
+        "Log_Type": "Progress",
         "Microservice": f"{microservice}",
         "Job_ID": f"{job_id}",
         "Client_ID" : f"{client_id}",

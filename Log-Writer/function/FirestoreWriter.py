@@ -2,7 +2,7 @@ from google.cloud import firestore
 
 def logProgressWriter(Job_ID:str, Client_ID:str, Processed_Rows: int, Num_Rows:int):
     try:
-        db = firestore.Client()
+        db = firestore.Client(project="elated-scope-437703-h9")
         doc_ref = db.collection("Clients").document(Client_ID).collection("Jobs").document("Job "+ Job_ID).collection("Job Data").document("Progress")
         doc_ref.set({
             "current_row": Processed_Rows,
@@ -12,6 +12,3 @@ def logProgressWriter(Job_ID:str, Client_ID:str, Processed_Rows: int, Num_Rows:i
 
     except Exception as e:
         print(f"Unexpected error writing progress to firestore: {e}")
-
-if __name__ == "__main__":
-    logProgressWriter("2", "Rick Sorkin", 1, 1)
