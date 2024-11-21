@@ -93,6 +93,7 @@ def calculateStats(db, Job_ID):
         "total_time": total_time_seconds,   
     })
 
+## Not sure f this works or how this works?? - Noah... 
 def queryStats(db, Job_ID):
     doc_ref = db.collection("Jobs").document("Job "+ str(Job_ID)).collection("Job Data").document("Time Stamps")
     counts = doc_ref.get().to_dict()
