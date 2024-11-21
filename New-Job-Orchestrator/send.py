@@ -12,8 +12,8 @@ def pubSubSender(message):
     
     # Define attributes as a dictionary
     attributes = {
-        "Job_ID": "test",
-        "Client_ID": "user1",
+        "Job_ID": "2",
+        "Client_ID": "Rick Sorkin",
         "User_Project_ID": "sampleproject-440900",
         "User_Dataset_ID": "user_dataset",
         "Input_Table_ID": "input_table",

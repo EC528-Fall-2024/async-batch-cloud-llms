@@ -3,7 +3,7 @@ from google.cloud import pubsub_v1
 
 # TODO(developer)
 project_id = "elated-scope-437703-h9"
-subscription_id = "InputData-sub"
+subscription_id = "ex-sub"
 # subscription_id = "IncomingJob-sub"
 # subscription_id = "ProgressLogs-sub"
 

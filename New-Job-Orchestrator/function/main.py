@@ -3,9 +3,13 @@ import functions_framework
 from InvokeBatchProcessor import call_batch_processor
 from FirestoreWriter import writeJobOrchestratorInformation
 
+
 # Triggered from a message on a Cloud Pub/Sub topic
 @functions_framework.cloud_event
 def start_job(cloud_event):
+
+    print("hello")
+    
     try:
         # Get data from Pub/Sub topic
         data = base64.b64decode(cloud_event.data["message"]["data"]).decode('utf-8')
