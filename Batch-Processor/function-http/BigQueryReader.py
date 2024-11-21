@@ -1,6 +1,19 @@
 from google.cloud import bigquery
 from Logger import log
 
+# Get database length
+def get_database_length(project_id, dataset_id, table_id):
+    try:
+        client = bigquery.Client(project=project_id)
+        query = f"SELECT COUNT(*) as total FROM `{project_id}.{dataset_id}.{table_id}`"
+        query_job = client.query(query)
+        results = query_job.result()
+        for row in results:
+            return row.total
+        
+    except Exception as e:
+        print(f"Error getting database length: {e}")
+
 # Outputs: prompt_and_text
 def read_from_database(row, Job_ID, Client_ID, project_id, dataset_id, table_id):
     
