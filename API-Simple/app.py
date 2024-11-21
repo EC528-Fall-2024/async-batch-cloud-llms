@@ -58,8 +58,8 @@ def publish_job(job_data, job_id):
     
     # Define attributes to pass to Pub/Sub
     attributes = {
-        "job_id": job_id,
-        "client_id": job_data["client_id"],
+        "Job_ID": job_id,
+        "Client_ID": job_data["Client_ID"],
         "User_Project_ID": job_data["User_Project_ID"],
         "User_Dataset_ID": job_data["User_Dataset_ID"],
         "Input_Table_ID": job_data["Input_Table_ID"],
