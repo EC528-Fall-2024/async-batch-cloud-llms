@@ -1,5 +1,6 @@
 import base64
 import functions_framework
+from FirestoreWriter import logProgressWriter
 
 @functions_framework.cloud_event
 def log(cloud_event):
@@ -15,9 +16,13 @@ def log(cloud_event):
         error_type = cloud_event.data["message"]["attributes"]["Error_Type"] # empty if progress
 
 
-        # Write to firestore here
-        print(f"message received by log writer: {data}")
+        # Handle errors here
+        if log_type is "Error":
+            print(f"{error_type} error message from {microservice} received by log writer: {data}")
+
+        # Write to firebase here
+        elif log_type is "Progress":
+            logProgressWriter(str(job_id), client_id, int(row), int(num_rows))
 
     except Exception as e:
         print(f"Error updating logs in log writer: {e}")
-    

@@ -48,4 +48,4 @@ def send_response(client_id, job_id, job_length, row, response, user_project_id,
                 print(f"Error deleting job {job_id} data")
             message += "... All done"
         print(message)
-        progress_message(message, job_id, client_id, processed_rows)
+        progress_message(message, job_id, client_id, processed_rows, job_length)

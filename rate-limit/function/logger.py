@@ -26,7 +26,7 @@ def error_message(message, job_id, client_id, error_type, row):
     publisher.publish(topic_path, message, **attributes)
     print(f"Sent error message to job orchestrator.")
 
-def progress_message(message, job_id, client_id, num_rows):
+def progress_message(message, job_id, client_id, rows_processed, job_length):
     project_id = "elated-scope-437703-h9"
     publisher = pubsub_v1.PublisherClient()
     topic_path = publisher.topic_path(project_id, topic)
@@ -39,8 +39,8 @@ def progress_message(message, job_id, client_id, num_rows):
         "Microservice": f"{microservice}",
         "Job_ID": f"{job_id}",
         "Client_ID" : f"{client_id}",
-        "Row_Number": "", # empty since progress log
-        "Num_Rows" : f"{num_rows}",
+        "Row_Number": f"{rows_processed}", # processed rows instead of actual row since progress log
+        "Num_Rows" : f"{job_length}",
         "Error_Type": "" # empty since progress log
     }
 

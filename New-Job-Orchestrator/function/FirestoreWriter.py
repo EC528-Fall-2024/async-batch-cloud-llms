@@ -1,7 +1,7 @@
 from google.cloud import firestore
 
 
-def writeJobOrchestratorInformation(Job_ID:str, Client_ID:str, User_Project_ID:str, User_Dataset_ID:str, Input_Table_ID:str, Output_Table_ID:str, Model:str, API_key:str):
+def writeJobOrchestratorInformation(Job_ID:str, Client_ID:str, User_Project_ID:str, User_Dataset_ID:str, Input_Table_ID:str, Output_Table_ID:str, Model:str):
     
     try:
         db = firestore.Client()
@@ -12,7 +12,6 @@ def writeJobOrchestratorInformation(Job_ID:str, Client_ID:str, User_Project_ID:s
             "Input_Table_ID": Input_Table_ID,
             "Output_Table_ID": Output_Table_ID,
             "Model": Model,
-            "API_key": API_key,
             "Job_ID": str(Job_ID),
             "Client_ID": Client_ID
         })
@@ -20,4 +19,4 @@ def writeJobOrchestratorInformation(Job_ID:str, Client_ID:str, User_Project_ID:s
         print(f"Wrote job {Job_ID} metadata to firestore successfully.")
 
     except Exception as e:
-        print(f"Unexpected error writing log to firestore: {e}")
+        print(f"Unexpected error writing meteadata to firestore: {e}")

@@ -24,7 +24,7 @@ def start_job(cloud_event):
         print(f"Processing {data} for {client_id}'s job {job_id}")
 
         # Write metadata to database
-        writeJobOrchestratorInformation(str(job_id), client_id, project_ID, dataset_ID, input_table_ID, output_table_ID, model, API_key)
+        writeJobOrchestratorInformation(str(job_id), client_id, project_ID, dataset_ID, input_table_ID, output_table_ID, model)
 
         # Invoke Batch Processor
         call_batch_processor(job_id, client_id, project_ID, dataset_ID, input_table_ID, output_table_ID, model, API_key)
