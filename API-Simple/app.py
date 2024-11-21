@@ -6,6 +6,7 @@ import os
 import requests
 from google.cloud import pubsub_v1
 from flask_cors import CORS
+from google.cloud import firestore 
 
 app = Flask(__name__)
 CORS(app)
@@ -81,53 +82,6 @@ def check_valid_job(job_data):
         return False
 
 
-# @app.route('/submit_job', methods=['POST'])
-# @require_api_key
-# def submit_job():
-#     """
-#     Updated implementation to call the batch processor directly
-#     """
-#     job_data = request.json
-#     if check_valid_job(job_data):
-#         # Generate job ID
-#         job_id = str(uuid.uuid4())
-
-#         # Call batch processor
-#         payload = {
-
-#             "Job_ID": job_id,
-#             "Client_ID": "rick sorkin",
-#             "User_Project_ID": "sampleproject-440900",
-#             "User_Dataset_ID": "user_dataset",
-#             "Input_Table_ID": "input_table",
-#             "Output_Table_ID": "output_2",
-#             "Model": "gpt-3.5-turbo",
-#             "API_key": ""
-
-#             # "Job_ID": job_id,
-#             # "Client_ID": job_data.get("client_id", "rick sorkin"),
-#             # "User_Project_ID": job_data.get("project_id", "sampleproject-440900"),
-#             # "User_Dataset_ID": job_data.get("dataset_id", "user_dataset"),
-#             # "Input_Table_ID": job_data.get("table_id", "input_table"),
-#             # "Output_Table_ID": job_data.get("output_table_id", "output_2"),
-#             # "Model": job_data.get("llm_model", "gpt-3.5-turbo"),
-#             # "API_key": job_data.get("api_key", ""),
-#         }
-#         headers = {'Content-Type': 'application/json'}
-
-#         try:
-#             response = requests.request("POST", BATCH_PROCESSOR_URL, headers=headers, data=payload)
-#             response_data = response.json()
-#         except requests.exceptions.RequestException as e:
-#             return jsonify({"error": "Failed to call batch processor", "details": str(e)}), 500
-
-#         # Log response and return job submission status
-#         print(response_data)
-#         return jsonify({"job_id": job_id, "status": "submitted", "batch_processor_response": response_data}), 200
-#     else:
-#         return jsonify({"error": "Job not valid"}), 400
-
-# Original implementation (commented out for future use using pub/sub)  
 @app.route('/submit_job', methods=['POST'])
 @require_api_key
 def submit_job():
@@ -141,55 +95,61 @@ def submit_job():
         publish_job(job_data, job_id)
 
         # Return job ID to user and indicate that job is submitted
-        return jsonify({"job_id": job_id, "status": "submitted"}), 200
+        return jsonify({"Job_ID": job_id, "status": "submitted"}), 200
     else:
         # Job was not valid
         return jsonify({"error": "Job not valid"}), 400
 
 
 
-# Route for checking 
+def get_progress(job_id, client_id):
+    """
+    Helper function to retrieve progress data from Firestore.
+    """
+    db = firestore.Client()
+    doc_ref = (
+        db.collection("Clients")
+        .document(client_id)
+        .collection("Jobs")
+        .document("Job " + job_id)
+        .collection("Job Data")
+        .document("Progress")
+    )
+    doc = doc_ref.get()
+    progress_data = doc.to_dict()
+
+    return {
+        "current_row": progress_data.get("current_row", 0),
+        "total_rows": progress_data.get("total_rows", 0),
+    }
+
 @app.route('/job_status/<job_id>', methods=['GET'])
 @require_api_key
 def job_status(job_id):
     """
-    Get the status of a job, including counts and timing data.
+    Get the status of a job by querying Firestore.
     """
-    return 0
-    # try:
-    #     # Firestore client
-    #     db = firestore.Client()
-        
-    #     # Retrieve counts from Firestore
-    #     count_data = getAllFirestore(db, job_id)
-        
-    #     # Retrieve timestamps and calculate stats
-    #     stats = queryStats(db, job_id)
-        
-    #     # Determine job status based on counts and stats
-    #     if stats['start_time'] == 0:
-    #         status = "not started"
-    #     elif stats['end_time'] == 0:
-    #         status = "processing"
-    #     else:
-    #         status = "completed"
-        
-    #     # Construct the response
-    #     response = {
-    #         "job_id": job_id,
-    #         "status": status,
-    #         "counts": count_data.to_dict(),
-    #         "stats": {
-    #             "start_time": stats['start_time'],
-    #             "end_time": stats['end_time'],
-    #             "total_time": stats['total_time'],
-    #             "average_time": stats['average_time']
-    #         }
-    #     }
-    #     return jsonify(response), 200
+    try:
+        # Extract Client ID from the query parameters
+        client_id = request.args.get("Client_ID")
 
-    # except Exception as e:
-    #     return jsonify({"error": "Failed to retrieve job status", "details": str(e)}), 500
+        if not client_id:
+            return jsonify({"error": "Client ID is required"}), 400
+
+        # Call the helper function to get progress
+        progress_data = get_progress(job_id, client_id)
+
+        # Construct the response
+        response = {
+            "Job_ID": job_id,
+            "Client_ID": client_id,
+            "current_row": progress_data["current_row"],
+            "total_rows": progress_data["total_rows"],
+        }
+        return jsonify(response), 200
+
+    except Exception as e:
+        return jsonify({"error": "Failed to retrieve job status", "details": str(e)}), 500
 
 
 
