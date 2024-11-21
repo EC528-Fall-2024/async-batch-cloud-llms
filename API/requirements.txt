@@ -1,5 +1,0 @@
-Flask
-pandas
-confluent-kafka
-requests
-openai
