@@ -7,8 +7,6 @@ from FirestoreWriter import writeJobOrchestratorInformation
 # Triggered from a message on a Cloud Pub/Sub topic
 @functions_framework.cloud_event
 def start_job(cloud_event):
-
-    print("hello")
     
     try:
         # Get data from Pub/Sub topic
@@ -26,7 +24,7 @@ def start_job(cloud_event):
         print(f"Processing {data} for {client_id}'s job {job_id}")
 
         # Write metadata to database
-        writeJobOrchestratorInformation(job_id, client_id, project_ID, dataset_ID, input_table_ID, output_table_ID, model, API_key)
+        writeJobOrchestratorInformation(str(job_id), client_id, project_ID, dataset_ID, input_table_ID, output_table_ID, model, API_key)
 
         # Invoke Batch Processor
         call_batch_processor(job_id, client_id, project_ID, dataset_ID, input_table_ID, output_table_ID, model, API_key)

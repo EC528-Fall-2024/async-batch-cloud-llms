@@ -1,7 +1,7 @@
 from google.cloud import firestore
 
 
-def writeJobOrchestratorInformation(Job_ID:int, Client_ID:str, User_Project_ID:str, User_Dataset_ID:str, Input_Table_ID:str, Output_Table_ID:str, Model:str, API_key:str):
+def writeJobOrchestratorInformation(Job_ID:str, Client_ID:str, User_Project_ID:str, User_Dataset_ID:str, Input_Table_ID:str, Output_Table_ID:str, Model:str, API_key:str):
     
     try:
         db = firestore.Client()
