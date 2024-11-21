@@ -1,6 +1,5 @@
 import requests
 import time
-import json
 import logging
 
 # Configure logging
@@ -81,29 +80,14 @@ def submit_job(API_BASE_URL, api_key, job_data):
         return None
     
 def check_job_status(API_BASE_URL, job_id, client_id, api_key):
-    """
-    Check the status of a job using its Job ID and Client ID.
-
-    Parameters:
-    - API_BASE_URL: The base URL of the API.
-    - job_id: The Job ID returned from the `/submit_job` endpoint.
-    - client_id: The Client ID associated with the job.
-    - api_key: The API key for authentication.
-
-    Returns:
-    - A dictionary with job status or a completion message.
-    """
-    headers = {
-        "x-api-key": api_key
-    }
-    params = {
-        "Client_ID": client_id
-    }
-
+    headers = {"x-api-key": api_key}
+    params = {"Client_ID": client_id}
+    
     response = requests.get(f"{API_BASE_URL}/job_status/{job_id}", headers=headers, params=params)
 
     if response.status_code == 200:
         job_data = response.json()
+        logging.info(f"Raw Response: {job_data}")
         current_row = job_data.get('current_row', 0)
         total_rows = job_data.get('total_rows', 0)
 
@@ -116,6 +100,7 @@ def check_job_status(API_BASE_URL, job_id, client_id, api_key):
     else:
         logging.error(f"Failed to retrieve job status: {response.status_code}, {response.text}")
         return None
+
 
 
 def wait_for_completion(API_BASE_URL, job_id, client_id, api_key, interval=10):
