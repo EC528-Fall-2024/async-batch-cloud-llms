@@ -124,12 +124,7 @@ Implement fault tolerance mechanisms.
 This scope shows what  will be delivered in the project, focusing on asynchronous batch processing, scalability, and efficient rate limit management while avoiding unnecessary complexity and features in the initial development phases.
 
 ## 5. Solution Concept
-![image](./images/system.jpg)
-
-### As of Sprint 4, here is our Visualized Story Board:
-![image](./images/sprint_4_miro.png)
-### With our Story Board:
-![image](./images/sprint_4_ooo.png)
+![image](./images/Nov22.png)
 
 **Stage 1: Information Ingestion**  
 The start of the data pipeline will consist of collecting information from the users. Requests will likely be packaged with metadata and the data to be processed (pyarrow table, pandas data frame, etc.) as a binary. The request will then be sent to an HTTP endpoint exposed by our API hosted on google cloud. Multiple technologies could be used to manage our API including cloud endpoints, an API Gateway, or Apigee. Choices relating to specific implementation will be resolved as we continue to work on our design.
