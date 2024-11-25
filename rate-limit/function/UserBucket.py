@@ -50,15 +50,15 @@ def update_user_bucket(user_id, tokens_needed):
         return False
 
 # Job removes tokens from user bucket
-def get_tokens_from_user(user_id, tokens_needed, refill_time):
+def get_tokens_from_user(user_id, tokens_needed):
     user_bucket_key = f"user_bucket:{user_id}"
     try:
         with redis_client.lock(f"{user_bucket_key}_lock"):
             current_time = int(time.time())
             last_updated = int(redis_client.hget(user_bucket_key, "last_updated") or 0)
 
-            # Refill logic, if refill_time has passed, reset to max tokens
-            if current_time - last_updated > refill_time:
+            # Refill logic, if refill_time (min) has passed, reset to max tokens
+            if current_time - last_updated > 60:
                 max_tokens = int(redis_client.hget(user_bucket_key, "max_tokens") or 0)
                 old_max_tokens = int(redis_client.hget(user_bucket_key, "max_tokens_at_update") or 0)
                 redis_client.hset(user_bucket_key, "tokens", old_max_tokens)
@@ -80,9 +80,9 @@ def get_tokens_from_user(user_id, tokens_needed, refill_time):
         return False
     
 # Delayed return of tokens to bucket
-def ret_used_tokens(tokens, refill_time):
-    # Wait refill_time
-    time.sleep(refill_time)
+def ret_used_tokens(tokens):
+    # Wait refill_time (min)
+    time.sleep(60)
 
     # Return used tokens to global bucket
     with redis_client.lock("global_increase"):
@@ -93,7 +93,7 @@ def ret_used_tokens(tokens, refill_time):
     print(f"Global bucket increased to {global_tokens} tokens.") 
 
 # Attempt to shrink/destroy the user bucket
-def shrink_user_bucket(user_id, tokens_used, actual_used, refill_time):
+def shrink_user_bucket(user_id, tokens_used, actual_used):
     user_bucket_key = f"user_bucket:{user_id}"
     try:
         with redis_client.lock(f"{user_bucket_key}_lock"):
@@ -129,7 +129,7 @@ def shrink_user_bucket(user_id, tokens_used, actual_used, refill_time):
         # Return used tokens a minute later
         used = min(actual_used, tokens_used)
         if used > 0:
-            threading.Thread(target=ret_used_tokens, args=(used,refill_time,)).start()
+            threading.Thread(target=ret_used_tokens, args=(used,)).start()
     
     # uncontrollable errors
     except redis.exceptions.RedisError as e:

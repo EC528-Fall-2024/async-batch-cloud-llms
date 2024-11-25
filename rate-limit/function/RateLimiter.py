@@ -7,7 +7,6 @@ from Publisher import send_response
 from logger import error_message
 
 token_limit = 200000 # token/min
-refill_time = 60 # min
 
 # Send batch through rate-limiter
 def rate_limit(batch):
@@ -46,7 +45,7 @@ def rate_limit(batch):
         return
 
     # Try to call LLM API
-    if get_tokens_from_user(user_id, tokens_needed, refill_time):
+    if get_tokens_from_user(user_id, tokens_needed):
         print("Attempting to call OpenAI...") 
 
         # Get request approved by request limiter before retry
@@ -62,7 +61,7 @@ def rate_limit(batch):
             errormessage = f"OpenAI API call failed, sending back tokens & aborting row {row}"
             print(errormessage)
             error_message(errormessage, job_id, user_id, "RowDropped", row)
-            shrink_user_bucket(user_id,min(tokens_needed*counter,token_limit), actual_tokens, refill_time)
+            shrink_user_bucket(user_id,min(tokens_needed*counter,token_limit), actual_tokens)
             return
         print(f"Received Response: {response_content}")
 
@@ -70,7 +69,7 @@ def rate_limit(batch):
         send_response(user_id, job_id, job_length, row, response_content, user_project_id, user_dataset_id, output_table_id)
 
         # Shrink user bucket accordingly since job complete
-        shrink_user_bucket(user_id,min(tokens_needed*counter,token_limit), actual_tokens,refill_time)
+        shrink_user_bucket(user_id,min(tokens_needed*counter,token_limit), actual_tokens)
     else:
         errormessage = f"Issue with accessing tokens from user bucket. Aborting row {row}"
         print(errormessage)
