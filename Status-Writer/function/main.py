@@ -1,6 +1,6 @@
 import base64
 import functions_framework
-from FirestoreWriter import logProgressWriter
+from FirestoreWriter import logProgressWriter, rowErrorWriter
 
 @functions_framework.cloud_event
 def log(cloud_event):
@@ -19,7 +19,9 @@ def log(cloud_event):
 
         # Handle errors here
         if log_type == "Error":
-            print(f"{error_type} error")
+            if error_type == "RowDropped":
+                rowErrorWriter(job_id, client_id, int(row))
+                
 
         # Write to firebase here
         elif log_type == "Progress":
