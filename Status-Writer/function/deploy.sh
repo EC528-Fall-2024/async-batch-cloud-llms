@@ -1,5 +1,5 @@
 # Deploy Log Writer on Cloud
-gcloud functions deploy log-writer \
+gcloud functions deploy status-writer \
     --region us-central1 \
     --runtime python312 \
     --timeout 540 \
