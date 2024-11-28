@@ -3,7 +3,7 @@ from google.cloud import pubsub_v1
 
 project_id = "elated-scope-437703-h9"
 microservice = "RateLimiter"
-topic = "Logs"
+topic = "Status"
 
 # send log messages to job orchestrator
 def error_message(message, job_id, client_id, error_type, row):

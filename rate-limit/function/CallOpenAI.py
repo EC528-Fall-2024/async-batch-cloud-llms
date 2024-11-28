@@ -28,6 +28,8 @@ def call_openai(messages, user_id, tokens_needed, token_limit, api_key, model, c
             print("Failure to set-up OpenAI Client")
             return None, tokens_needed, counter
     else:
+        # Send fake response for testing purposes
+        time.sleep(1)
         return "sample response", tokens_needed, 1
     
     # Assume this job needs to be dropped if delay over 2 minutes

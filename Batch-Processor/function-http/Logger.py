@@ -6,7 +6,7 @@ microservice = "BatchProcessor"
 def log(message, job_id, client_id, error_type, row):
     project_id = "elated-scope-437703-h9"
     publisher = pubsub_v1.PublisherClient()
-    topic_path = publisher.topic_path(project_id, "Logs")
+    topic_path = publisher.topic_path(project_id, "Status")
 
     message = f"{message}".encode("utf-8")
 

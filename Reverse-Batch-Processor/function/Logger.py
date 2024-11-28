@@ -6,7 +6,7 @@ microservice = "ReverseBatchProcessor"
 # send log messages to job orchestrator
 def log(message, job_id, client_id, error_type, row):
     publisher = pubsub_v1.PublisherClient()
-    topic_path = publisher.topic_path(project_id, "Logs")
+    topic_path = publisher.topic_path(project_id, "Status")
 
     message = f"{message}".encode("utf-8")
 

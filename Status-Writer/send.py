@@ -2,7 +2,7 @@ from google.cloud import pubsub_v1
 
 def pubSubSender(message):
     project_id = "elated-scope-437703-h9"
-    topic_id = "Logs"
+    topic_id = "Status"
 
     publisher = pubsub_v1.PublisherClient()
     # The `topic_path` method creates a fully qualified identifier

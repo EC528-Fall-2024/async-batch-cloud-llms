@@ -9,5 +9,5 @@ gcloud functions deploy status-writer \
     --max-instances 10 \
     --source . \
     --entry-point log \
-    --trigger-topic Logs \
+    --trigger-topic Status \
     --allow-unauthenticated 
