@@ -1,4 +1,4 @@
-# Deploy Log Writer on Cloud
+# Deploy Status Writer on Cloud
 gcloud functions deploy status-writer \
     --region us-central1 \
     --runtime python312 \
