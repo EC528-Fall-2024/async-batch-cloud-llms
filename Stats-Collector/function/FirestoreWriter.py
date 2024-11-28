@@ -11,10 +11,10 @@ def StatsWriter(Job_ID, Client_ID, Row):
         key = f"{Client_ID}_{Job_ID}_{Row}"
         
         # Get vars
-        start = int(redis_client.hget(key, "start"))
-        in_llm = int(redis_client.hget(key, "in_llm"))
-        out_llm = int(redis_client.hget(key, "out_llm"))
-        end = int(redis_client.hget(key, "end"))
+        start = float(redis_client.hget(key, "start"))
+        in_llm = float(redis_client.hget(key, "in_llm"))
+        out_llm = float(redis_client.hget(key, "out_llm"))
+        end = float(redis_client.hget(key, "end"))
 
         # Calculate metrics
         total_time = end - start

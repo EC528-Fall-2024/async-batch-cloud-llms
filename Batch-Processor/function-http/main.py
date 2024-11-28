@@ -17,7 +17,7 @@ def go(request):
         print(data['Output_Table_ID'])
         print(data['Model'])
         print(data['API_key'])
-            
+
         jobStatus = goHandle(data['Job_ID'], data['Client_ID'], data['User_Project_ID'],data['User_Dataset_ID'], data['Input_Table_ID'], data['Output_Table_ID'], data['Model'], data['API_key'], )
 
         # Return a success response

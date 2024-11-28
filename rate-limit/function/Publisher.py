@@ -7,6 +7,7 @@ from performance import decrementRateLimiter, incrementQueue2
 # Project information
 project_id = "elated-scope-437703-h9"
 output_topic = "OutputData"
+stats_topic = "Stats"
 
 # send message to reverse batch processor
 def send_response(client_id, job_id, job_length, row, response, user_project_id, user_dataset_id, output_table_id):
@@ -49,3 +50,25 @@ def send_response(client_id, job_id, job_length, row, response, user_project_id,
             message += "... All done"
         print(message)
         progress_message(message, job_id, client_id, processed_rows, job_length)
+
+# send time metrics to status collector
+def send_metrics(client_id, job_id, row, in_llm, out_llm):
+    publisher = pubsub_v1.PublisherClient()
+    publisher_path = publisher.topic_path(project_id, stats_topic)
+
+    # Prepare message to publish
+    service = "RateLimiter"
+    message = service.encode("utf-8")
+    attributes = {
+        "Job_ID": f"{job_id}",
+        "Client_ID": f"{client_id}",
+        "Row": f"{row}",
+        "Start": "",
+        "In_LLM": str(in_llm),
+        "Out_LLM": str(out_llm),
+        "End": ""
+    }
+
+    # Send out response via pub/sub
+    publisher.publish(publisher_path, message, **attributes)
+    print("Sent time metrics to stats collector") 

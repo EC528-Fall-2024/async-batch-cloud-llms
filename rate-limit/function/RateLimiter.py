@@ -1,9 +1,10 @@
 '''Rate Limiter'''
+import time
 from tokenizer import openai_tokenizer
 from RequestLimiter import incr_request
 from UserBucket import update_user_bucket, get_tokens_from_user, shrink_user_bucket
 from CallOpenAI import call_openai, valid_model, format_messages
-from Publisher import send_response
+from Publisher import send_response, send_metrics
 from logger import error_message
 
 token_limit = 200000 # token/min
@@ -55,8 +56,14 @@ def rate_limit(batch):
             error_message(errormessage, job_id, user_id, "RowDropped", row)
             return
         
-        # Call LLM API
+        # Call LLM API & record metrics
+        in_llm = time.time()
         response_content, actual_tokens, counter = call_openai(messages, user_id, tokens_needed, token_limit, api_key, model)
+        out_llm = time.time()
+
+        # Send metrics to status collector
+        send_metrics(user_id, job_id, row, in_llm, out_llm)
+
         if response_content is None:
             errormessage = f"OpenAI API call failed, sending back tokens & aborting row {row}"
             print(errormessage)

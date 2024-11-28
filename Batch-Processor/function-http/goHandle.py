@@ -1,6 +1,8 @@
+import time
 from BigQueryReader import read_from_database, get_database_length
 from pubSubSender import pubSubSender
 from performance import decrementBatchProcessor, incrementQueue1, setBatchProcessor, setTotalCount, resetSystem
+from pubSubSender import send_metrics
 
 def goHandle(Job_ID:str, Client_ID:str, User_Project_ID:str, User_Dataset_ID:str, Input_Table_ID:str, Output_Table_ID:str, Model:str, API_key:str):
     
@@ -16,6 +18,9 @@ def goHandle(Job_ID:str, Client_ID:str, User_Project_ID:str, User_Dataset_ID:str
         print(f"An unexpected error occurred: {e}")
     
     for i in range(1, int(Database_Length) + 1): 
+        # record start time in stats collector
+        send_metrics(Client_ID, Job_ID, i, time.time())
+        
         # Read the database
         rowFromDatabase = read_from_database(i, Job_ID, Client_ID, User_Project_ID,  User_Dataset_ID, Input_Table_ID)
         
