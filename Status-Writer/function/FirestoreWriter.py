@@ -15,10 +15,12 @@ def logProgressWriter(Job_ID:str, Client_ID:str, Processed_Rows: int, Num_Rows:i
         print(f"Unexpected error writing progress to firestore: {e}")
 
 # convey what rows have been dropped for a job in firestore 
-def rowErrorWriter(Job_ID, Client_ID, Failed_Row):
+def rowErrorWriter(Job_ID, Client_ID, Failed_Row, Error_Message):
     try:
         db = firestore.Client()
-        doc_ref = db.collection("Clients").document(Client_ID).collection("Jobs").document("Job "+ Job_ID).collection("Job Data").document("Progress")
+
+        # First update error row lists
+        doc_ref = db.collection("Clients").document(Client_ID).collection("Jobs").document("Job "+ Job_ID).collection("Job Data").document("Errors")
         # Use a transaction to ensure atomic updates 
         with db.transaction(): 
             doc = doc_ref.get() 
@@ -26,6 +28,16 @@ def rowErrorWriter(Job_ID, Client_ID, Failed_Row):
                 doc_ref.update({ 'error_rows': firestore.ArrayUnion([Failed_Row]) }) # Append failed row
             else: 
                 doc_ref.set({ 'error_rows': [Failed_Row] }) # New list of failed rows starting with this row
+        print(f"Updated error row to fire store for job {Job_ID}")
+
+        # Then update error string list
+        # Use a transaction to ensure atomic updates 
+        with db.transaction(): 
+            doc = doc_ref.get() 
+            if doc.exists: 
+                doc_ref.update({ 'error_row_messages': firestore.ArrayUnion([Error_Message]) }) # Append failed row message
+            else: 
+                doc_ref.set({ 'error_row_messages': [Error_Message] }) # New list of failed row messages starting with this row
         print(f"Updated error row to fire store for job {Job_ID}")
 
     except Exception as e:

@@ -17,9 +17,9 @@ def pubSubSender(message):
     attributes = {
         "Log_Type": "Error",
         "Microservice": "RateLimiter",
-        "Job_ID": "466f47f2-6a5e-4ee1-9603-661095296532",
-        "Client_ID": "rayan syed",
-        "Row_Number": "3",
+        "Job_ID": "a1a7deec-83fa-4224-8752-b13774271078",
+        "Client_ID": "test",
+        "Row_Number": "1",
         "Num_Rows": "",
         "Error_Type": "RowDropped"
     }
@@ -32,5 +32,5 @@ def pubSubSender(message):
 
 # Example usage
 if __name__ == "__main__":
-    data = "Solve: 1+1"
+    data = "fake error message"
     pubSubSender(data)

@@ -1,5 +1,6 @@
 import base64
 import functions_framework
+from datetime import datetime
 from FirestoreWriter import logProgressWriter, rowErrorWriter
 
 @functions_framework.cloud_event
@@ -20,7 +21,7 @@ def log(cloud_event):
         # Handle errors here
         if log_type == "Error":
             if error_type == "RowDropped":
-                rowErrorWriter(job_id, client_id, int(row))
+                rowErrorWriter(job_id, client_id, int(row), f"Error from {microservice} for row {row} at {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: {data}")
                 
 
         # Write to firebase here
