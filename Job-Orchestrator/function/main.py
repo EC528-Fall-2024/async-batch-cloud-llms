@@ -1,7 +1,7 @@
 import base64
 import functions_framework
 from InvokeBatchProcessor import call_batch_processor
-from FirestoreWriter import writeJobOrchestratorInformation
+from FirestoreWriter import writeJobOrchestratorInformation, initializeJobHierarchy
 
 
 # Triggered from a message on a Cloud Pub/Sub topic
@@ -22,6 +22,9 @@ def start_job(cloud_event):
 
         # Print received message and attributes 
         print(f"Processing {data} for {client_id}'s job {job_id}")
+        
+        # ADDED Init - Noah - Thursday Nov 18th
+        initializeJobHierarchy(client_id, job_id)
 
         # Write metadata to database
         writeJobOrchestratorInformation(str(job_id), client_id, project_ID, dataset_ID, input_table_ID, output_table_ID, model)
