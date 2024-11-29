@@ -17,13 +17,14 @@ def reverse(cloud_event):
         project_ID = cloud_event.data["message"]["attributes"]["User_Project_ID"]
         dataset_ID = cloud_event.data["message"]["attributes"]["User_Dataset_ID"]
         table_ID = cloud_event.data["message"]["attributes"]["Output_Table_ID"]
+        final_row = cloud_event.data["message"]["attributes"]["Final_Row_Flag"]
         
 
         # Print received message and attributes 
         print(f"Received message: {data}, Job_ID: {job_id}, Client_ID: {client_id}, Row_Number: {row_number}") 
 
         # Start time metric calculations in stats collector by marking end time
-        send_metrics(client_id, job_id, row_number, time.time())
+        send_metrics(client_id, job_id, row_number, time.time(), final_row)
 
         # Write the message to a database 
         insert_rows(response=data, row=row_number, job_id=job_id, client_id=client_id, project_id=project_ID, dataset_id=dataset_ID, table_id=table_ID)

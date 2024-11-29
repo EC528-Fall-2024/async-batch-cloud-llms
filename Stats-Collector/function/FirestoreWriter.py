@@ -73,3 +73,16 @@ def StatsWriter(Job_ID, Client_ID, Row):
 
     except Exception as e:
         print(f"Unexpected error calculating metrics/sending stats to Firestore: {e}")
+
+def end_time(Job_ID, Client_ID):
+    try:
+        db = firestore.Client()
+        doc_ref = db.collection("Clients").document(Client_ID).collection("Jobs").document("Job "+ Job_ID).collection("Job Data").document("Orchestrator Information")
+        doc_ref.update({
+            "End_Time": firestore.SERVER_TIMESTAMP
+        })
+        print(f"Updated end time in metadata in Firestore since all rows processed for job {Job_ID}")
+    except Exception as e:
+        print(f"Unexpected error updating end time for job {Job_ID} in Firestore: {e}")
+
+            

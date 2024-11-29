@@ -25,7 +25,7 @@ def log(message, job_id, client_id, error_type, row):
     print(f"Sent error log message to job orchestrator.")
 
 # send time metrics to status collector
-def send_metrics(client_id, job_id, row, end):
+def send_metrics(client_id, job_id, row, end, final_row):
     publisher = pubsub_v1.PublisherClient()
     publisher_path = publisher.topic_path(project_id, "Stats")
 
@@ -39,7 +39,8 @@ def send_metrics(client_id, job_id, row, end):
         "Start": "",
         "In_LLM": "",
         "Out_LLM": "",
-        "End": str(end)
+        "End": str(end),
+        "Final_Row_Flag": str(final_row)
     }
 
     # Send out response via pub/sub

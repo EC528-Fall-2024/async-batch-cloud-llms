@@ -1,7 +1,7 @@
 import base64
 import functions_framework
 import redis
-from FirestoreWriter import StatsWriter
+from FirestoreWriter import StatsWriter, end_time
 
 # set up redis_client
 redis_client = redis.Redis(host='10.84.53.171', port=6379, db=0)
@@ -32,6 +32,13 @@ def update(cloud_event):
             print(f"Updated llm times of job {job_id}'s row {row}")
 
         elif service == "ReverseBatchProcessor":
+            # get final flag
+            final_flag = bool(int(cloud_event.data["message"]["attributes"]["Final_Row_Flag"]))
+            if(final_flag):
+                # write the final end time to firestore
+                end_time(job_id, client_id)
+                
+            # deal with standard metric updates
             redis_client.hset(key, "end", end) 
             print(f"Updated end time of job {job_id}'s row {row}")
             StatsWriter(job_id, client_id, row)
