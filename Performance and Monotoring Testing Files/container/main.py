@@ -12,22 +12,12 @@ def hello():
     return 'Hello, World!'
 
 
-# Data
-total_count = 0
-batch_processor_count = 0
-reverse_batch_processor_count = 0
-rate_limiter_count = 0
-
-job_ID = 0
-
-#Types of microservice
-Microservice = ""
+# Types of microservice
 # batch_processor
 # reverse_batch_processor
-# rate limiter
+# rate_limiter
 
-project_ID = "elated-scope-437703-h9"
-
+# project_ID = "elated-scope-437703-h9"
 db = firestore.Client()
 
 
@@ -38,6 +28,7 @@ db = firestore.Client()
 def resetSystem():
 
     data = request.get_json()
+    client_ID = data.get("Client_ID")
     job_ID = data.get("Job_ID")
     
     clear_counts(db, job_ID)
@@ -53,9 +44,10 @@ def resetSystem():
 def setStats():
 
     data = request.get_json()
+    client_ID = data.get("Client_ID")
     job_ID = data.get("Job_ID")
     
-    calculateStats(db, job_ID)
+    calculateStats(db, client_ID, job_ID)
 
     print("Resetting the system")
     
@@ -65,9 +57,10 @@ def setStats():
 def getStats():
 
     data = request.get_json()
+    client_ID = data.get("Client_ID")
     job_ID = data.get("Job_ID")
     
-    returnData = queryStats(db, job_ID)
+    returnData = queryStats(db, client_ID, job_ID)
     print(returnData)
     
     return jsonify({"returnData": returnData }), 200
@@ -83,9 +76,10 @@ def setTotalCount():
     
     # Extract the `inputBatchCount` field, with error handling
     total_count = data.get("total_count")
+    client_ID = data.get("Client_ID")
     job_ID = data.get("Job_ID")
 
-    setCount(db, job_ID, "total_count",total_count)
+    setCount(db, client_ID, job_ID, "total_count",total_count)
         
     return jsonify({"response": 'The total_count has been set' }), 200
     
@@ -94,11 +88,12 @@ def setTotalCount():
 def setBatchProcessorCount():
     data = request.get_json()
     
+    client_ID = data.get("Client_ID")
     job_ID = data.get("Job_ID")
     total_count = data.get("batch_processor_count")
 
     
-    setCount(db, job_ID, "batch_processor_count",total_count)
+    setCount(db, client_ID, job_ID, "batch_processor_count",total_count)
 
     return jsonify({"response": 'The batch_processor_count set' }), 200 
 
@@ -110,10 +105,11 @@ def setBatchProcessorCount():
 def decrementService():
         
     data = request.get_json()
+    client_ID = data.get("Client_ID")
     job_ID = data.get("Job_ID")
     microservice = data.get("Microservice")
     
-    status = decrementFirestore(db, job_ID, microservice)
+    status = decrementFirestore(db, client_ID, job_ID, microservice)
     
     return jsonify({"Status": (microservice + ': ' +  str(status))}), 200
 
@@ -127,10 +123,11 @@ def incrementService():
     global rate_limiter_count
     
     data = request.get_json()
+    client_ID = data.get("Client_ID")
     job_ID = data.get("Job_ID")
     microservice = data.get("Microservice")
     
-    status = incrementFirestore(db, job_ID, microservice)
+    status = incrementFirestore(db, client_ID, job_ID, microservice)
     
     return jsonify({"Status": (microservice + ': ' +  str(status))}), 200
 
@@ -144,10 +141,11 @@ def incrementService():
 def getBatchProcessorLoad():
     
     data = request.get_json()
+    client_ID = data.get("Client_ID")
     job_ID = data.get("Job_ID")
     microservice = data.get("Microservice")
     
-    countValue = getMicroserviceCount(db, job_ID, microservice)
+    countValue = getMicroserviceCount(db, client_ID, job_ID, microservice)
 
     return jsonify({(microservice + "_count"): countValue}), 200
 
@@ -160,7 +158,7 @@ def getAllInfo():
     job_ID = data.get("Job_ID")
     
     
-    allInfo = getAllFirestore(db, job_ID)
+    allInfo = getAllFirestore(db, client_ID, job_ID)
     print(allInfo)
         
     return jsonify({"total_count": str(allInfo)}), 200

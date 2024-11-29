@@ -1,6 +1,7 @@
 from google.cloud import firestore
 
 
+# TODO: In the future, Start_Time should be calculated by the flask API and passed into the function
 def writeJobOrchestratorInformation(Job_ID:str, Client_ID:str, User_Project_ID:str, User_Dataset_ID:str, Input_Table_ID:str, Output_Table_ID:str, Model:str):
     
     try:
@@ -13,7 +14,9 @@ def writeJobOrchestratorInformation(Job_ID:str, Client_ID:str, User_Project_ID:s
             "Output_Table_ID": Output_Table_ID,
             "Model": Model,
             "Job_ID": str(Job_ID),
-            "Client_ID": Client_ID
+            "Client_ID": Client_ID,
+            "Start_Time": firestore.SERVER_TIMESTAMP,
+            "End_Time": 0
         })
         
         print(f"Wrote job {Job_ID} metadata to firestore successfully.")
@@ -41,26 +44,28 @@ def initializeJobHierarchy(Client_ID: str, Job_ID: str):
         if not job_doc_ref.get().exists:
             job_doc_ref.set({})  # Create an empty document
             print(f"Initialized Job document for Job_ID: {Job_ID}")
+            
 
-        # Ensure "Job Data" sub-collection exists
         job_data_doc_ref = job_doc_ref.collection("Job Data").document("Orchestrator Information")
         if not job_data_doc_ref.get().exists:
             job_data_doc_ref.set({})  # Create a minimal document to initialize
             print(f"Initialized Job Data sub-collection for Job_ID: {Job_ID}")
             
-                # Ensure "Job Data" sub-collection exists
-        job_data_doc_ref = job_doc_ref.collection("Job Data").document("PerformanceAPI")
-        if not job_data_doc_ref.get().exists:
-            job_data_doc_ref.set({})  # Create a minimal document to initialize
+        # job_data_doc_ref = job_doc_ref.collection("Job Data").document("PerformanceAPI")
+        # if not job_data_doc_ref.get().exists:
+        #     job_data_doc_ref.set({})  # Create a minimal document to initialize
             
-                # Ensure "Job Data" sub-collection exists
-        job_data_doc_ref = job_doc_ref.collection("Job Data").document("Progress")
-        if not job_data_doc_ref.get().exists:
-            job_data_doc_ref.set({})  # Create a minimal document to initialize
+        # job_data_doc_ref = job_doc_ref.collection("Job Data").document("Progress")
+        # if not job_data_doc_ref.get().exists:
+        #     job_data_doc_ref.set({})  # Create a minimal document to initialize
             
-        job_data_doc_ref = job_doc_ref.collection("Job Data").document("Stats")
-        if not job_data_doc_ref.get().exists:
-            job_data_doc_ref.set({})  # Create a minimal document to initialize
+        # job_data_doc_ref = job_doc_ref.collection("Job Data").document("Errors")
+        # if not job_data_doc_ref.get().exists:
+        #     job_data_doc_ref.set({})  # Create a minimal document to initialize
+            
+        # job_data_doc_ref = job_doc_ref.collection("Job Data").document("Stats")
+        # if not job_data_doc_ref.get().exists:
+        #     job_data_doc_ref.set({})  # Create a minimal document to initialize
             
 
         print(f"Hierarchy initialized successfully for Client_ID: {Client_ID}, Job_ID: {Job_ID}")
@@ -68,4 +73,5 @@ def initializeJobHierarchy(Client_ID: str, Job_ID: str):
     except Exception as e:
         print(f"Error initializing hierarchy: {e}")
         
-initializeJobHierarchy("rick sorkin", "job 2123")
+        
+# initializeJobHierarchy("rick sorkin", "job 2123")

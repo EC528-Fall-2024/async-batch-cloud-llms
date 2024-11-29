@@ -6,10 +6,10 @@ from google.cloud import firestore
 ############
 # Firebase #
 ############
-def clear_counts(db, Job_ID):
+def clear_counts(db, Client_ID, Job_ID):
     # db = firestore.Client()
     # [START firestore_setup_dataset_pt1]
-    doc_ref = db.collection("Jobs").document("Job "+ str(Job_ID)).collection("Job Data").document("Counts")
+    doc_ref = db.collection("Clients").document(Client_ID).collection("Jobs").document("Job "+ str(Job_ID)).collection("Job Data").document("PerformanceAPI")
         # doc_ref.set({"first": "Ada", "last": "Lovelace", "born": 1815})
     doc_ref.set({
         "total_count": 0,
@@ -20,7 +20,7 @@ def clear_counts(db, Job_ID):
         "queue_2_count": 0
     })
     
-    doc_ref = db.collection("Jobs").document("Job "+ str(Job_ID)).collection("Job Data").document("Time Stamps")
+    doc_ref = db.collection("Clients").document(Client_ID).collection("Jobs").document("Job "+ str(Job_ID)).collection("Job Data").document("PerformanceAPI")
         # doc_ref.set({"first": "Ada", "last": "Lovelace", "born": 1815})
     doc_ref.set({
         "start_time": 0,
@@ -28,8 +28,8 @@ def clear_counts(db, Job_ID):
     })
     
     
-def setCount(db, Job_ID, Microservice, Count):
-    doc_ref = db.collection("Jobs").document("Job "+ str(Job_ID)).collection("Job Data").document("Counts")
+def setCount(db, Client_ID, Job_ID, Microservice, Count):
+    doc_ref = db.collection("Clients").document(Client_ID).collection("Jobs").document("Job "+ str(Job_ID)).collection("Job Data").document("PerformanceAPI")
     doc_ref.update({ Microservice:  Count })
     
     if(Microservice == "batch_processor_count"):
@@ -38,15 +38,15 @@ def setCount(db, Job_ID, Microservice, Count):
         
 
     
-def setTime(db, Job_ID, TypeOfTime, CurrentTime):
+def setTime(db, Client_ID, Job_ID, TypeOfTime, CurrentTime):
     # db = firestore.Client()
-    doc_ref = db.collection("Jobs").document("Job "+ str(Job_ID)).collection("Job Data").document("Time Stamps")
+    doc_ref = db.collection("Clients").document(Client_ID).collection("Jobs").document("Job "+ str(Job_ID)).collection("Job Data").document("PerformanceAPI")
     doc_ref.update({ TypeOfTime:  CurrentTime })
     
     
 
-def incrementFirestore(db, Job_ID, Microservice):
-    doc_ref = db.collection("Jobs").document("Job " + str(Job_ID)).collection("Job Data").document("Counts")
+def incrementFirestore(db, Client_ID, Job_ID, Microservice):
+    doc_ref = db.collection("Clients").document(Client_ID).collection("Jobs").document("Job " + str(Job_ID)).collection("Job Data").document("PerformanceAPI")
     
     # Retrieve the current counts from Firestore
     counts = doc_ref.get().to_dict()
@@ -66,15 +66,15 @@ def incrementFirestore(db, Job_ID, Microservice):
         setTime(db, Job_ID, "end_time", firestore.SERVER_TIMESTAMP)
     
 
-def calculateStats(db, Job_ID):
+def calculateStats(db, Client_ID, Job_ID):
     ## get start, end and total count
-    doc_ref = db.collection("Jobs").document("Job "+ str(Job_ID)).collection("Job Data").document("Counts")
+    doc_ref = db.collection("Clients").document(Client_ID).collection("Jobs").document("Job "+ str(Job_ID)).collection("Job Data").document("PerformanceAPI")
     counts = doc_ref.get().to_dict()
     
     # Extract the current count for the microservice and the total count
     total_count = counts.get("total_count", 0)
     
-    doc_ref = db.collection("Jobs").document("Job "+ str(Job_ID)).collection("Job Data").document("Time Stamps")
+    doc_ref = db.collection("Clients").document(Client_ID).collection("Jobs").document("Job "+ str(Job_ID)).collection("Job Data").document("PerformanceAPI")
     counts = doc_ref.get().to_dict()
     
     # Extract the current count for the microservice and the total count
@@ -86,7 +86,7 @@ def calculateStats(db, Job_ID):
     total_time_seconds = total_time.total_seconds()
     average_time_seconds = total_time_seconds / total_count
     
-    doc_ref = db.collection("Jobs").document("Job "+ str(Job_ID)).collection("Job Data").document("Stats")
+    doc_ref = db.collection("Clients").document(Client_ID).collection("Jobs").document("Job "+ str(Job_ID)).collection("Job Data").document("PerformanceAPI")
     
     doc_ref.update({
         "average_time": average_time_seconds,
@@ -94,8 +94,8 @@ def calculateStats(db, Job_ID):
     })
 
 ## Not sure f this works or how this works?? - Noah... 
-def queryStats(db, Job_ID):
-    doc_ref = db.collection("Jobs").document("Job "+ str(Job_ID)).collection("Job Data").document("Time Stamps")
+def queryStats(db, Client_ID, Job_ID):
+    doc_ref = db.collection("Clients").document(Client_ID).collection("Jobs").document("Job "+ str(Job_ID)).collection("Job Data").document("PerformanceAPI")
     counts = doc_ref.get().to_dict()
     
     # Extract the current count for the microservice and the total count
@@ -119,8 +119,8 @@ def queryStats(db, Job_ID):
     
     return returnData
     
-def decrementFirestore(db, Job_ID, Microservice):
-    doc_ref = db.collection("Jobs").document("Job "+ str(Job_ID)).collection("Job Data").document("Counts")
+def decrementFirestore(db, Client_ID, Job_ID, Microservice):
+    doc_ref = db.collection("Clients").document(Client_ID).collection("Jobs").document("Job "+ str(Job_ID)).collection("Job Data").document("PerformanceAPI")
         # doc_ref.set({"first": "Ada", "last": "Lovelace", "born": 1815})
         
     doc_ref.update({
@@ -130,20 +130,20 @@ def decrementFirestore(db, Job_ID, Microservice):
     # Return status of the write
     return True
 
-def getAllFirestore(db, Job_ID):
+def getAllFirestore(db, Client_ID, Job_ID):
     # db = firestore.Client()
 
-    doc_ref = db.collection("Jobs").document("Job "+ str(Job_ID)).collection("Job Data").document("Counts")
+    doc_ref = db.collection("Clients").document(Client_ID).collection("Jobs").document("Job "+ str(Job_ID)).collection("Job Data").document("PerformanceAPI")
 
     doc = doc_ref.get()
     countData = CountData.from_dict(doc.to_dict())
     return countData
     
     
-def getMicroserviceCount(db, Job_ID, Microservice):
+def getMicroserviceCount(db, Client_ID, Job_ID, Microservice):
     # db = firestore.Client()
 
-    doc_ref = db.collection("Jobs").document("Job "+ str(Job_ID)).collection("Job Data").document("Counts")
+    doc_ref = db.collection("Clients").document(Client_ID).collection("Jobs").document("Job "+ str(Job_ID)).collection("Job Data").document("PerformanceAPI")
 
     doc = doc_ref.get()
     countData = CountData.from_dict(doc.to_dict())

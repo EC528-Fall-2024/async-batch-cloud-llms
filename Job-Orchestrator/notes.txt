@@ -10,3 +10,4 @@ This folder contains two orchestrators
 functions-framework --target=start_job
 
 // Chmod program
+chmod +x deploy.sh
