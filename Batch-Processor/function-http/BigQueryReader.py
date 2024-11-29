@@ -39,10 +39,6 @@ def read_from_database(row, Job_ID, Client_ID, project_id, dataset_id, table_id)
 
         # Get the single row result
         for row in results:
-            print("///////")
-            print(f"{row}")
-            print("///////")
-            # print(f"Prompt and Text for row {row} read successfully.")
             return row.prompt_and_text
         
         return None  # Return None if no row is found
@@ -55,7 +51,3 @@ def read_from_database(row, Job_ID, Client_ID, project_id, dataset_id, table_id)
         # send message to job orchestrator that this row was dropped
         log(message, Job_ID, Client_ID, "RowDropped", row)
         return None
-
-# # Need to update permissions to BQ Data View and BQ Job User
-# if __name__ == "__main__":
-#     read_from_database(row=1, Job_ID=1, Client_ID=1,project_id="sampleproject-440900",dataset_id='user_dataset',table_id='input_table')

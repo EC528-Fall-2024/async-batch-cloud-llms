@@ -25,7 +25,7 @@ def goHandle(Job_ID:str, Client_ID:str, User_Project_ID:str, User_Dataset_ID:str
         rowFromDatabase = read_from_database(i, Job_ID, Client_ID, User_Project_ID,  User_Dataset_ID, Input_Table_ID)
         
         if rowFromDatabase is not None: 
-            pubSubSender(i,rowFromDatabase,Job_ID, Client_ID, User_Project_ID, User_Dataset_ID, Output_Table_ID, Model, API_key, Database_Length)
+            pubSubSender(i, rowFromDatabase,Job_ID, Client_ID, User_Project_ID, User_Dataset_ID, Output_Table_ID, Model, API_key, Database_Length)
             print(f"Prompt and Text for row {i} read successfully.")
             
             # # Performance calls

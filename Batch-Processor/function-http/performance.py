@@ -3,22 +3,6 @@ import requests
 # VM URL
 base_url = "http://34.27.114.71:8080"
 
-# Local
-# base_url = "http://localhost:8089"
-
-
-
-# # Example Calls
-# #########################
-# decrementBatchProcessor(job_id)
-# incrementQueue1(job_id)
-        
-
-
-#########################
-# Batch Processor Calls #
-#########################
-
 def decrementBatchProcessor(Job_ID):
     
     json_body = {"Job_ID": Job_ID,"Microservice": "batch_processor"}
@@ -31,7 +15,7 @@ def decrementBatchProcessor(Job_ID):
     )
     
     if response.status_code == 200:
-        print("Success") # remove for implemetation
+        return
     return "Error"
 
 # queue calls
@@ -47,7 +31,7 @@ def incrementQueue1(Job_ID):
     )
     
     if response.status_code == 200:
-        print("Success") # remove for implemetation
+        return
     return "Error"
 
 
@@ -63,7 +47,7 @@ def setTotalCount(Job_ID):
     )
     
     if response.status_code == 200:
-        print("Success") # remove for implemetation
+        return
     return "Error"
 
 def setBatchProcessor(Job_ID):
@@ -78,7 +62,7 @@ def setBatchProcessor(Job_ID):
     )
     
     if response.status_code == 200:
-        print("Success") # remove for implemetation
+        return
     return "Error"
 
 def resetSystem(Job_ID):
@@ -93,6 +77,6 @@ def resetSystem(Job_ID):
     )
     
     if response.status_code == 200:
-        print("Success") # remove for implemetation
+        return
     return "Error"
 
