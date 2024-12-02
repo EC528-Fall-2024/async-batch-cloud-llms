@@ -1,3 +1,10 @@
+#############
+
+# Documentation:
+# https://cloud.google.com/iam/docs/write-policy-client-libraries#client-libraries-usage-python
+
+############
+
 SAMPLE_PROJ="sampleproject-440900"
 service_acc="dummy-account@elated-scope-437703-h9.iam.gserviceaccount.com"
 
