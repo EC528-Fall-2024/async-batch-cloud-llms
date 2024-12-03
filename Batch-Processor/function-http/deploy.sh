@@ -3,10 +3,10 @@ gcloud functions deploy batch-processor-http \
 --runtime=python312 \
 --region=us-central1 \
 --timeout=540 \
---memory=256Mi \
---cpu=1 \
+--memory=4Gi \
+--cpu=4 \
 --concurrency=1000 \
---max-instances=10 \
+--max-instances=1 \
 --source=. \
 --entry-point=go \
 --trigger-http \
