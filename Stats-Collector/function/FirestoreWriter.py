@@ -76,21 +76,24 @@ def StatsWriter(Job_ID, Client_ID, Row):
 
 def end_time(Job_ID, Client_ID):
     try:
-        db = firestore.Client()
-        doc_ref = db.collection("Clients").document(Client_ID).collection("Jobs").document("Job "+ Job_ID).collection("Job Data").document("Orchestrator Information")
-        doc_ref.update({
-            "End_Time": firestore.SERVER_TIMESTAMP
-        })
-        print(f"Updated end time in metadata in Firestore since all rows processed for job {Job_ID}")
+        # Use redis lock for updating firestore
+        with redis_client.lock(f"{Client_ID}_{Job_ID}_info_lock"):
+            db = firestore.Client()
+            doc_ref = db.collection("Clients").document(Client_ID).collection("Jobs").document("Job "+ Job_ID).collection("Job Data").document("Orchestrator Information")
+            doc_ref.update({
+                "End_Time": firestore.SERVER_TIMESTAMP
+            })
+            print(f"Updated end time in metadata in Firestore since all rows processed for job {Job_ID}")
+
     except Exception as e:
         print(f"Unexpected error updating end time for job {Job_ID} in Firestore: {e}")
 
 def write_llm_cost(Job_ID, Client_ID, llm_cost):
     try:
         # Use redis lock for updating firestore
-        with redis_client.lock(f"{Client_ID}_{Job_ID}_progress_lock"):
+        with redis_client.lock(f"{Client_ID}_{Job_ID}_info_lock"):
             db = firestore.Client()
-            doc_ref = db.collection("Clients").document(Client_ID).collection("Jobs").document("Job "+ Job_ID).collection("Job Data").document("Progress")
+            doc_ref = db.collection("Clients").document(Client_ID).collection("Jobs").document("Job "+ Job_ID).collection("Job Data").document("Orchestrator Information")
             doc = doc_ref.get() # get current state
             data = doc.to_dict() # get variables
 
