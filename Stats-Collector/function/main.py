@@ -1,7 +1,7 @@
 import base64
 import functions_framework
 import redis
-from FirestoreWriter import StatsWriter, end_time
+from FirestoreWriter import StatsWriter, end_time, write_llm_cost
 
 # set up redis_client
 redis_client = redis.Redis(host='10.84.53.171', port=6379, db=0)
@@ -27,9 +27,14 @@ def update(cloud_event):
             print(f"Updated start time of job {job_id}'s row {row}")
         
         elif service == "RateLimiter": 
+            # standard metric updates
             redis_client.hset(key, "in_llm", in_llm) 
             redis_client.hset(key, "out_llm", out_llm) 
             print(f"Updated llm times of job {job_id}'s row {row}")
+
+            # llm cost update
+            llm_cost = float(cloud_event.data["message"]["attributes"]["LLM_Cost"])
+            write_llm_cost(job_id, client_id, llm_cost)
 
         elif service == "ReverseBatchProcessor":
             # get final flag

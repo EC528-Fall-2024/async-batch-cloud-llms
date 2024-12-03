@@ -38,11 +38,11 @@ def get_tokens_from_global(amount, user_id):
                     tokens = int(redis_client.hget(GLOBAL_BUCKET_KEY, "tokens") or 0)
                     time.sleep(0.1) # brief sleep between checks
         
-        with redis_client.lock("global_increase"):
-            # Take tokens
-            redis_client.hincrby(GLOBAL_BUCKET_KEY, "tokens", -amount)
-            print(f"{user_id} consumed {amount} tokens from global bucket. Had {tokens} tokens, now {tokens-amount} tokens.")
-            return True  # Allocation succeeded
+            with redis_client.lock("global_increase"):
+                # Take tokens
+                redis_client.hincrby(GLOBAL_BUCKET_KEY, "tokens", -amount)
+                print(f"{user_id} consumed {amount} tokens from global bucket. Had {tokens} tokens, now {tokens-amount} tokens.")
+                return True  # Allocation succeeded
             
     # uncontrollable errors
     except redis.exceptions.RedisError as e:

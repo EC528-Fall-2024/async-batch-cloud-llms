@@ -1,6 +1,6 @@
 '''Rate Limiter'''
 import time
-from tokenizer import openai_tokenizer
+from tokenizer import openai_tokenizer, cost_estimator
 from RequestLimiter import incr_request
 from UserBucket import update_user_bucket, get_tokens_from_user, shrink_user_bucket
 from CallOpenAI import call_openai, valid_model, format_messages
@@ -35,7 +35,7 @@ def rate_limit(batch):
     messages = format_messages(message)
     
     # Predict needed tokens
-    tokens_needed = openai_tokenizer(messages, model)
+    token_input, tokens_needed = openai_tokenizer(messages, model)
     print(f"Predicting {tokens_needed} tokens needed")
 
     # Try to initialize/update that user's subbucket
@@ -62,7 +62,9 @@ def rate_limit(batch):
         out_llm = time.time()
 
         # Send metrics to status collector
-        send_metrics(user_id, job_id, row, in_llm, out_llm)
+        llm_cost = cost_estimator(model, token_input, actual_tokens)
+        print(f"Cost for job {job_id}'s row {row} estiamted to be {actual_tokens}")
+        send_metrics(user_id, job_id, row, in_llm, out_llm, llm_cost)
 
         if response_content is None:
             errormessage = f"OpenAI API call failed, sending back tokens & aborting row {row}"

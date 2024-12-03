@@ -56,7 +56,7 @@ def send_response(client_id, job_id, job_length, row, response, user_project_id,
         print(f"Error updating performance metrics: {e}...")
 
 # send time metrics to status collector
-def send_metrics(client_id, job_id, row, in_llm, out_llm):
+def send_metrics(client_id, job_id, row, in_llm, out_llm, llm_cost):
     publisher = pubsub_v1.PublisherClient()
     publisher_path = publisher.topic_path(project_id, stats_topic)
 
@@ -70,7 +70,8 @@ def send_metrics(client_id, job_id, row, in_llm, out_llm):
         "Start": "",
         "In_LLM": str(in_llm),
         "Out_LLM": str(out_llm),
-        "End": ""
+        "End": "",
+        "LLM_Cost": str(llm_cost)
     }
 
     # Send out response via pub/sub

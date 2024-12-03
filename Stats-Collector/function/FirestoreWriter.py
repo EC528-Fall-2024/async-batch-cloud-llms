@@ -85,4 +85,31 @@ def end_time(Job_ID, Client_ID):
     except Exception as e:
         print(f"Unexpected error updating end time for job {Job_ID} in Firestore: {e}")
 
+def write_llm_cost(Job_ID, Client_ID, llm_cost):
+    try:
+        # Use redis lock for updating firestore
+        with redis_client.lock(f"{Client_ID}_{Job_ID}_progress_lock"):
+            db = firestore.Client()
+            doc_ref = db.collection("Clients").document(Client_ID).collection("Jobs").document("Job "+ Job_ID).collection("Job Data").document("Progress")
+            doc = doc_ref.get() # get current state
+            data = doc.to_dict() # get variables
+
+            # Write the llm_cost if it doesnt exist
+            if data.get("LLM_Cost") is None:
+                doc_ref.update({
+                    "LLM_Cost": str(llm_cost)
+                })
             
+            # Add to current llm_cost otherwise
+            else:
+                data = doc.to_dict()
+                curr_cost = data.get("LLM_Cost")
+                llm_cost = float(curr_cost) + llm_cost
+                doc_ref.update({
+                    "LLM_Cost": str(llm_cost)
+                })
+            
+            print(f"Successfully updated LLM cost for job {Job_ID} in Firestore")
+
+    except Exception as e:
+        print(f"Error updating LLM Cost for job {Job_ID} in Firestore: {e}")
