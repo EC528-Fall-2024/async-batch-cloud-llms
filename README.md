@@ -21,7 +21,7 @@
 [Sprint3 Demo](https://drive.google.com/file/d/16_lV_df1BlzsAY3tFrf_6CKKA9yntzWA/view?usp=sharing)  
 [Sprint4 Demo](https://drive.google.com/file/d/1QWUBAF8ekrdv3lGSUJAmf5UFGnswtPHv/view?usp=sharing)  
 [Sprint5 Demo](https://drive.google.com/file/d/1RQ4_SbEfUcaeZkxm-eQ1F-HGWp4ByRd0/view?usp=sharing)  
-Sprint6 Demo
+Final Presentation
 
 
 ## Sprint Demo Slideshows:
@@ -30,7 +30,7 @@ Sprint6 Demo
 [Sprint3 Slideshow](https://docs.google.com/presentation/d/1f_77tuTC3z717qgW_xtFdsB0G6VBBOTUwqp2TKolrZM/edit?usp=sharing)  
 [Sprint4 Slideshow](https://docs.google.com/presentation/d/1LCoCL9HCC0GMx4awD1OfVJdlpK0LxsRrhhtyRrBAN9M/edit?usp=sharing)  
 [Sprint5 Slideshow](https://docs.google.com/presentation/d/1nKVr_AxejMW-zizcu4_F4WmSpvvAdPP4nAIwX2-5RAw/edit?usp=sharing)  
-Sprint6 Slideshow
+Final Presentation Slideshow
 
 ## 1. The Problem
 
@@ -72,72 +72,63 @@ They require an automated, scalable solution capable of handling large data volu
 ## 4.   Scope and Features Of The Project:
 **Scope Overview:**  
 
-The scope of this project is to design and develop an asynchronous batch processing system that automates the management of rate limits and requests flows for cloud-based LLMs. The system will focus on ensuring efficient, scalable, and cost-effective processing of large datasets without requiring manual oversight. It will also provide a user-friendly interface for managing and monitoring the batch process.
+The scope of this project is to design and develop an asynchronous batch processing system that automates the management of rate limits and requests flows for cloud-based LLMs. The system will focus on ensuring efficient, scalable, and cost-effective processing of large datasets without requiring manual oversight. It will also provide a user-friendly interface for managing and monitoring the batch process along with an operator dashboard for operators to easily get insights on the system as a whole.
 
-The solution will integrate with various LLM providers (e.g., OpenAi, Google Vertex AI) and streamline the communications across different APIs, ensuring a united approach to input and output handling. The solution will also notify users upon job completion, while automating key functions such as queueing, rate limiting logic, and error handling. 
-
-The scope of this project is to design and develop an asynchronous batch processing system that automates the management of rate limits and requests flows for cloud-based LLMs. The system will focus on ensuring efficient, scalable, and cost-effective processing of large datasets without requiring manual oversight. It will also provide a user-friendly interface for managing and monitoring the batch process.
-
-The solution will integrate with various LLM providers (e.g., OpenAi, Google Vertex AI) and streamline the communications across different APIs, ensuring a united approach to input and output handling. The solution will also notify users upon job completion, while automating key functions such as queueing, rate limiting logic, and error handling. 
+The solution will integrate with LLM providers (e.g. OpenAI) and streamline the communications across different APIs, ensuring a united approach to input and output BigQuery tables. The solution will provide users ways to check on job status, while automating key functions such as batch processing the input table, rate limiting the input prompts and data, and handling errors throughout the pipeline.
 
 **In-Scope Features:** 
 1. Async Batch Processing System:  
--  Develop an asynchronous system that handles and processes large datasets efficiently using cloud LLMs.
--  Enable the system to process tasks from multiple users and datasets at the same time.
-- Ensure compliance with LLM rate limits through automated management of the flow of request.
+- Develop an asynchronous system that handles and processes large datasets efficiently through batching for cloud LLMs
+- Enable the system to process tasks from multiple users and datasets at the same time
+- Utilize Google PubSub for communication between all microservices within this system
 
 2. Unified API Interface:
-- Create a common interface to interact with multiple LLM providers regardless of different formats.
-- Allow input via dataframes (e.g. pandas) and file formats (e.g. CSV, JSON).
-Handle different output formats.
+- Create a common interface between the backend and client-side for abstraction away from users and operators
+- Allow job orchestrator to communicate with API to trigger the starting of the pipeline when needed
+- Allow input via dataframes uploaded to BigQuery tables
 
-3. Queue, Scheduling and Rate Limit Management:
-- Implement automated queue and rate limiting management using tools like Apache Kafka, - Redis, or custom rate limiting algorithms.
-- Manage the flow of requests to the LLMs without requiring manual intervention, optimizing for speed and minimizing throttling.
-- Evaluate in-memory queues vs. persistent queues for optimal performance in handling large data backfill jobs.
+3. Rate Limit Management:
+- Implement automated handling of requests for LLMs through robust rate limiter keeping track of both requests and token usages with in-house tokenizer and rate-limiting algorithms with Redis for state
+- Manage the flow of requests to the LLMs without requiring manual intervention, optimizing for speed and minimizing throttling
+- Evaluate in-memory queues vs. persistent queues for optimal performance in handling large data backfill jobs
 
-4. Scalability and Performance Optimization:
-- Design the system to scale horizontally, accommodating increasing workloads without degrading performance.
-- Optimize resource use in cloud environments for cost management.
-Implement fault tolerance mechanisms.
-
-5. Cost Optimization: 
-- Evaluate cost factors and optimize the system to minimize expenses related to cloud LLM usage, storage, and data transfer. 
-- Implement monitoring tools to track resource usage and costs over time.
+4. Scalability, Performance, and Cost Optimization:
+- Design the system to scale horizontally, accommodating increasing workloads without degrading performance through the use of many serverless Google Cloud Functions
+- Optimize resource use in cloud environments for cost management
+- Implement monitoring tools to track resource usage and costs over time
 
 **Stretch Features (Out-of-Scope for initial Phase):**
-1. Dynamic Rate Limiting:
-- Implement dynamic rate limit adjustment based on real-time feedback from LLM providers. This feature would allow the system to adjust its request flow according to available capacity, ensuring maximum efficiency.
-2. Advanced Analytics and Reporting:
-- Develop an analytics dashboard that provides insight into the system’s performance, including metrics on throughput, error rates, and usage patterns over time.
-- Offer detailed reports to stakeholders, allowing them to optimize system use further.
-3. User Interface and Automation:
-- Build a user-friendly interface to track and monitor the status of request, including the number of queued, processed, and completed tasks.
-- Automate notifications to users when the process is complete or when issues arise. 
-4. Automated Error Handling:
-- Develop a mechanism to automatically retry failed requests.
-- Report error and log troubleshooting.
-5. Notifications and Reporting:
-- Automate notifications to users via email or other channels to inform when jobs are completed or errors occur.
-- Develop reporting tools that provide insight into system performance, queue statuses, and LLM usage patterns.
+1. User Interface and Automation:
+- Build a user-friendly interface in Jupyter Notebook to track and monitor the status of request, including the number of queued, processed, and completed tasks
+- Present notifications to users when the process is complete or when issues arise
 
-This scope shows what  will be delivered in the project, focusing on asynchronous batch processing, scalability, and efficient rate limit management while avoiding unnecessary complexity and features in the initial development phases.
+2. Advanced Analytics and Reporting
+- Develop an analytics dashboard in Jupyter Notebook to provide insights into the system’s performance
+- Capture and calculate key metrics such as LLM cost and throughput for operators to view overall performance and costs through the use of status writer and stats collector modules
+
+This scope shows what was delivered in the project, focusing on asynchronous batch processing, scalability, and efficient rate limit management while avoiding unnecessary complexity and features in the initial development phases. However, the stretch quality-of-life features were also met successfully, providing users and operators an end-to-end robust pipeline with simple usability.
 
 ## 5. Solution Concept
 ![image](./images/Nov22.png)
 
-**Stage 1: Information Ingestion**  
-The start of the data pipeline will consist of collecting information from the users. Requests will likely be packaged with metadata and the data to be processed (pyarrow table, pandas data frame, etc.) as a binary. The request will then be sent to an HTTP endpoint exposed by our API hosted on google cloud. Multiple technologies could be used to manage our API including cloud endpoints, an API Gateway, or Apigee. Choices relating to specific implementation will be resolved as we continue to work on our design.
+**Stage 1: User Interface/Operator Dashboards**  
+The User Interface provides a clean interface for Users to set up their input/output BigQuery tables, upload their dataframes, and start their jobs with ease.
 
+The Operator Dashboard provides operators an interface to monitor performance and retrieve core time and cost metrics regarding specific jobs and the pipeline as a whole. 
 
-**Stage 2: Queuing Batch Process Requests**  
-Once the API has received the batch request a google cloud function will push it to an incoming requests kafka topic. The microservice responsible for pushing the request to the kafka topic can also prepare the data for the Flink batch processing and rate limiting logic. In order to host Kafka and Flink clusters, we will need to set up a google kubernetes engine cluster and deploy using a service like Helm or Strimzi.
+All metadata for both of the user personas’ dashboards are stored in the Firestore database throughout job execution and accessed through the Flask API as described in the subsequent sections.
 
-**Stage 3: Rate Limiting Logic**  
-During this stage Flink will first ingest data from the kafka topic queue and prepare the batch to be processed by the LLM API. Before sending the request to the LLM API, logic relating to rate limit management will be performed and an LLM API node can be chosen. If needed the request can be requeued until a suitable node has been found.
+**Stage 2: Information Digestion**  
+The start of the data pipeline will consist of collecting information from the users. Requests are packaged with metadata to be written into Firestore Database by the Job Orchestrator. The user’s data is uploaded as a BigQuery table which the system’s service account has access to. The request will then be sent to an HTTP endpoint exposed by our API hosted on google cloud. The API will then trigger the Job Orchestrator via the IncomingJob Pub/Sub topic, effectively starting the pipeline. 
 
-**Stage 4: Forwarding Results**  
-Once the Flink job has received a complete response from an LLM API it will add this data to an appropriate kafka queue. Depending on the initial request made to our API these queues could deliver the data back to the user via a number of different methods. The resultant data could be stored on the cloud and continued to be used from there or a pub/sub system could be implemented to notify clients that the batch job is complete and the resulting data can be collected.
+**Stage 3: Batch Processing**  
+The Job Orchestrator will start the Batch Processor via an HTTP request containing relevant data for a user’s job. The Batch Processor will read from the input table in the user’s project in batches of 100, subsequently forwarding individual rows to the Rate Limiter via the InputData Pub/Sub Topic. Additionally, all important error information and time metrics are communicated to the Firestore database through Pub/Sub communication with the Status Writer and Stats Collector modules. 
+
+**Stage 4: Rate Limiting**  
+The Rate Limiter accepts input prompts and corresponding relevant text and uses an in-house tokenizer algorithm to predict the amount of tokens it will need. The prediction is used to dynamically allocate a user bucket for a specific client and subsequently attempt to retrieve tokens from a global bucket (depending on the model requested). Once tokens have been allocated the request passes through a request limiter (also depending on the model requested) before finally calling the LLM API and sending the response to the Reverse Batch Processor via the Pub/Sub OutputData Topic. All token bucket and request limiting metadata is stored in Redis. Additionally, all important progress and error information along with relevant metrics are communicated to the Firestore database through Pub/Sub communication with the Status Writer and Stats Collector modules. 
+
+**Stage 5: Reverse Batch Processor**
+The Reverse Batch Processor receives responses from the Rate Limiter and immediately writes them into the user’s project’s output BigQuery table for easy exporting as needed. Additionally, all important error information and time metrics are communicated to the Firestore database through Pub/Sub communication with the Status Writer and Stats Collector modules. 
 
 ## 6. Acceptance Criteria
 Our minimum viable product will be labeled as:
