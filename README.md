@@ -150,19 +150,22 @@ Our minimum viable product will be labeled as:
 
 
 ## 7. Rough Release Plan
-**Sprint 1:** End to End Proof of Concept.    
-During this demo, we will be building an end to end system that will mock the final data pipeline. This version will not use redis and will only implement a basic version of Apache Kafka and Flink those tasks are finished.
+**Sprint 1:** Research and Design
+During this sprint, we researched the different technologies and designed how our final product will function. 
 
-**Sprint 2:** Batch Queuing and Kafka Integration  
-During this sprint, we will be integrating the batch processing, Kafka, and Flink technologies. 
+**Sprint 2:** End to End Proof of Concept.
+During this sprint, we built an end to end system that mocked the final data pipeline. This version did not use redis and only implemented a basic version of Apache Kafka with an API call to the LLM.
 
-**Sprint 3:** Rate Limiting Logic and Fault Tolerance. Implementing additional LLMs
-During this sprint, we will begin to tune the rate limiting logic and include logic to detect and respond to Faults and Errors. Additionally, during this sprint we decide if we increase our offerings to more LLMs if possible.
+**Sprint 3:** Cloud Implementation Redesign
+During this sprint, we applied the lessons learned from the end to end proof of concept and redesign our initial approach. In this sprint we transitioned away from Apache Kafka and Flink and moved towards a google Pub/Sub messaging application.
 
-**Sprint 4:** Forwarding Results and Notifications  
-During this stage we will iterate on the response return process and handle notifications for the user.
+**Sprint 4:** Cloud Hosting of Functional elements
+During this sprint, we uploaded and tested many of the functional elements in the Google cloud. In this sprint we also redesigned and improved upon our architecture to adjust to the challenges we were experiencing. We moved many of the Cloud Run applications to Google Cloud Functions.
 
-**Sprint 5:** Scalability and Performance Optimization 
-The final sprint will focus on scaling and tuning the pipeline to make sure it is efficient for Two Sigma’s use case as well as scaled large enough to withstand their jobs. 
+**Sprint 5:** End to End Cloud Implementation
+During this Sprint, we provided a full end to end functioning application with all pieces hosted on the Google Cloud. 
+
+**Sprint 6:** Refactoring and Code Cleanup 
+During this sprint, we worked on improving our performance and structure while refactoring and simplifying the implementations. 
 
 
