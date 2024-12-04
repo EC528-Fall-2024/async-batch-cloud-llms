@@ -1,12 +1,5 @@
-############################################################################################################
-# https://cloud.google.com/iam/docs/write-policy-client-libraries#client-libraries-usage-python
-############################################################################################################
-
-############################################################################################################
-#TODO: Change project information; using batch-processor as gserviceaccount for now
-SAMPLE_PROJ="thing-443700"
+SAMPLE_PROJ=$1
 service_acc="batch-processor@elated-scope-437703-h9.iam.gserviceaccount.com"
-############################################################################################################
 
 gcloud config set project $SAMPLE_PROJ
 gcloud services enable cloudresourcemanager.googleapis.com
