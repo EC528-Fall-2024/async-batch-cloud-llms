@@ -1,39 +1,43 @@
 # Requires pandas and pyarrow to be installed
 import sys
+import google
 from google.cloud import bigquery
 import pandas as pd
 
+# Variables to read in from user
+project_id = "thing-443700"
+dataset_id = "test"
+table_id = "input"
+output_table_id = "output"
 
-client = bigquery.Client()
+client = bigquery.Client(project=project_id)
 
-############################################################################################################
-#TODO: Change dataframe based on what the client wants
+# Upload DF - change this to reading in file from same directory
 data = {
-    "name": ["Alice", "Bob", "Charlie"],
-    "age": [25, 30, 37],
+    "row": [1, 2],
+    "prompt_and_text": ["solve 1+1", "solve 1+2"],
 }
-############################################################################################################
 
 df = pd.DataFrame(data)
 
-############################################################################################################
-#TODO: Change BQT location
-project_id = "elated-scope-437703-h9"
-dataset_id = "test_dataset"
-table_id = "test_2"
-############################################################################################################
-
-# Define the full table reference
+# Define table parameters
 table_ref = f"{project_id}.{dataset_id}.{table_id}"
-
-############################################################################################################
-#TODO: Change the schema for what the information should be for LLM
 schema = [
-    bigquery.SchemaField("name", "STRING", mode="REQUIRED"),
-    bigquery.SchemaField("age", "INTEGER", mode="REQUIRED"),
+    bigquery.SchemaField("row", "INTEGER", mode="REQUIRED"),
+    bigquery.SchemaField("prompt_and_text", "STRING", mode="REQUIRED"),
 ]
-############################################################################################################
 
+# Create the dataset if it doesn't exist
+dataset_ref = client.dataset(dataset_id) 
+dataset = bigquery.Dataset(dataset_ref) 
+dataset.location = "US" # Set location as needed
+try: 
+    client.get_dataset(dataset_ref) 
+    print(f"Dataset {dataset_id} already exists.") 
+
+except google.api_core.exceptions.NotFound: 
+    dataset = client.create_dataset(dataset) 
+    print(f"Dataset {dataset_id} created successfully.")
 
 # Creates a new datatable if it doesn't exist, otherwise just quits
 try:

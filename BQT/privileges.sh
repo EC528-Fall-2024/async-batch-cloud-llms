@@ -4,7 +4,7 @@
 
 ############################################################################################################
 #TODO: Change project information; using batch-processor as gserviceaccount for now
-SAMPLE_PROJ="sampleproject-440900"
+SAMPLE_PROJ="thing-443700"
 service_acc="batch-processor@elated-scope-437703-h9.iam.gserviceaccount.com"
 ############################################################################################################
 
