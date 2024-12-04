@@ -21,10 +21,16 @@ data = {
 df = pd.DataFrame(data)
 
 # Define table parameters
-table_ref = f"{project_id}.{dataset_id}.{table_id}"
-schema = [
+input_table_ref = f"{project_id}.{dataset_id}.{table_id}"
+input_schema = [
     bigquery.SchemaField("row", "INTEGER", mode="REQUIRED"),
     bigquery.SchemaField("prompt_and_text", "STRING", mode="REQUIRED"),
+]
+
+output_table_ref = f"{project_id}.{dataset_id}.{output_table_id}"
+output_schema = [
+    bigquery.SchemaField("row", "INTEGER", mode="REQUIRED"),
+    bigquery.SchemaField("response", "STRING", mode="REQUIRED"),
 ]
 
 # Create the dataset if it doesn't exist
@@ -39,19 +45,30 @@ except google.api_core.exceptions.NotFound:
     dataset = client.create_dataset(dataset) 
     print(f"Dataset {dataset_id} created successfully.")
 
-# Creates a new datatable if it doesn't exist, otherwise just quits
+# Create new output datatable
 try:
-    table = bigquery.Table(table_ref, schema=schema)
+    table = bigquery.Table(output_table_ref, schema=output_schema)
     table = client.create_table(table)
-    print(f"Table {table_ref} created successfully.")
+    print(f"Table {output_table_ref} created successfully.")
 except Exception as e:
     if "Already Exists" in str(e):
-        print(f"Table {table_ref} already exists.")
+        print(f"Table {output_table_ref} already exists.")
+    else:
+        print(f"\nThe error message is {str(e)}")
+
+# Creates new input datatable
+try:
+    table = bigquery.Table(input_table_ref, schema=input_schema)
+    table = client.create_table(table)
+    print(f"Table {input_table_ref} created successfully.")
+except Exception as e:
+    if "Already Exists" in str(e):
+        print(f"Table {input_table_ref} already exists.")
         sys.exit()
     else:
         print(f"\nThe error message is {str(e)}")
 
-job = client.load_table_from_dataframe(df, table_ref)
+job = client.load_table_from_dataframe(df, input_table_ref)
 job.result()
 
-print(f"Data uploaded to {table_ref} successfully.")
+print(f"Data uploaded to {input_table_ref} successfully.")
