@@ -49,24 +49,13 @@ High-Level Goals of this project include:
 
 ## 3. Users/Personas Of The Project:
 
-**Persona 1: Quantitative Researcher**
-
-**Key Characteristics:** The quantitative researcher uses large datasets to develop investment strategies and conduct financial analysis, relying on cloud-based LLMs for data augmentation and processing. They face challenges due to rate limits imposed by providers, making manual management during backfill jobs impractical and time-consuming, which delays timely decision-making.
-
-**Needs and Expectations:** They desire automated rate limit management to submit large-scale backfill jobs without manual intervention. Efficient asynchronous processing is needed to handle millions of data points concurrently, ensuring timely outputs. A user-friendly interface for job submission, progress monitoring, and notifications upon completion is preferred, allowing them to focus on data analysis rather than technical limitations.  
-
-**Typical Scenario:** The researcher submits a backfill job involving millions of data points through the system without worrying about rate limits or monitoring. The system manages the request flow efficiently, automatically adhering to rate limits. Upon completion, they receive a notification and can immediately proceed with data analysis.
-
-**Persona 2: Data Engineer**  
-
-**Key Characteristics:**   
-The data engineer manages data pipelines and infrastructure to support researchers and analysts. Skilled in system architecture, scalability, and performance optimization, they are familiar with cloud services and LLM integrations. Currently, they spend significant time manually managing rate limits and job queues for large backfill jobs, as existing systems struggle with increasing workloads.  
-
-**Needs and Expectations:**
-They require an automated, scalable solution capable of handling large data volumes and multiple concurrent user requests without manual oversight. Robustness and fault tolerance mechanisms are needed to handle failures gracefully and ensure high availability. Advanced monitoring tools and automated alerts for issues or job completions are desired. Insights into resource utilization to optimize costs associated with cloud LLM usage are also important.
+**Users**   
+The users of this pipeline are traders at Two Sigma that want to run extremely large datasets through an LLM. They use this information to make trading divisions. Some examples could be news articles, financial documents, or weather data.  Speed and real time results are important to these traders. Additionally, having a low variable cost, or cost per job, is important. They should be able to monitor in-progress jobs, see completed jobs, and see errors that prevented a job from completing. The errors that a user sees should be user-friendly and all the information should be able to be viewed from a single UI (web-app or CLI)
 
 
-**Typical Scenario:** The data engineer sets up parameters in the new system, which automatically manages request flows for multiple backfill jobs submitted by researchers. The system handles rate limiting, scales resources as needed, and provides real-time monitoring dashboards. If issues occur, they receive automated alerts and can address problems promptly without constant supervision.
+**Operators**  
+The operators of this pipeline are the development and operations employees at Two Sigma. They want a reliable system that can scale quickly. They want to have visibility into status/logs/errors from all jobs, machines, cloud functions. They would like easy access to information about the pipeline. Additionally, they would also like a single UI (web-app or CLI) that can allow them to see and configure all necessary data about the system.
+
 
 
 ## 4.   Scope and Features Of The Project:
@@ -136,17 +125,20 @@ The Reverse Batch Processor receives responses from the Rate Limiter and immedia
 ## 6. Acceptance Criteria
 Our minimum viable product will be labeled as:
 
-**Minimum Criteria** 
-1. Format the datasets into partitioned data and for it to work with pre-set listings of tested LLMs. This will likely be limited to the more ‘popular’ LLMs: OpenAI, Google, Azure. If the data follows the requirements to be processed by any of the requests, the other LLMs should be able to process it as well. For example, if the dataset can be parsed, partitioned, and is accepted to the Google LLM API, then our model should be able to reparse it into the appropriate requirements for Azure, OpenAI, etc.
-2. The partitioned, batched data that is within the LLM API rate limits will get responses.
-3. The data should be asynchronously batch processed; manual intervention is not required, data thrown into our model will be processed (and if not processed due to rate limits, labeled as such).
-4. Model should work for any range of data, only limiting factors are cloud storage and rate limiting spendings. A high tier of LLM rate limits and large amounts of cloud storage should work in the same way as a low tier of LLM rate limits and low amounts of cloud storage. 
-5. Multiple users will be able to contribute to the batch data across multiple systems
 
-**Stretch goals:**
-1. Friendly UI to understand how the data pipeline is being processed at any moment in time
-2. Expand beyond OpenAI, Google, Azure and other LLMs for testing
-3. Allowance for flexible data; PyArrow, Pandas, other libraries supporting other data/file types.
+Minimum Criteria
+1. Ability to read data and write LLM responses to a cloud database.
+2. Ensure compliance with rate limits and timely processing of large datasets.
+3. Create a user interface for users to monitor the current jobs and completion status.
+
+
+Stretch goals:
+1. Implement advanced features such as dynamic rate limit adjustment based on real-time feedback from the LLM provider.
+2. Develop analytics and reporting tools to provide insights into system performance and usage patterns.
+3. Create a user interface for operators that allows for managing of pipeline load as well as monitor current clients and jobs in the pipeline. 
+4. Develop logging infrastructure to comply with trading guidelines.
+5. Handle alternative data types and formats include python DataFrames and pyarrow tables.
+
 
 
 ## 7. Rough Release Plan
