@@ -150,22 +150,28 @@ Our minimum viable product will be labeled as:
 
 
 ## 7. Rough Release Plan
-**Sprint 1:** Research and Design
+**Sprint 1:** Research and Design 
+
 During this sprint, we researched the different technologies and designed how our final product will function. 
 
-**Sprint 2:** End to End Proof of Concept.
-During this sprint, we built an end to end system that mocked the final data pipeline. This version did not use redis and only implemented a basic version of Apache Kafka with an API call to the LLM.
+**Sprint 2:** End to End Proof of Concept 
 
-**Sprint 3:** Cloud Implementation Redesign
+During this sprint, we built an end to end system that mocked the final data pipeline. This version did not use Redis and only implemented a basic version of Apache Kafka with an API call to the LLM.
+
+**Sprint 3:** Cloud Implementation Redesign 
+
 During this sprint, we applied the lessons learned from the end to end proof of concept and redesign our initial approach. In this sprint we transitioned away from Apache Kafka and Flink and moved towards a google Pub/Sub messaging application.
 
-**Sprint 4:** Cloud Hosting of Functional elements
+**Sprint 4:** Cloud Hosting of Functional elements 
+
 During this sprint, we uploaded and tested many of the functional elements in the Google cloud. In this sprint we also redesigned and improved upon our architecture to adjust to the challenges we were experiencing. We moved many of the Cloud Run applications to Google Cloud Functions.
 
-**Sprint 5:** End to End Cloud Implementation
-During this Sprint, we provided a full end to end functioning application with all pieces hosted on the Google Cloud. 
+**Sprint 5:** End to End Cloud Implementation 
 
-**Sprint 6:** Refactoring and Code Cleanup 
-During this sprint, we worked on improving our performance and structure while refactoring and simplifying the implementations. 
+During this Sprint, we provided a full end to end functioning application with all pieces hosted on the Google Cloud. Additionally, basic performance metrics were implemented.
+
+**Final Sprint:** Refactoring and Code Cleanup 
+
+During this sprint, we worked on improving our performance and structure while refactoring and simplifying the implementations. User Interfaces and Operator Dashboards were created for efficient accessibility and ease of use.
 
 
