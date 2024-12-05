@@ -3,6 +3,26 @@ import google
 from google.cloud import bigquery
 import pandas as pd
 
+def BigQuery_to_CSV(project_id, dataset_id, table_id, csv_path):
+    # Initialize a BigQuery client
+    client = bigquery.Client(project=project_id)
+
+    # Construct the full table ID
+    table_id = f"{project_id}.{dataset_id}.{table_id}"
+
+    # Query to select all data from the table
+    query = f"SELECT * FROM `{table_id}`"
+
+    # Execute the query and load the result into a DataFrame
+    output_table = client.query(query)
+    df = output_table.to_dataframe()
+
+    # Save the DataFrame as a CSV file
+    df.to_csv(csv_path, index=False)
+
+    print(f"Data from {table_id} saved in {csv_path}")
+
+
 def CSV_to_BigQuery(CSV_path, project_id, dataset_id, table_id, output_table_id):
 
     # Connect to BigQuery client in project
