@@ -104,7 +104,10 @@ def submit_job():
 # Internal Function added Dec 5th by noah robitshek
 # Inputs: Client_ID, Job_ID
 # Outputs: True or False
-def jobHasErrors(db, client_id, job_id):
+def jobHasErrors(client_id, job_id):
+    
+    db = firestore.Client()
+
     # Define the document reference
     doc_ref = db.collection("Clients").document(client_id).collection("Jobs").document(job_id).collection("Job Data").document("Errors")
     
@@ -137,7 +140,9 @@ def get_progress(job_id, client_id):
 # getErrorRows
 # Inputs: Client_ID, Job_ID
 # Outputs: List of Errors
-def getErrorRows(db, Client_ID, Job_ID):
+def getErrorRows(Client_ID, Job_ID):
+    db = firestore.Client()
+
     doc_ref = db.collection("Clients").document(Client_ID).collection("Jobs").document(Job_ID).collection("Job Data").document("Errors")
     docs = doc_ref.get()
     data = docs.to_dict()
