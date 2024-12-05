@@ -28,13 +28,14 @@ def submitjob(username, password, Client_ID, User_Project_ID, User_Dataset_ID, I
         logging.info("📤 Submitting job...")
         job_id = submit_job(api_key, job_data)
 
-        # Step 3: Monitor Job Status
-        if job_id:
-            logging.info("⏳ Monitoring job status...")
-            final_status = wait_for_completion(
-                job_id, user_data["Client_ID"], api_key, 3)
-            if final_status:
-                logging.info("📊 Final Job Status Retrieved:")
-                logging.info(json.dumps(final_status, indent=4))
+        # # The code below would enable a continuous status pull until job completion
+        # # Step 3: Monitor Job Status
+        # if job_id:
+        #     logging.info("⏳ Monitoring job status...")
+        #     final_status = wait_for_completion(
+        #         job_id, user_data["Client_ID"], api_key, 3)
+        #     if final_status:
+        #         logging.info("📊 Final Job Status Retrieved:")
+        #         logging.info(json.dumps(final_status, indent=4))
     
     return job_id, api_key
