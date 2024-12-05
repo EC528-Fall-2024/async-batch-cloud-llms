@@ -150,11 +150,38 @@ def getErrorRows(Client_ID, Job_ID):
         
     return error_rows
 
+# @app.route('/job_status/<job_id>', methods=['GET'])
+# @require_api_key
+# def job_status(job_id):
+#     """
+#     Get the status of a job by querying Firestore.
+#     """
+#     try:
+#         # Extract Client ID from the query parameters
+#         client_id = request.args.get("Client_ID")
+#
+#         if not client_id:
+#             return jsonify({"error": "Client ID is required"}), 400
+#
+#         # Call the helper function to get progress
+#         progress_data = get_progress(job_id, client_id)
+#
+#         # Construct the response
+#         response = {
+#             "Job_ID": job_id,
+#             "Client_ID": client_id,
+#             "current_row": progress_data["current_row"],
+#             "total_rows": progress_data["total_rows"],
+#         }
+#         return jsonify(response), 200
+#
+#     except Exception as e:
+#         return jsonify({"error": "Failed to retrieve job status", "details": str(e)}), 500
 @app.route('/job_status/<job_id>', methods=['GET'])
 @require_api_key
 def job_status(job_id):
     """
-    Get the status of a job by querying Firestore.
+    Get the status of a job by querying Firestore, including error details if applicable.
     """
     try:
         # Extract Client ID from the query parameters
@@ -163,8 +190,14 @@ def job_status(job_id):
         if not client_id:
             return jsonify({"error": "Client ID is required"}), 400
 
-        # Call the helper function to get progress
+        # Retrieve job progress
         progress_data = get_progress(job_id, client_id)
+
+        # Check for errors
+        has_errors = jobHasErrors(client_id, job_id)
+        error_rows = None
+        if has_errors:
+            error_rows = getErrorRows(client_id, job_id)
 
         # Construct the response
         response = {
@@ -172,7 +205,16 @@ def job_status(job_id):
             "Client_ID": client_id,
             "current_row": progress_data["current_row"],
             "total_rows": progress_data["total_rows"],
+            "errors_present": has_errors,
+            "error_rows": error_rows if has_errors else []
         }
+
+        # Check if job is complete
+        if progress_data["current_row"] >= progress_data["total_rows"]:
+            response["status"] = "complete"
+        else:
+            response["status"] = "in_progress"
+
         return jsonify(response), 200
 
     except Exception as e:

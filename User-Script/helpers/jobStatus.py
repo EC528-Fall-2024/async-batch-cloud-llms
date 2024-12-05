@@ -39,7 +39,7 @@ def wait_for_completion(job_id, client_id, api_key, interval=10):
 # Check status manually   
 def check_job_status(job_id, client_id, api_key):
     """
-    Check the status of a job using its Job ID and Client ID.
+    Check the status of a job, including error details, using its Job ID and Client ID.
 
     Parameters:
     - job_id: The Job ID returned from the `/submit_job` endpoint.
@@ -47,38 +47,36 @@ def check_job_status(job_id, client_id, api_key):
     - api_key: The API key retrieved earlier in the script.
 
     Returns:
-    - A dictionary with job status or a completion message.
+    - A dictionary with job status, progress, and error details.
     """
-
-    logging.info("🔎 Checking for Job Status...")
+    logging.info(f"🔎 Fetching status for job {job_id}...")
 
     headers = {
-        "x-api-key": api_key  # Use the already retrieved API key
+        "x-api-key": api_key
     }
     params = {
-        "Client_ID": client_id  # Ensure the `Client_ID` is passed as required
+        "Client_ID": client_id
     }
 
     response = requests.get(f"{API_BASE_URL}/job_status/{job_id}", headers=headers, params=params)
 
     if response.status_code == 200:
-        job_data = response.json()
-        current_row = job_data.get('current_row', 0)
-        total_rows = job_data.get('total_rows', 0)
+        data = response.json()
+        logging.info("✅ Job status retrieved successfully.")
 
-        # Check if the job is complete
-        if current_row >= total_rows:
-            logging.info(f"Job {job_id} is complete. Processed {current_row} rows.")
-            return {
-                "status": "complete",
-                "details": job_data
-            }
+        # Display the job status
+        print("Job Status:")
+        print(f"Job ID: {data['Job_ID']}")
+        print(f"Progress: {data['current_row']} / {data['total_rows']}")
+        if data["errors_present"]:
+            print("Errors Found:")
+            for row in data["error_rows"]:
+                print(f" - Error at row: {row}")
         else:
-            logging.info(f"Job {job_id} in progress: {current_row} / {total_rows}")
-            return {
-                "status": "in_progress",
-                "details": job_data
-            }
+            print("No errors detected.")
+
+        # Return detailed status
+        return data
     else:
-        logging.error(f"Failed to retrieve job status: {response.status_code}, {response.text}")
+        logging.error(f"Failed to fetch job status: {response.status_code}, {response.text}")
         return None
