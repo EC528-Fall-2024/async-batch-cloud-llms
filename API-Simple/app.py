@@ -101,6 +101,16 @@ def submit_job():
         return jsonify({"error": "Job not valid"}), 400
 
 
+# Internal Function added Dec 5th by noah robitshek
+# Inputs: Client_ID, Job_ID
+# Outputs: True or False
+def jobHasErrors(db, client_id, job_id):
+    # Define the document reference
+    doc_ref = db.collection("Clients").document(client_id).collection("Jobs").document(job_id).collection("Job Data").document("Errors")
+    
+    # Check if the document exists
+    return doc_ref.get().exists
+
 
 def get_progress(job_id, client_id):
     """
@@ -122,6 +132,18 @@ def get_progress(job_id, client_id):
         "current_row": progress_data.get("current_row", 0),
         "total_rows": progress_data.get("total_rows", 0),
     }
+   
+# external function added on dec 5th by noah robitshek
+# getErrorRows
+# Inputs: Client_ID, Job_ID
+# Outputs: List of Errors
+def getErrorRows(db, Client_ID, Job_ID):
+    doc_ref = db.collection("Clients").document(Client_ID).collection("Jobs").document(Job_ID).collection("Job Data").document("Errors")
+    docs = doc_ref.get()
+    data = docs.to_dict()
+    error_rows = data["error_rows"]
+        
+    return error_rows
 
 @app.route('/job_status/<job_id>', methods=['GET'])
 @require_api_key

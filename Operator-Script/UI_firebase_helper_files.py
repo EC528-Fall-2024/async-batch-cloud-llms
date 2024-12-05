@@ -1,4 +1,6 @@
 import pytz
+from google.cloud import firestore
+
 
 
 #####################
@@ -72,6 +74,17 @@ def getErrorRows(db, Client_ID, Job_ID):
     error_rows = data["error_rows"]
         
     return error_rows
+
+## jobHasErrors
+# Inputs: Client_ID, Job_ID
+# Outputs: True or False
+def jobHasErrors(db, client_id, job_id):
+    # Define the document reference
+    doc_ref = db.collection("Clients").document(client_id).collection("Jobs").document(job_id).collection("Job Data").document("Errors")
+    
+    # Check if the document exists
+    return doc_ref.get().exists
+
 
 
 ## produceInvoice
@@ -167,6 +180,9 @@ def runDashboard():
 
 ## Average_Time
 
+client_id = "test"
+job_id = "Job 07e6a62d-7850-401f-9968-a21ff50396de"
+db = firestore.Client()
 
 # getAllClients()
 # print(getAllInfoAboutClient("rayan syed"))
@@ -174,6 +190,9 @@ def runDashboard():
 # print(getJobStatistics("rayan syed","Job 466f47f2-6a5e-4ee1-9603-661095296532"))
 # print(getErrorInformation("rayan syed","Job 466f47f2-6a5e-4ee1-9603-661095296532"))
 # print(produceInvoice("rayan syed","Job 466f47f2-6a5e-4ee1-9603-661095296532"))
+print(jobHasErrors(db, client_id, job_id))
+
+
 
 
 
