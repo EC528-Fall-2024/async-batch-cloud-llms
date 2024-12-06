@@ -241,7 +241,7 @@ This guide provides a step-by-step process to set up the TurboBatch system, leve
 ### **Additional Notes**
 - For advanced configuration or troubleshooting, refer to the helper scripts and modules in the repository.
 - The `helpers` directory contains scripts like `privileges.sh` to streamline setup and management tasks.
-- For a shorter guide, follow the instructions provided in the UserNotebook jupyter file
+- For a shorter guide, follow the instructions provided in the [UserNotebook](https://github.com/EC528-Fall-2024/async-batch-cloud-llms/blob/main/User-Script/UserNotebook.ipynb)
 
 ---
 
