@@ -166,4 +166,84 @@ During this Sprint, we provided a full end to end functioning application with a
 
 During this sprint, we worked on improving our performance and structure while refactoring and simplifying the implementations. User Interfaces and Operator Dashboards were created for efficient accessibility and ease of use.
 
+## 8. Installation Guide
+
+This guide provides a step-by-step process to set up the TurboBatch system, leveraging details from the README and the provided Jupyter Notebook.
+
+### **Requirements**
+1. **Environment Setup**:
+    - A **Google Cloud Project** with an active billing account.
+    - The **Google Cloud CLI** installed and authenticated on your machine.
+    - Python (version 3.8 or higher)
+   
+2. **Dependencies**:
+    - Install the required Python packages by running:
+      ```bash
+      pip install -r requirements.txt
+      ```
+    - Ensure that all dependencies listed in `requirements.txt` are installed in your environment.
+
+---
+
+### **Setup Steps**
+#### Step 1: Configure Google Cloud
+1. Create a Google Cloud project and link it to a billing account.
+2. Authenticate and initialize the Google Cloud CLI:
+   ```bash
+   gcloud init
+   gcloud auth login
+   ```
+3. Enable required APIs for your project:
+   ```bash
+   gcloud services enable pubsub.googleapis.com bigquery.googleapis.com cloudfunctions.googleapis.com
+   ```
+
+#### Step 2: Set Up Permissions
+1. Navigate to the `helpers` directory in the repository.
+2. Run the `privileges.sh` script to grant necessary permissions to the system's service account:
+   ```bash
+   ./privileges.sh [PROJECT_ID]
+   ```
+   Replace `[PROJECT_ID]` with your Google Cloud project ID.
+
+---
+
+### **Prepare Data**
+1. Ensure your input data is formatted correctly:
+    - The input file should have two columns:
+      - `row`: Integer values.
+      - `prompt_and_text`: Strings containing the data to be processed.
+    - Example file: `example.csv`.
+
+2. Use the provided helper function in the Jupyter Notebook to upload your dataset to BigQuery:
+   ```python
+   from helpers.df import CSV_to_BigQuery
+
+   # Update these variables
+   input_CSV_path = "example.csv"
+   project_id = "your_project_id"
+   dataset_id = "your_dataset_id"
+   input_table_id = "input_table_name"
+   output_table_id = "output_table_name"
+
+   CSV_to_BigQuery(input_CSV_path, project_id, dataset_id, input_table_id, output_table_id)
+   ```
+
+---
+
+### **Run the System**
+1. Submit a job by running the appropriate cell in the Jupyter Notebook. Update the configuration variables as required.
+
+2. Monitor your job's progress via the notebook interface. Updates on the job status will appear automatically.
+
+---
+
+### **Additional Notes**
+- For advanced configuration or troubleshooting, refer to the helper scripts and modules in the repository.
+- The `helpers` directory contains scripts like `privileges.sh` to streamline setup and management tasks.
+- For a shorter guide, follow the instructions provided in the UserNotebook jupyter file
+
+---
+
+If you need assistance, feel free to share your questions!
 
