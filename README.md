@@ -15,26 +15,32 @@
 | Stefan Philip | Mentor |        |
 | Mayur Srivastava          | Mentor |       |
 
-## Sprint Demo Videos:
-[Sprint1 Demo](https://drive.google.com/file/d/1AckVEbBgkP-q0t7MMwMPyFpk_JpBOWmr/view?usp=sharing)  
-[Sprint2 Demo](https://drive.google.com/file/d/1NjymlgsvtWI8tLfMjFaLiHEr-3TgZ8N5/view?usp=sharing)  
-[Sprint3 Demo](https://drive.google.com/file/d/16_lV_df1BlzsAY3tFrf_6CKKA9yntzWA/view?usp=sharing)  
-[Sprint4 Demo](https://drive.google.com/file/d/1QWUBAF8ekrdv3lGSUJAmf5UFGnswtPHv/view?usp=sharing)  
-[Sprint5 Demo](https://drive.google.com/file/d/1RQ4_SbEfUcaeZkxm-eQ1F-HGWp4ByRd0/view?usp=sharing)  
-Final Presentation
 
+## Sprint Videos:
+**Sprint Videos:**  
+[Sprint 1](https://drive.google.com/file/d/1AckVEbBgkP-q0t7MMwMPyFpk_JpBOWmr/view?usp=sharing)  
+[Sprint 2](https://drive.google.com/file/d/1NjymlgsvtWI8tLfMjFaLiHEr-3TgZ8N5/view?usp=sharing)  
+[Sprint 3](https://drive.google.com/file/d/16_lV_df1BlzsAY3tFrf_6CKKA9yntzWA/view?usp=sharing)  
+[Sprint 4](https://drive.google.com/file/d/1QWUBAF8ekrdv3lGSUJAmf5UFGnswtPHv/view?usp=sharing)  
+[Sprint 5](https://drive.google.com/file/d/1RQ4_SbEfUcaeZkxm-eQ1F-HGWp4ByRd0/view?usp=sharing)   
 
-## Sprint Demo Slideshows:
-[Sprint1 Slideshow](https://docs.google.com/presentation/d/14M9Q9WwM2tktHl2NyspCqJEftkKHSECiHJnucQ3VKqw/edit?usp=sharing)  
-[Sprint2 Slideshow](https://docs.google.com/presentation/d/1h4vzF_IGO_7xRFhTZ4Gz1gRdLEJGcvXHZI2-pYbjRF4/edit?usp=sharing)   
-[Sprint3 Slideshow](https://docs.google.com/presentation/d/1f_77tuTC3z717qgW_xtFdsB0G6VBBOTUwqp2TKolrZM/edit?usp=sharing)  
-[Sprint4 Slideshow](https://docs.google.com/presentation/d/1LCoCL9HCC0GMx4awD1OfVJdlpK0LxsRrhhtyRrBAN9M/edit?usp=sharing)  
-[Sprint5 Slideshow](https://docs.google.com/presentation/d/1nKVr_AxejMW-zizcu4_F4WmSpvvAdPP4nAIwX2-5RAw/edit?usp=sharing)  
-Final Presentation Slideshow
+**Final Presentation:**  
+[Final Presentation](https://drive.google.com/file/d/1rxKw-FO9KWUHjarSm0Xs4UsedsVx0ALq/view?usp=sharing)  
+[Rate Limiter Highlight](https://drive.google.com/file/d/1ARPqlvCzM-pybC9YFtUUl7bvidQzNyrf/view?usp=sharing)
+## Sprint Slideshows:
+[Sprint 1](https://docs.google.com/presentation/d/14M9Q9WwM2tktHl2NyspCqJEftkKHSECiHJnucQ3VKqw/edit?usp=sharing)  
+[Sprint 2](https://docs.google.com/presentation/d/1h4vzF_IGO_7xRFhTZ4Gz1gRdLEJGcvXHZI2-pYbjRF4/edit?usp=sharing)   
+[Sprint 3](https://docs.google.com/presentation/d/1f_77tuTC3z717qgW_xtFdsB0G6VBBOTUwqp2TKolrZM/edit?usp=sharing)  
+[Sprint 4](https://docs.google.com/presentation/d/1LCoCL9HCC0GMx4awD1OfVJdlpK0LxsRrhhtyRrBAN9M/edit?usp=sharing)  
+[Sprint 5](https://docs.google.com/presentation/d/1nKVr_AxejMW-zizcu4_F4WmSpvvAdPP4nAIwX2-5RAw/edit?usp=sharing)
 
+[Final Presentation ](https://docs.google.com/presentation/d/1d0QrttldCRvtFOK6SfeaXXJtlciQdNNdUvqmVrBk1h4/edit?usp=sharing)
 ## 1. The Problem
 
-There are three large problems with the current process for calling LLMs available on the market. The first problem is Rate Limits which Cloud LLM providers impose. These limits prevent sending all requests simultaneously. Second is the problem of the Manual Oversight: required in the current process. The current manual process is inefficient and impractical for large-scale backfill jobs. The third problem is the inefficient management of requests caused a delayed timely output.
+There are three significant problems with the current procedure for processing large requests through cloud-hosted LLMs available on the market:
+1. **Rate Limits:** Cloud LLM providers impose strict rate limits, which prevent users from sending all requests simultaneously.
+2. **Manual Oversight:** The process requires significant manual intervention, making it inefficient and impractical for large-scale backfill jobs.
+3. **Inefficient Request Management:** Poor handling of request flows results in delays and untimely outputs, reducing the effectiveness of LLM-powered systems.
 
 
 ## 2.   Vision and Goals Of The Project:
