@@ -184,7 +184,7 @@ For a shorter guide, follow the instructions provided in the [UserNotebook](http
     - Python (version 3.8 or higher)
    
 2. **Dependencies**:
-    - Install the required Python packages by running:
+    - Navigate to the `User-Script` directory and install the required Python packages by running:
       ```bash
       pip install -r requirements.txt
       ```
@@ -206,7 +206,7 @@ For a shorter guide, follow the instructions provided in the [UserNotebook](http
    ```
 
 #### Step 2: Set Up Permissions
-1. Navigate to the `helpers` directory in the repository.
+1. Navigate to the `User-Script` directory in the repository
 2. Run the `privileges.sh` script to grant necessary permissions to the system's service account:
    ```bash
    ./privileges.sh [PROJECT_ID]
