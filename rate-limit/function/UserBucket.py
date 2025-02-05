@@ -85,8 +85,7 @@ def ret_used_tokens(tokens):
     time.sleep(60)
 
     # Return used tokens to global bucket
-    with redis_client.lock("global_increase"):
-        redis_client.hincrby(GLOBAL_BUCKET_KEY, "tokens", tokens)
+    redis_client.hincrby(GLOBAL_BUCKET_KEY, "tokens", tokens)
 
     # Logging
     global_tokens = int(redis_client.hget(GLOBAL_BUCKET_KEY, "tokens") or 0)
