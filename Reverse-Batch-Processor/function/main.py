@@ -30,11 +30,11 @@ def reverse(cloud_event):
         insert_rows(response=data, row=row_number, job_id=job_id, client_id=client_id, project_id=project_ID, dataset_id=dataset_ID, table_id=table_ID)
         
         # Send Performance metrics 
-        try:
-            incrementReverseBatchProcessor(job_id)
-            decrementQueue2(job_id)
-        except Exception as e:
-            print(f"Error updating performance metrics: {e}...")
+        # try:
+        #     incrementReverseBatchProcessor(job_id)
+        #     decrementQueue2(job_id)
+        # except Exception as e:
+        #     print(f"Error updating performance metrics: {e}...")
     
     except Exception as e:
         print(f"Error processing message in reverse batch processor: {e}") 

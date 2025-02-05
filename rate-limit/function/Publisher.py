@@ -49,11 +49,11 @@ def send_response(client_id, job_id, job_length, row, response, user_project_id,
     print("Sent response to reverse batch processor") 
 
     # Send Performance Metrics
-    try:
-        incrementQueue2(job_id)
-        decrementRateLimiter(job_id)
-    except Exception as e:
-        print(f"Error updating performance metrics: {e}...")
+    # try:
+    #     incrementQueue2(job_id)
+    #     decrementRateLimiter(job_id)
+    # except Exception as e:
+    #     print(f"Error updating performance metrics: {e}...")
 
 # send time metrics to status collector
 def send_metrics(client_id, job_id, row, in_llm, out_llm, llm_cost):

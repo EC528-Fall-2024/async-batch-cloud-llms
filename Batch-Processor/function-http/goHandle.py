@@ -9,12 +9,12 @@ def goHandle(Job_ID:str, Client_ID:str, User_Project_ID:str, User_Dataset_ID:str
     Database_Length = get_database_length(User_Project_ID, User_Dataset_ID, Input_Table_ID)
     
     # Performance API calls
-    try:
-        resetSystem(Job_ID)
-        setBatchProcessor(Job_ID)
-        setTotalCount(Job_ID)
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+    # try:
+    #     resetSystem(Job_ID)
+    #     setBatchProcessor(Job_ID)
+    #     setTotalCount(Job_ID)
+    # except Exception as e:
+    #     print(f"An unexpected error occurred: {e}")
 
     # batch size for reading from BigQuery
     batch_size = 100
@@ -34,11 +34,11 @@ def goHandle(Job_ID:str, Client_ID:str, User_Project_ID:str, User_Dataset_ID:str
                 print(f"Prompt and Text for row {idx} read successfully.")
                 
                 # Performance calls
-                try:
-                    decrementBatchProcessor(Job_ID)
-                    incrementQueue1(Job_ID)
-                except Exception as e:
-                    print(f"An unexpected error occurred for updating performance API metrics: {e}")
+                # try:
+                #     decrementBatchProcessor(Job_ID)
+                #     incrementQueue1(Job_ID)
+                # except Exception as e:
+                #     print(f"An unexpected error occurred for updating performance API metrics: {e}")
 
     # Return status
     return True

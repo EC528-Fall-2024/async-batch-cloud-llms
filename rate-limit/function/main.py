@@ -24,11 +24,11 @@ def process_message(cloud_event):
         print(f"Rate-limiter received message for row {batch['row']} for job {batch['job_id']} from batch processor.") 
 
         # Send Performance Metrics
-        try:
-            decrementQueue1(batch['job_id'])
-            incrementRateLimiter(batch['job_id'])
-        except Exception as e:
-            print(f"Error updating performance metrics: {e}...")
+        # try:
+        #     decrementQueue1(batch['job_id'])
+        #     incrementRateLimiter(batch['job_id'])
+        # except Exception as e:
+        #     print(f"Error updating performance metrics: {e}...")
 
         # Process the batch
         rate_limit(batch)
