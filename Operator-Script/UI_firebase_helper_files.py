@@ -96,15 +96,13 @@ def produceInvoice(db, Client_ID, Job_ID):
     data = docs.to_dict()
     
     
-    # Not sure if this works
-    # total_time = data["Start_Time"] - data["End_Time"]
-    total_time = 34
-    
+    total_time = (data["End_Time"] - data["Start_Time"]).total_seconds()
+
     Start_Time = data["Start_Time"].astimezone(pytz.timezone('US/Eastern'))
     Start_Time_String = Start_Time.strftime("%A, %B %d, %Y at %I:%M:%S %p %Z")
     
     invoiceData = {
-        "total_llm_cost": .0032, # Hardcoded for now
+        "total_llm_cost": data["LLM_Cost"], # Hardcoded for now
         "Start_Time": Start_Time_String,
         "total_time": total_time, # Switch to total-time
         "Client_ID": data["Client_ID"],
@@ -181,7 +179,7 @@ def runDashboard():
 ## Average_Time
 
 client_id = "test"
-job_id = "Job 07e6a62d-7850-401f-9968-a21ff50396de"
+job_id = "Job 9af9d723-194a-4528-80b4-7eb1fcf14134"
 db = firestore.Client()
 
 # getAllClients()
@@ -189,8 +187,8 @@ db = firestore.Client()
 # print(getAllInfoAboutJob("rayan syed","Job 466f47f2-6a5e-4ee1-9603-661095296532"))
 # print(getJobStatistics("rayan syed","Job 466f47f2-6a5e-4ee1-9603-661095296532"))
 # print(getErrorInformation("rayan syed","Job 466f47f2-6a5e-4ee1-9603-661095296532"))
-# print(produceInvoice("rayan syed","Job 466f47f2-6a5e-4ee1-9603-661095296532"))
-print(jobHasErrors(db, client_id, job_id))
+print(produceInvoice(db, client_id,job_id ))
+# print(jobHasErrors(db, client_id, job_id))
 
 
 
