@@ -35,6 +35,10 @@
 [Sprint 5](https://docs.google.com/presentation/d/1nKVr_AxejMW-zizcu4_F4WmSpvvAdPP4nAIwX2-5RAw/edit?usp=sharing)
 
 [Final Presentation ](https://docs.google.com/presentation/d/1d0QrttldCRvtFOK6SfeaXXJtlciQdNNdUvqmVrBk1h4/edit?usp=sharing)
+
+## Company Collaboration: Two Sigma
+This project was in collaboration with Two Sigma, is a New York City-based hedge fund, who provided the initial problem description and mentorship through the project. 
+
 ## 1. The Problem
 
 There are three significant problems with the current procedure for processing large requests through cloud-hosted LLMs available on the market:
