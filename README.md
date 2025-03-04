@@ -37,7 +37,7 @@
 [Final Presentation ](https://docs.google.com/presentation/d/1d0QrttldCRvtFOK6SfeaXXJtlciQdNNdUvqmVrBk1h4/edit?usp=sharing)
 
 ## Company Collaboration: Two Sigma
-This project was in collaboration with Two Sigma, is a New York City-based hedge fund, who provided the initial problem description and mentorship through the project. 
+This project originated in collaboration with Two Sigma, is a New York City-based hedge fund, who provided the initial problem description and mentorship through the project. This project has been open sourced from the start.
 
 ## 1. The Problem
 
