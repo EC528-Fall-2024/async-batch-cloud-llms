@@ -174,3 +174,7 @@ google-cloud-sdk
 #Noah's Keys
 ServiceAccountKeys
 /.idea
+
+# Internal Data
+metrics/
+/User-Script/*.csv

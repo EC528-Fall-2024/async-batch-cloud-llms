@@ -1,5 +1,6 @@
 '''Tokenizer'''
 import tiktoken
+import math
 
 # Tokenizer 
 def openai_tokenizer(messages, model) -> int:
@@ -13,16 +14,9 @@ def openai_tokenizer(messages, model) -> int:
         total_tokens += len(tokenizer.encode(message["content"]))
         total_tokens += 2  # <im_start> and <im_end>
 
-    total_tokens += 2  # For message start/end separators
+    token_input = total_tokens
 
-    token_input = total_tokens # done with estimate input message token length
-
-    # Add large buffer for safety
-    buffer = int(0.2 * total_tokens)  
-    total_tokens += buffer
-
-    # Add estimated reply size (scaled for longer responses)
-    total_tokens += 100  # arbitrary amnt to represent long response
+    total_tokens = int(math.ceil(1.0089 * token_input + 112))
 
     return token_input, total_tokens
 

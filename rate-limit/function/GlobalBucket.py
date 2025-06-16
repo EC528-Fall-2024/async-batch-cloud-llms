@@ -1,7 +1,7 @@
 '''Global Bucket Functions'''
 import redis
 import time
-from RedisClient import redis_client, GLOBAL_BUCKET_KEY
+from RedisClient import redis_client, GLOBAL_BUCKET_KEY, PENDING_THREADS_KEY, incr_pending_threads, decr_pending_threads
 
 # Initialize global bucket
 def init_global_bucket(token_limit = 200000):
@@ -12,6 +12,7 @@ def init_global_bucket(token_limit = 200000):
             redis_client.delete(GLOBAL_BUCKET_KEY)
         redis_client.hset(GLOBAL_BUCKET_KEY, "tokens", token_limit) 
         redis_client.hset(GLOBAL_BUCKET_KEY, "last_updated", int(time.time()))
+        redis_client.hset(PENDING_THREADS_KEY, "threads", 0)
         print(f"Global bucket initialized with {token_limit} tokens") 
         return True
 
