@@ -1,6 +1,5 @@
 '''User Bucket Functions'''
 import redis
-import threading
 import time
 from GlobalBucket import get_tokens_from_global
 from RedisClient import redis_client, GLOBAL_BUCKET_KEY
@@ -78,18 +77,6 @@ def get_tokens_from_user(user_id, tokens_needed):
     except Exception as e:
         print(f"Unexpected error in get_tokens_from_user for user {user_id}: {e}")
         return False
-    
-# Delayed return of tokens to bucket
-def ret_used_tokens(tokens):
-    # Wait refill_time (min)
-    time.sleep(60)
-
-    # Return used tokens to global bucket
-    redis_client.hincrby(GLOBAL_BUCKET_KEY, "tokens", tokens)
-
-    # Logging
-    global_tokens = int(redis_client.hget(GLOBAL_BUCKET_KEY, "tokens") or 0)
-    print(f"Global bucket increased to {global_tokens} tokens.") 
 
 # Attempt to shrink/destroy the user bucket
 def shrink_user_bucket(user_id, tokens_used, actual_used):
@@ -124,11 +111,6 @@ def shrink_user_bucket(user_id, tokens_used, actual_used):
                 # log status
                 global_tokens = int(redis_client.hget(GLOBAL_BUCKET_KEY, "tokens") or 0)
                 print(f"Global bucket increased to {global_tokens} tokens.") 
-
-        # Return used tokens a minute later
-        used = min(actual_used, tokens_used)
-        if used > 0:
-            threading.Thread(target=ret_used_tokens, args=(used,)).start()
     
     # uncontrollable errors
     except redis.exceptions.RedisError as e:

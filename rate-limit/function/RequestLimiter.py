@@ -27,7 +27,7 @@ def init_request_limiter():
         print(f"Error accessing Redis globally: {e}")
         return False
     except Exception as e:
-        print(f"Unexpected error for get_tokens_from_global: {e}")
+        print(f"Unexpected error for init_request_limiter: {e}")
         return False 
 
 # Update request limiter for every processing request
@@ -60,5 +60,5 @@ def incr_request():
         print(f"Error accessing Redis globally: {e}")
         return False
     except Exception as e:
-        print(f"Unexpected error for get_tokens_from_global: {e}")
+        print(f"Unexpected error for incr_request: {e}")
         return False 

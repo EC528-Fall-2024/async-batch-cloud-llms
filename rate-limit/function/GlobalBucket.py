@@ -1,10 +1,14 @@
 '''Global Bucket Functions'''
 import redis
 import time
-from RedisClient import redis_client, GLOBAL_BUCKET_KEY, PENDING_THREADS_KEY, incr_pending_threads, decr_pending_threads
+import math
+from RedisClient import redis_client, GLOBAL_BUCKET_KEY
 
 # Initialize global bucket
-def init_global_bucket(token_limit = 200000):
+TPM = 200000
+TPS = math.ceil(TPM/60)
+
+def init_global_bucket(token_limit = TPM):
     try:
         # Initialize or reset the global bucket to token_limit tokens
         key_type = redis_client.type(GLOBAL_BUCKET_KEY)
@@ -12,7 +16,6 @@ def init_global_bucket(token_limit = 200000):
             redis_client.delete(GLOBAL_BUCKET_KEY)
         redis_client.hset(GLOBAL_BUCKET_KEY, "tokens", token_limit) 
         redis_client.hset(GLOBAL_BUCKET_KEY, "last_updated", int(time.time()))
-        redis_client.hset(PENDING_THREADS_KEY, "threads", 0)
         print(f"Global bucket initialized with {token_limit} tokens") 
         return True
 
@@ -21,7 +24,7 @@ def init_global_bucket(token_limit = 200000):
         print(f"Error accessing Redis globally: {e}")
         return False
     except Exception as e:
-        print(f"Unexpected error for get_tokens_from_global: {e}")
+        print(f"Unexpected error for init_global_bucket: {e}")
         return False 
 
 # User bucket trying to get tokens from global bucket
@@ -36,6 +39,13 @@ def get_tokens_from_global(amount, user_id):
             if tokens<amount:
                 print(f"{user_id} waiting for tokens from global bucket.") 
                 while tokens<amount:
+                    last_updated = redis_client.hget(GLOBAL_BUCKET_KEY, "last_updated")
+                    time_elapsed = int(time.time()) - int(last_updated)
+                    if time_elapsed >= 1:
+                        with redis_client.lock("global_increase"):
+                            increase_amount = min(TPS*time_elapsed, TPM-tokens)
+                            redis_client.hincrby(GLOBAL_BUCKET_KEY, "tokens", increase_amount)
+                            redis_client.hset(GLOBAL_BUCKET_KEY, "last_updated", int(time.time()))
                     tokens = int(redis_client.hget(GLOBAL_BUCKET_KEY, "tokens") or 0)
                     time.sleep(0.1) # brief sleep between checks
         
